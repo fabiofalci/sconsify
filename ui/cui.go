@@ -11,14 +11,13 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 )
 
-var sideView *gocui.View
-var mainView *gocui.View
+var playlistsView *gocui.View
+var tracksView *gocui.View
 var toPlay chan sp.Track
 
 func Start(toPlayChannel chan sp.Track) {
 	toPlay = toPlayChannel
 
-	var err error
 	g := gocui.NewGui()
 	if err := g.Init(); err != nil {
 		log.Panicln(err)
@@ -33,7 +32,7 @@ func Start(toPlayChannel chan sp.Track) {
 	g.SelFgColor = gocui.ColorBlack
 	g.ShowCursor = true
 
-	err = g.MainLoop()
+	err := g.MainLoop()
 	if err != nil && err != gocui.ErrorQuit {
 		log.Panicln(err)
 	}
@@ -56,7 +55,7 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
-		updateTracks(g, mainView)
+		updateTracksView(g)
 	}
 	return nil
 }
@@ -70,17 +69,17 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
-		updateTracks(g, mainView)
+		updateTracksView(g)
 	}
 	return nil
 }
 
 func getSelectedPlaylist(g *gocui.Gui) (string, error) {
-	return getSelected(g, sideView)
+	return getSelected(g, playlistsView)
 }
 
 func getSelectedTrack(g *gocui.Gui) (string, error) {
-	return getSelected(g, mainView)
+	return getSelected(g, tracksView)
 }
 
 func getSelected(g *gocui.Gui, v *gocui.View) (string, error) {
@@ -102,8 +101,8 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	currentPlaylist, errPlaylist := getSelectedPlaylist(g)
 	currentTrack, errTrack := getSelectedTrack(g)
-	if errPlaylist == nil && errTrack == nil && spotify.PlaylistsMap != nil {
-		playlist := spotify.PlaylistsMap[currentPlaylist]
+	if errPlaylist == nil && errTrack == nil && spotify.Playlists != nil {
+		playlist := spotify.Playlists[currentPlaylist]
 
 		if playlist != nil {
 			playlist.Wait()
@@ -161,11 +160,11 @@ func keybindings(g *gocui.Gui) error {
 	return nil
 }
 
-func updateTracks(g *gocui.Gui, v *gocui.View) {
-	v.Clear()
+func updateTracksView(g *gocui.Gui) {
+	tracksView.Clear()
 	currentPlaylist, err := getSelectedPlaylist(g)
-	if err == nil && spotify.PlaylistsMap != nil {
-		playlist := spotify.PlaylistsMap[currentPlaylist]
+	if err == nil && spotify.Playlists != nil {
+		playlist := spotify.Playlists[currentPlaylist]
 
 		if playlist != nil {
 			playlist.Wait()
@@ -173,8 +172,17 @@ func updateTracks(g *gocui.Gui, v *gocui.View) {
 				playlistTrack := playlist.Track(i)
 				track := playlistTrack.Track()
 				track.Wait()
-				fmt.Fprintf(v, "%v. %v", (i + 1), track.Name())
+				fmt.Fprintf(tracksView, "%v. %v", (i + 1), track.Name())
 			}
+		}
+	}
+}
+
+func updatePlaylistsView(g *gocui.Gui) {
+	playlistsView.Clear()
+	if spotify.Playlists != nil {
+		for playlist := range spotify.Playlists {
+			fmt.Fprintln(playlistsView, playlist)
 		}
 	}
 }
@@ -185,27 +193,20 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
-		sideView = v
-		sideView.Highlight = true
+		playlistsView = v
+		playlistsView.Highlight = true
 
-		if spotify.GetSession() != nil {
-			playlists, _ := spotify.GetSession().Playlists()
-			for i := 0; i < playlists.Playlists(); i++ {
-				playlist := playlists.Playlist(i)
-				playlist.Wait()
-				fmt.Fprintln(v, playlist.Name())
-			}
-		}
+		updatePlaylistsView(g)
 	}
 	if v, err := g.SetView("main", 30, -1, maxX, maxY); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
-		mainView = v
+		tracksView = v
+		tracksView.Highlight = true
 
-		updateTracks(g, mainView)
+		updateTracksView(g)
 
-		v.Highlight = true
 		if err := g.SetCurrentView("main"); err != nil {
 			return err
 		}

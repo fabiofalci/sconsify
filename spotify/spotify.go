@@ -29,13 +29,9 @@ func newPortAudio() *portAudio {
 	}
 }
 
-var session *sp.Session
-
 var (
-	PlaylistsMap = make(map[string]*sp.Playlist)
+	Playlists = make(map[string]*sp.Playlist)
 )
-
-// var player *sp.Player
 
 func Initialise(initialised chan string, toPlay chan sp.Track) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
@@ -54,7 +50,7 @@ func Initialise(initialised chan string, toPlay chan sp.Track) {
 	pa := newPortAudio()
 	go pa.player()
 
-	session, err = sp.NewSession(&sp.Config{
+	session, err := sp.NewSession(&sp.Config{
 		ApplicationKey:   appKey,
 		ApplicationName:  "testing",
 		CacheLocation:    "tmp",
@@ -91,7 +87,7 @@ func Initialise(initialised chan string, toPlay chan sp.Track) {
 			playlist.Wait()
 
 			if playlists.PlaylistType(i) == sp.PlaylistTypePlaylist {
-				PlaylistsMap[playlist.Name()] = playlist
+				Playlists[playlist.Name()] = playlist
 			}
 		}
 	}
@@ -101,22 +97,18 @@ func Initialise(initialised chan string, toPlay chan sp.Track) {
 	for {
 		select {
 		case track := <-toPlay:
-			Play(&track)
+			Play(session, &track)
 		}
 	}
 }
 
-func Play(track *sp.Track) {
+func Play(session *sp.Session, track *sp.Track) {
 	player := session.Player()
 	if err := player.Load(track); err != nil {
 		println("error")
 		log.Fatal(err)
 	}
 	player.Play()
-}
-
-func GetSession() *sp.Session {
-	return session
 }
 
 func (pa *portAudio) player() {
@@ -156,19 +148,15 @@ func (pa *portAudio) player() {
 
 func (pa *portAudio) WriteAudio(format sp.AudioFormat, frames []byte) int {
 	audio := &audio{format, frames}
-	// println("audio", len(frames), len(frames)/2)
 
 	if len(frames) == 0 {
-		// println("no frames")
 		return 0
 	}
 
 	select {
 	case pa.buffer <- audio:
-		// println("return", len(frames))
 		return len(frames)
 	default:
-		// println("buffer full")
 		return 0
 	}
 }
