@@ -26,6 +26,7 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
+		updateTracks(g, mainView)
 	}
 	return nil
 }
@@ -39,6 +40,7 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
+		updateTracks(g, mainView)
 	}
 	return nil
 }
@@ -94,14 +96,25 @@ func keybindings(g *gocui.Gui) error {
 		return err
 	}
 
-	// if err := g.SetKeybinding("side", gocui.KeyEnter, 0, getPlaylist); err != nil {
-	// 	return err
-	// }
-	// if err := g.SetKeybinding("main", gocui.KeyEnter, 0, getPlaylist); err != nil {
-	// 	return err
-	// }
-
 	return nil
+}
+
+func updateTracks(g *gocui.Gui, v *gocui.View) {
+	v.Clear()
+	currentPlaylist, err := getPlaylist(g, sideView)
+	if err == nil && playlistsMap != nil {
+		playlist := playlistsMap[currentPlaylist]
+
+		if playlist != nil {
+			playlist.Wait()
+			for i := 0; i < playlist.Tracks(); i++ {
+				playlistTrack := playlist.Track(i)
+				track := playlistTrack.Track()
+				track.Wait()
+				fmt.Fprintf(v, "%v", track.Name())
+			}
+		}
+	}
 }
 
 func layout(g *gocui.Gui) error {
@@ -126,24 +139,10 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
+		mainView = v
 
-		currentPlaylist, err := getPlaylist(g, sideView)
-		if err == nil && playlistsMap != nil {
-			playlist := playlistsMap[currentPlaylist]
+		updateTracks(g, mainView)
 
-			if playlist != nil {
-				playlist.Wait()
-				for i := 0; i < playlist.Tracks(); i++ {
-					playlistTrack := playlist.Track(i)
-					track := playlistTrack.Track()
-					track.Wait()
-					fmt.Fprintf(v, "%v", track.Name())
-					// track.Wait()
-					// fmt.Fprintf(v, "%v", track.Name())
-				}
-			}
-
-		}
 		v.Highlight = true
 		if err := g.SetCurrentView("main"); err != nil {
 			return err
@@ -153,6 +152,7 @@ func layout(g *gocui.Gui) error {
 }
 
 var sideView *gocui.View
+var mainView *gocui.View
 
 var (
 	playlistsMap = make(map[string]*sp.Playlist)
