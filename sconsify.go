@@ -6,6 +6,7 @@ import (
 
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/jroimartin/gocui"
+	sp "github.com/op/go-libspotify/spotify"
 )
 
 func nextView(g *gocui.Gui, v *gocui.View) error {
@@ -42,7 +43,7 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func getPlaylist(g *gocui.Gui, v *gocui.View) error {
+func getPlaylist(g *gocui.Gui, v *gocui.View) (string, error) {
 	var l string
 	var err error
 
@@ -51,17 +52,7 @@ func getPlaylist(g *gocui.Gui, v *gocui.View) error {
 		l = ""
 	}
 
-	maxX, maxY := g.Size()
-	if v, err := g.SetView("msg", maxX/2-30, maxY/2, maxX/2+30, maxY/2+2); err != nil {
-		if err != gocui.ErrorUnkView {
-			return err
-		}
-		fmt.Fprintln(v, l)
-		if err := g.SetCurrentView("msg"); err != nil {
-			return err
-		}
-	}
-	return nil
+	return l, nil
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
@@ -103,12 +94,12 @@ func keybindings(g *gocui.Gui) error {
 		return err
 	}
 
-	if err := g.SetKeybinding("side", gocui.KeyEnter, 0, getPlaylist); err != nil {
-		return err
-	}
-	if err := g.SetKeybinding("main", gocui.KeyEnter, 0, getPlaylist); err != nil {
-		return err
-	}
+	// if err := g.SetKeybinding("side", gocui.KeyEnter, 0, getPlaylist); err != nil {
+	// 	return err
+	// }
+	// if err := g.SetKeybinding("main", gocui.KeyEnter, 0, getPlaylist); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
@@ -119,30 +110,40 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
-		v.Highlight = true
+		sideView = v
+		sideView.Highlight = true
 
-		fmt.Fprintln(v, "Playlist Dummy")
 		if spotify.GetSession() != nil {
 			playlists, _ := spotify.GetSession().Playlists()
-			// for i := 0; i < playlists.Playlists(); i++ {
-			// 	playlist := playlists.Playlist(i)
-			// 	playlist.Wait()
-			// }
-			fmt.Fprintln(v, "Playlist 1 %v", playlists.Playlists())
-			fmt.Fprintln(v, "Playlist 2")
-			fmt.Fprintln(v, "Playlist 3")
-			fmt.Fprintln(v, "Playlist 4")
+			for i := 0; i < playlists.Playlists(); i++ {
+				playlist := playlists.Playlist(i)
+				playlist.Wait()
+				fmt.Fprintln(v, playlist.Name())
+			}
 		}
 	}
 	if v, err := g.SetView("main", 30, -1, maxX, maxY); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
-		fmt.Fprintln(v, "Music A")
-		fmt.Fprintln(v, "Music B")
-		fmt.Fprintln(v, "Music C")
-		fmt.Fprintln(v, "Music D")
-		fmt.Fprintln(v, "Music E")
+
+		currentPlaylist, err := getPlaylist(g, sideView)
+		if err == nil && playlistsMap != nil {
+			playlist := playlistsMap[currentPlaylist]
+
+			if playlist != nil {
+				playlist.Wait()
+				for i := 0; i < playlist.Tracks(); i++ {
+					playlistTrack := playlist.Track(i)
+					track := playlistTrack.Track()
+					track.Wait()
+					fmt.Fprintf(v, "%v", track.Name())
+					// track.Wait()
+					// fmt.Fprintf(v, "%v", track.Name())
+				}
+			}
+
+		}
 		v.Highlight = true
 		if err := g.SetCurrentView("main"); err != nil {
 			return err
@@ -151,10 +152,29 @@ func layout(g *gocui.Gui) error {
 	return nil
 }
 
+var sideView *gocui.View
+
+var (
+	playlistsMap = make(map[string]*sp.Playlist)
+)
+
 func main() {
 	var err error
 
 	spotify.Initialise()
+
+	if spotify.GetSession() != nil {
+		playlists, _ := spotify.GetSession().Playlists()
+		playlists.Wait()
+		for i := 0; i < playlists.Playlists(); i++ {
+			playlist := playlists.Playlist(i)
+			playlist.Wait()
+
+			if playlists.PlaylistType(i) == sp.PlaylistTypePlaylist {
+				playlistsMap[playlist.Name()] = playlist
+			}
+		}
+	}
 
 	g := gocui.NewGui()
 	if err := g.Init(); err != nil {
