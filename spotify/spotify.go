@@ -29,9 +29,15 @@ func newPortAudio() *portAudio {
 	}
 }
 
-var Session *sp.Session
+var session *sp.Session
 
-func Initialise() {
+var (
+	PlaylistsMap = make(map[string]*sp.Playlist)
+)
+
+// var player *sp.Player
+
+func Initialise(initialised chan string, toPlay chan sp.Track) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +54,7 @@ func Initialise() {
 	pa := newPortAudio()
 	go pa.player()
 
-	Session, err = sp.NewSession(&sp.Config{
+	session, err = sp.NewSession(&sp.Config{
 		ApplicationKey:   appKey,
 		ApplicationName:  "testing",
 		CacheLocation:    "tmp",
@@ -66,20 +72,51 @@ func Initialise() {
 	// 	}
 	// }()
 
-	if err = Session.Login(credentials, false); err != nil {
+	if err = session.Login(credentials, false); err != nil {
 		log.Fatal(err)
 	}
 
 	select {
-	case err := <-Session.LoginUpdates():
+	case err := <-session.LoginUpdates():
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
+
+	if session != nil {
+		playlists, _ := session.Playlists()
+		playlists.Wait()
+		for i := 0; i < playlists.Playlists(); i++ {
+			playlist := playlists.Playlist(i)
+			playlist.Wait()
+
+			if playlists.PlaylistType(i) == sp.PlaylistTypePlaylist {
+				PlaylistsMap[playlist.Name()] = playlist
+			}
+		}
+	}
+
+	initialised <- ""
+
+	for {
+		select {
+		case track := <-toPlay:
+			Play(&track)
+		}
+	}
+}
+
+func Play(track *sp.Track) {
+	player := session.Player()
+	if err := player.Load(track); err != nil {
+		println("error")
+		log.Fatal(err)
+	}
+	player.Play()
 }
 
 func GetSession() *sp.Session {
-	return Session
+	return session
 }
 
 func (pa *portAudio) player() {
