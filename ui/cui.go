@@ -16,15 +16,19 @@ var playlistsView *gocui.View
 var tracksView *gocui.View
 var statusView *gocui.View
 var toPlay chan sp.Track
+var nextPlay chan string
 
-func Start(toPlayChannel chan sp.Track, statusChannel chan string) {
+func Start(toPlayChannel chan sp.Track, nextPlayChannel chan string, statusChannel chan string) {
 	toPlay = toPlayChannel
+	nextPlay = nextPlayChannel
 
 	go func() {
 		for {
 			select {
 			case message := <-statusChannel:
 				updateStatus(message)
+			case <-nextPlay:
+				playCurrent()
 			}
 		}
 	}()
@@ -123,6 +127,10 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrorQuit
 }
 
+func playCurrent() error {
+	return playCurrentSelectedTrack(g, tracksView)
+}
+
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	currentPlaylist, errPlaylist := getSelectedPlaylist(g)
 	currentTrack, errTrack := getSelectedTrack(g)
@@ -199,7 +207,7 @@ func updateTracksView(g *gocui.Gui) {
 				playlistTrack := playlist.Track(i)
 				track := playlistTrack.Track()
 				track.Wait()
-				fmt.Fprintf(tracksView, "%v. %v", (i + 1), track.Name())
+				fmt.Fprintf(tracksView, "%v. [%v] %v", (i + 1), track.Duration().String(), track.Name())
 			}
 		}
 	}

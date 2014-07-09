@@ -9,10 +9,11 @@ import (
 
 func main() {
 	initialised := make(chan string)
+	status := make(chan string)
 	toPlay := make(chan sp.Track)
-	// nextPlay := make(chan string)
+	nextPlay := make(chan string)
 
-	go spotify.Initialise(initialised, toPlay)
+	go spotify.Initialise(initialised, toPlay, nextPlay, status)
 
 	<-initialised
 

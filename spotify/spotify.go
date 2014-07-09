@@ -36,7 +36,7 @@ var (
 
 var statusChannel chan string
 
-func Initialise(initialised chan string, toPlay chan sp.Track, status chan string) {
+func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan string, status chan string) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err)
@@ -98,6 +98,15 @@ func Initialise(initialised chan string, toPlay chan sp.Track, status chan strin
 	}
 
 	initialised <- ""
+
+	go func() {
+		for {
+			select {
+			case <-session.EndOfTrackUpdates():
+				nextPlay <- ""
+			}
+		}
+	}()
 
 	for {
 		select {
