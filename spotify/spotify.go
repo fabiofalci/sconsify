@@ -125,7 +125,7 @@ func Play(session *sp.Session, track *sp.Track) {
 	player.Play()
 	artist := track.Artist(0)
 	artist.Wait()
-	statusChannel <- fmt.Sprintf("Playing: %v - %v", artist.Name(), track.Name())
+	statusChannel <- fmt.Sprintf("Playing: %v - %v [%v]", artist.Name(), track.Name(), track.Duration().String())
 }
 
 func (pa *portAudio) player() {
