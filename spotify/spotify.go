@@ -117,6 +117,10 @@ func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan str
 }
 
 func Play(session *sp.Session, track *sp.Track) {
+	if track.Availability() != sp.TrackAvailabilityAvailable {
+		statusChannel <- "Not available"
+		return
+	}
 	player := session.Player()
 	if err := player.Load(track); err != nil {
 		println("error")
