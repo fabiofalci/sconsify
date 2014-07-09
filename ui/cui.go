@@ -55,7 +55,9 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
-		updateTracksView(g)
+		if v == playlistsView {
+			updateTracksView(g)
+		}
 	}
 	return nil
 }
@@ -69,7 +71,9 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
-		updateTracksView(g)
+		if v == playlistsView {
+			updateTracksView(g)
+		}
 	}
 	return nil
 }
@@ -162,6 +166,8 @@ func keybindings(g *gocui.Gui) error {
 
 func updateTracksView(g *gocui.Gui) {
 	tracksView.Clear()
+	tracksView.SetCursor(0, 0)
+	tracksView.SetOrigin(0, 0)
 	currentPlaylist, err := getSelectedPlaylist(g)
 	if err == nil && spotify.Playlists != nil {
 		playlist := spotify.Playlists[currentPlaylist]
