@@ -55,7 +55,6 @@ func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan str
 	defer portaudio.Terminate()
 
 	pa := newPortAudio()
-	go pa.player()
 
 	session, err := sp.NewSession(&sp.Config{
 		ApplicationKey:   appKey,
@@ -78,9 +77,7 @@ func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan str
 		if err != nil {
 			log.Fatal(err)
 		}
-	}
 
-	if session != nil {
 		playlists, _ := session.Playlists()
 		playlists.Wait()
 		for i := 0; i < playlists.Playlists(); i++ {
@@ -91,9 +88,10 @@ func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan str
 				Playlists[playlist.Name()] = playlist
 			}
 		}
-	}
 
-	initialised <- ""
+		go pa.player()
+		initialised <- ""
+	}
 
 	go func() {
 		for {
