@@ -133,7 +133,9 @@ func (pa *portAudio) player() {
 	// delivered as int16 in []byte, hence we need to convert it.
 	for audio := range pa.buffer {
 		if len(audio.frames) != 2048*2*2 {
-			panic("unexpected")
+			// panic("unexpected")
+			// don't know if it's a panic or track just ended
+			return
 		}
 
 		j := 0
