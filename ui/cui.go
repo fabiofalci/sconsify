@@ -18,6 +18,8 @@ var tracksView *gocui.View
 var statusView *gocui.View
 var toPlay chan sp.Track
 var nextPlay chan string
+var currentIndexTrack int
+var currentPlaylist string
 
 func Start(toPlayChannel chan sp.Track, nextPlayChannel chan string, statusChannel chan string) {
 	toPlay = toPlayChannel
@@ -29,7 +31,7 @@ func Start(toPlayChannel chan sp.Track, nextPlayChannel chan string, statusChann
 			case message := <-statusChannel:
 				updateStatus(message)
 			case <-nextPlay:
-				playCurrent()
+				playNext()
 			}
 		}
 	}()
@@ -128,12 +130,26 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrorQuit
 }
 
-func playCurrent() error {
-	return playCurrentSelectedTrack(g, tracksView)
+func playNext() error {
+	if currentPlaylist != "" {
+		playlist := spotify.Playlists[currentPlaylist]
+		if currentIndexTrack >= playlist.Tracks()-1 {
+			currentIndexTrack = 0
+		} else {
+			currentIndexTrack = currentIndexTrack + 1
+		}
+		playlistTrack := playlist.Track(currentIndexTrack)
+		track := playlistTrack.Track()
+		track.Wait()
+
+		toPlay <- *track
+	}
+	return nil
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	currentPlaylist, errPlaylist := getSelectedPlaylist(g)
+	var errPlaylist error
+	currentPlaylist, errPlaylist = getSelectedPlaylist(g)
 	currentTrack, errTrack := getSelectedTrack(g)
 	if errPlaylist == nil && errTrack == nil && spotify.Playlists != nil {
 		playlist := spotify.Playlists[currentPlaylist]
@@ -141,8 +157,9 @@ func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 		if playlist != nil {
 			playlist.Wait()
 			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
-			indexTrack, _ := strconv.Atoi(currentTrack)
-			playlistTrack := playlist.Track(indexTrack - 1)
+			currentIndexTrack, _ = strconv.Atoi(currentTrack)
+			currentIndexTrack = currentIndexTrack - 1
+			playlistTrack := playlist.Track(currentIndexTrack)
 			track := playlistTrack.Track()
 			track.Wait()
 

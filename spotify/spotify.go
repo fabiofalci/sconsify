@@ -35,6 +35,7 @@ var (
 )
 
 var statusChannel chan string
+var nextPlayChannel chan string
 
 func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan string, status chan string) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
@@ -48,6 +49,7 @@ func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan str
 	}
 
 	statusChannel = status
+	nextPlayChannel = status
 
 	portaudio.Initialize()
 	defer portaudio.Terminate()
@@ -66,12 +68,6 @@ func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan str
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// go func() {
-	// 	for msg := range session.LogMessages() {
-	// 		log.Print(msg)
-	// 	}
-	// }()
 
 	if err = session.Login(credentials, false); err != nil {
 		log.Fatal(err)
@@ -150,22 +146,30 @@ func (pa *portAudio) player() {
 	stream.Start()
 	defer stream.Stop()
 
-	// Decode the incoming data which is expected to be 2 channels and
-	// delivered as int16 in []byte, hence we need to convert it.
-	for audio := range pa.buffer {
-		if len(audio.frames) != 2048*2*2 {
-			// panic("unexpected")
-			// don't know if it's a panic or track just ended
-			return
-		}
+	for {
+		// Decode the incoming data which is expected to be 2 channels and
+		// delivered as int16 in []byte, hence we need to convert it.
 
-		j := 0
-		for i := 0; i < len(audio.frames); i += 2 {
-			out[j] = int16(audio.frames[i]) | int16(audio.frames[i+1])<<8
-			j++
-		}
+		select {
+		case audio := <-pa.buffer:
+			// for audio := range buffer {
+			if len(audio.frames) != 2048*2*2 {
+				// panic("unexpected")
+				// don't know if it's a panic or track just ended
+				// nextPlayChannel <- ""
+				break
+			}
 
-		stream.Write()
+			j := 0
+			for i := 0; i < len(audio.frames); i += 2 {
+				out[j] = int16(audio.frames[i]) | int16(audio.frames[i+1])<<8
+				j++
+			}
+
+			stream.Write()
+			// }
+		}
+		// time.Sleep(1 * time.Second)
 	}
 }
 
