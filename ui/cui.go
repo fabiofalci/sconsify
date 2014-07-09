@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -216,8 +217,15 @@ func updateTracksView(g *gocui.Gui) {
 func updatePlaylistsView(g *gocui.Gui) {
 	playlistsView.Clear()
 	if spotify.Playlists != nil {
-		for playlist := range spotify.Playlists {
-			fmt.Fprintln(playlistsView, playlist)
+		keys := make([]string, len(spotify.Playlists))
+		i := 0
+		for k, _ := range spotify.Playlists {
+			keys[i] = k
+			i++
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			fmt.Fprintln(playlistsView, key)
 		}
 	}
 }
