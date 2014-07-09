@@ -11,14 +11,25 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 )
 
+var g *gocui.Gui
 var playlistsView *gocui.View
 var tracksView *gocui.View
+var statusView *gocui.View
 var toPlay chan sp.Track
 
-func Start(toPlayChannel chan sp.Track) {
+func Start(toPlayChannel chan sp.Track, statusChannel chan string) {
 	toPlay = toPlayChannel
 
-	g := gocui.NewGui()
+	go func() {
+		for {
+			select {
+			case message := <-statusChannel:
+				updateStatus(message)
+			}
+		}
+	}()
+
+	g = gocui.NewGui()
 	if err := g.Init(); err != nil {
 		log.Panicln(err)
 	}
@@ -36,6 +47,16 @@ func Start(toPlayChannel chan sp.Track) {
 	if err != nil && err != gocui.ErrorQuit {
 		log.Panicln(err)
 	}
+}
+
+func updateStatus(message string) {
+	statusView.Clear()
+	statusView.SetCursor(0, 0)
+	statusView.SetOrigin(0, 0)
+	fmt.Fprintf(statusView, "%v", message)
+
+	// otherwise the update will appear only in the next keyboard move
+	g.Flush()
 }
 
 func nextView(g *gocui.Gui, v *gocui.View) error {
@@ -195,7 +216,7 @@ func updatePlaylistsView(g *gocui.Gui) {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("side", -1, -1, 30, maxY); err != nil {
+	if v, err := g.SetView("side", -1, -1, 30, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -204,7 +225,7 @@ func layout(g *gocui.Gui) error {
 
 		updatePlaylistsView(g)
 	}
-	if v, err := g.SetView("main", 30, -1, maxX, maxY); err != nil {
+	if v, err := g.SetView("main", 30, -1, maxX, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -216,6 +237,12 @@ func layout(g *gocui.Gui) error {
 		if err := g.SetCurrentView("main"); err != nil {
 			return err
 		}
+	}
+	if v, err := g.SetView("status", -1, maxY-2, maxX, maxY); err != nil {
+		if err != gocui.ErrorUnkView {
+			return err
+		}
+		statusView = v
 	}
 	return nil
 }

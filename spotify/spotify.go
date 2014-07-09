@@ -1,6 +1,7 @@
 package spotify
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -33,7 +34,9 @@ var (
 	Playlists = make(map[string]*sp.Playlist)
 )
 
-func Initialise(initialised chan string, toPlay chan sp.Track) {
+var statusChannel chan string
+
+func Initialise(initialised chan string, toPlay chan sp.Track, status chan string) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err)
@@ -43,6 +46,8 @@ func Initialise(initialised chan string, toPlay chan sp.Track) {
 		Username: "fabiofalci",
 		Password: os.Getenv("SPOTIFY_PASSWORD"),
 	}
+
+	statusChannel = status
 
 	portaudio.Initialize()
 	defer portaudio.Terminate()
@@ -109,6 +114,9 @@ func Play(session *sp.Session, track *sp.Track) {
 		log.Fatal(err)
 	}
 	player.Play()
+	artist := track.Artist(0)
+	artist.Wait()
+	statusChannel <- fmt.Sprintf("Playing: %v - %v", artist.Name(), track.Name())
 }
 
 func (pa *portAudio) player() {
