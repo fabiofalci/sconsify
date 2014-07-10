@@ -1,3 +1,4 @@
+// A lot of pieces copied from the awesome library github.com/op/go-libspotify by Örjan Persson
 package spotify
 
 import (
@@ -5,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"code.google.com/p/portaudio-go/portaudio"
 	sp "github.com/op/go-libspotify/spotify"
@@ -36,8 +38,9 @@ var (
 
 var statusChannel chan string
 var nextPlayChannel chan string
+var toPlayChannel chan sp.Track
 
-func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan string, status chan string) {
+func Initialise(initialised chan bool, toPlay chan sp.Track, nextPlay chan string, status chan string) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +52,8 @@ func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan str
 	}
 
 	statusChannel = status
-	nextPlayChannel = status
+	nextPlayChannel = nextPlay
+	toPlayChannel = toPlay
 
 	portaudio.Initialize()
 	defer portaudio.Terminate()
@@ -72,39 +76,68 @@ func Initialise(initialised chan string, toPlay chan sp.Track, nextPlay chan str
 		log.Fatal(err)
 	}
 
-	select {
-	case err := <-session.LoginUpdates():
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		playlists, _ := session.Playlists()
-		playlists.Wait()
-		for i := 0; i < playlists.Playlists(); i++ {
-			playlist := playlists.Playlist(i)
-			playlist.Wait()
-
-			if playlists.PlaylistType(i) == sp.PlaylistTypePlaylist {
-				Playlists[playlist.Name()] = playlist
-			}
-		}
-
-		go pa.player()
-		initialised <- ""
+	err = <-session.LoginUpdates()
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	if checkConnectionState(session) {
+		finishInitialisation(session, pa, initialised)
+	} else {
+		println("Could not login")
+		initialised <- false
+	}
+}
+
+func checkConnectionState(session *sp.Session) bool {
+	timeout := make(chan bool)
+	go func() {
+		time.Sleep(3 * time.Second)
+		timeout <- true
+	}()
+	loggedIn := false
+	running := true
+	for running {
+		select {
+		case <-session.ConnectionStateUpdates():
+			if session.ConnectionState() == sp.ConnectionStateLoggedIn {
+				running = false
+				loggedIn = true
+			}
+		case <-timeout:
+			running = false
+		}
+	}
+	return loggedIn
+}
+
+func finishInitialisation(session *sp.Session, pa *portAudio, initialised chan bool) {
+	playlists, _ := session.Playlists()
+	playlists.Wait()
+	for i := 0; i < playlists.Playlists(); i++ {
+		playlist := playlists.Playlist(i)
+		playlist.Wait()
+
+		if playlists.PlaylistType(i) == sp.PlaylistTypePlaylist {
+			Playlists[playlist.Name()] = playlist
+		}
+	}
+
+	initialised <- true
+
+	go pa.player()
 
 	go func() {
 		for {
 			select {
 			case <-session.EndOfTrackUpdates():
-				nextPlay <- ""
+				nextPlayChannel <- ""
 			}
 		}
 	}()
-
 	for {
 		select {
-		case track := <-toPlay:
+		case track := <-toPlayChannel:
 			Play(session, &track)
 		}
 	}
@@ -150,7 +183,6 @@ func (pa *portAudio) player() {
 
 		select {
 		case audio := <-pa.buffer:
-			// for audio := range buffer {
 			if len(audio.frames) != 2048*2*2 {
 				// panic("unexpected")
 				// don't know if it's a panic or track just ended
@@ -165,9 +197,7 @@ func (pa *portAudio) player() {
 			}
 
 			stream.Write()
-			// }
 		}
-		// time.Sleep(1 * time.Second)
 	}
 }
 

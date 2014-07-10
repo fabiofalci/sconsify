@@ -7,14 +7,14 @@ import (
 )
 
 func main() {
-	initialised := make(chan string)
+	initialised := make(chan bool, 1)
 	status := make(chan string)
 	toPlay := make(chan sp.Track)
 	nextPlay := make(chan string)
 
 	go spotify.Initialise(initialised, toPlay, nextPlay, status)
 
-	<-initialised
-
-	ui.Start(toPlay, nextPlay, status)
+	if <-initialised {
+		ui.Start(toPlay, nextPlay, status)
+	}
 }
