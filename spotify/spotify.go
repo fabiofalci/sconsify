@@ -47,7 +47,7 @@ func Initialise(initialised chan bool, toPlay chan sp.Track, nextPlay chan strin
 	}
 
 	credentials := sp.Credentials{
-		Username: "fabiofalci",
+		Username: os.Getenv("SPOTIFY_USERNAME"),
 		Password: os.Getenv("SPOTIFY_PASSWORD"),
 	}
 
