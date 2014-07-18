@@ -15,3 +15,5 @@ Dev: How to run
 * Make sure [Libspotify SDK](https://developer.spotify.com/technologies/libspotify/) is installed and exported
 
 * Run: `go run sconsify.go`
+
+![alt tag](https://raw.githubusercontent.com/wiki/fabiofalci/sconsify/sconsify.png)
