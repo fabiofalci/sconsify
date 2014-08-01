@@ -225,7 +225,7 @@ func updateTracksView(g *gocui.Gui) {
 				playlistTrack := playlist.Track(i)
 				track := playlistTrack.Track()
 				track.Wait()
-				fmt.Fprintf(tracksView, "%v. %v", (i + 1), track.Name())
+				fmt.Fprintf(tracksView, "%v. %v - %v", (i + 1), track.Artist(0).Name(), track.Name())
 			}
 		}
 	}
