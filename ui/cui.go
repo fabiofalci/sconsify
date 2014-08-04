@@ -7,30 +7,29 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/jroimartin/gocui"
-	sp "github.com/op/go-libspotify/spotify"
 )
 
 var g *gocui.Gui
 var playlistsView *gocui.View
 var tracksView *gocui.View
 var statusView *gocui.View
-var toPlay chan sp.Track
-var nextPlay chan string
 var currentIndexTrack int
 var currentPlaylist string
 
-func Start(toPlayChannel chan sp.Track, nextPlayChannel chan string, statusChannel chan string) {
-	toPlay = toPlayChannel
-	nextPlay = nextPlayChannel
+var playEvents *events.Events
+
+func Start(allEvents *events.Events) {
+	playEvents = allEvents
 
 	go func() {
 		for {
 			select {
-			case message := <-statusChannel:
+			case message := <-playEvents.Status:
 				updateStatus(message)
-			case <-nextPlay:
+			case <-playEvents.NextPlay:
 				playNext()
 			}
 		}
@@ -142,7 +141,7 @@ func playNext() error {
 		track := playlistTrack.Track()
 		track.Wait()
 
-		toPlay <- *track
+		playEvents.ToPlay <- *track
 	}
 	return nil
 }
@@ -163,7 +162,7 @@ func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 			track := playlistTrack.Track()
 			track.Wait()
 
-			toPlay <- *track
+			playEvents.ToPlay <- *track
 		}
 	}
 	return nil

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"code.google.com/p/portaudio-go/portaudio"
+	"github.com/fabiofalci/sconsify/events"
 	sp "github.com/op/go-libspotify/spotify"
 )
 
@@ -36,11 +37,7 @@ var (
 	Playlists = make(map[string]*sp.Playlist)
 )
 
-var statusChannel chan string
-var nextPlayChannel chan string
-var toPlayChannel chan sp.Track
-
-func Initialise(initialised chan bool, toPlay chan sp.Track, nextPlay chan string, status chan string) {
+func Initialise(allEvents *events.Events) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err)
@@ -50,10 +47,6 @@ func Initialise(initialised chan bool, toPlay chan sp.Track, nextPlay chan strin
 		Username: os.Getenv("SPOTIFY_USERNAME"),
 		Password: os.Getenv("SPOTIFY_PASSWORD"),
 	}
-
-	statusChannel = status
-	nextPlayChannel = nextPlay
-	toPlayChannel = toPlay
 
 	portaudio.Initialize()
 	defer portaudio.Terminate()
@@ -82,10 +75,10 @@ func Initialise(initialised chan bool, toPlay chan sp.Track, nextPlay chan strin
 	}
 
 	if checkConnectionState(session) {
-		finishInitialisation(session, pa, initialised)
+		finishInitialisation(session, pa, allEvents)
 	} else {
 		println("Could not login")
-		initialised <- false
+		allEvents.Initialised <- false
 	}
 }
 
@@ -111,7 +104,7 @@ func checkConnectionState(session *sp.Session) bool {
 	return loggedIn
 }
 
-func finishInitialisation(session *sp.Session, pa *portAudio, initialised chan bool) {
+func finishInitialisation(session *sp.Session, pa *portAudio, allEvents *events.Events) {
 	playlists, _ := session.Playlists()
 	playlists.Wait()
 	for i := 0; i < playlists.Playlists(); i++ {
@@ -123,7 +116,7 @@ func finishInitialisation(session *sp.Session, pa *portAudio, initialised chan b
 		}
 	}
 
-	initialised <- true
+	allEvents.Initialised <- true
 
 	go pa.player()
 
@@ -131,21 +124,21 @@ func finishInitialisation(session *sp.Session, pa *portAudio, initialised chan b
 		for {
 			select {
 			case <-session.EndOfTrackUpdates():
-				nextPlayChannel <- ""
+				allEvents.NextPlay <- true
 			}
 		}
 	}()
 	for {
 		select {
-		case track := <-toPlayChannel:
-			Play(session, &track)
+		case track := <-allEvents.ToPlay:
+			Play(session, &track, allEvents)
 		}
 	}
 }
 
-func Play(session *sp.Session, track *sp.Track) {
+func Play(session *sp.Session, track *sp.Track, allEvents *events.Events) {
 	if track.Availability() != sp.TrackAvailabilityAvailable {
-		statusChannel <- "Not available"
+		allEvents.Status <- "Not available"
 		return
 	}
 	player := session.Player()
@@ -156,7 +149,7 @@ func Play(session *sp.Session, track *sp.Track) {
 	player.Play()
 	artist := track.Artist(0)
 	artist.Wait()
-	statusChannel <- fmt.Sprintf("Playing: %v - %v [%v]", artist.Name(), track.Name(), track.Duration().String())
+	allEvents.Status <- fmt.Sprintf("Playing: %v - %v [%v]", artist.Name(), track.Name(), track.Duration().String())
 }
 
 func (pa *portAudio) player() {
@@ -186,7 +179,6 @@ func (pa *portAudio) player() {
 			if len(audio.frames) != 2048*2*2 {
 				// panic("unexpected")
 				// don't know if it's a panic or track just ended
-				// nextPlayChannel <- ""
 				break
 			}
 
