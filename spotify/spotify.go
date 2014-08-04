@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"time"
 
 	"code.google.com/p/portaudio-go/portaudio"
@@ -37,15 +36,15 @@ var (
 	Playlists = make(map[string]*sp.Playlist)
 )
 
-func Initialise(allEvents *events.Events) {
+func Initialise(username string, pass *[]byte, allEvents *events.Events) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	credentials := sp.Credentials{
-		Username: os.Getenv("SPOTIFY_USERNAME"),
-		Password: os.Getenv("SPOTIFY_PASSWORD"),
+		Username: username,
+		Password: string(*pass),
 	}
 
 	portaudio.Initialize()
