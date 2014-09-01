@@ -168,8 +168,16 @@ func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
+	playEvents.Pause <- true
+	return nil
+}
+
 func keybindings(g *gocui.Gui) error {
 	if err := g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("", 'p', 0, pauseCurrentSelectedTrack); err != nil {
 		return err
 	}
 

@@ -33,7 +33,9 @@ func newPortAudio() *portAudio {
 }
 
 var (
-	Playlists = make(map[string]*sp.Playlist)
+	Playlists    = make(map[string]*sp.Playlist)
+	currentTrack *sp.Track
+	paused       bool
 )
 
 func Initialise(username string, pass *[]byte, allEvents *events.Events) {
@@ -131,6 +133,25 @@ func finishInitialisation(session *sp.Session, pa *portAudio, allEvents *events.
 		select {
 		case track := <-allEvents.ToPlay:
 			Play(session, &track, allEvents)
+		case <-allEvents.Pause:
+			Pause(session, allEvents)
+		}
+	}
+}
+
+func Pause(session *sp.Session, allEvents *events.Events) {
+	if currentTrack != nil {
+		if paused {
+			Play(session, currentTrack, allEvents)
+			paused = false
+		} else {
+			player := session.Player()
+			player.Pause()
+
+			artist := currentTrack.Artist(0)
+			artist.Wait()
+			allEvents.Status <- fmt.Sprintf("Paused: %v - %v [%v]", artist.Name(), currentTrack.Name(), currentTrack.Duration().String())
+			paused = true
 		}
 	}
 }
@@ -142,13 +163,13 @@ func Play(session *sp.Session, track *sp.Track, allEvents *events.Events) {
 	}
 	player := session.Player()
 	if err := player.Load(track); err != nil {
-		println("error")
 		log.Fatal(err)
 	}
 	player.Play()
 	artist := track.Artist(0)
 	artist.Wait()
-	allEvents.Status <- fmt.Sprintf("Playing: %v - %v [%v]", artist.Name(), track.Name(), track.Duration().String())
+	currentTrack = track
+	allEvents.Status <- fmt.Sprintf("Playing: %v - %v [%v]", artist.Name(), currentTrack.Name(), currentTrack.Duration().String())
 }
 
 func (pa *portAudio) player() {
