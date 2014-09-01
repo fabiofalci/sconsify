@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/jroimartin/gocui"
+	sp "github.com/op/go-libspotify/spotify"
 )
 
 var g *gocui.Gui
@@ -18,6 +20,8 @@ var tracksView *gocui.View
 var statusView *gocui.View
 var currentIndexTrack int
 var currentPlaylist string
+var randomMode bool = false
+var currentMessage string
 
 var playEvents *events.Events
 
@@ -59,10 +63,19 @@ func updateStatus(message string) {
 	statusView.Clear()
 	statusView.SetCursor(0, 0)
 	statusView.SetOrigin(0, 0)
-	fmt.Fprintf(statusView, "%v", message)
+
+	currentMessage = message
+	fmt.Fprintf(statusView, getMode()+"%v", currentMessage)
 
 	// otherwise the update will appear only in the next keyboard move
 	g.Flush()
+}
+
+func getMode() string {
+	if randomMode {
+		return "Random - "
+	}
+	return ""
 }
 
 func nextView(g *gocui.Gui, v *gocui.View) error {
@@ -132,10 +145,10 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 func playNext() error {
 	if currentPlaylist != "" {
 		playlist := spotify.Playlists[currentPlaylist]
-		if currentIndexTrack >= playlist.Tracks()-1 {
-			currentIndexTrack = 0
+		if !randomMode {
+			currentIndexTrack = getNextTrack(playlist)
 		} else {
-			currentIndexTrack = currentIndexTrack + 1
+			currentIndexTrack = getRandomNextTrack(playlist)
 		}
 		playlistTrack := playlist.Track(currentIndexTrack)
 		track := playlistTrack.Track()
@@ -144,6 +157,17 @@ func playNext() error {
 		playEvents.ToPlay <- *track
 	}
 	return nil
+}
+
+func getNextTrack(playlist *sp.Playlist) int {
+	if currentIndexTrack >= playlist.Tracks()-1 {
+		return 0
+	}
+	return currentIndexTrack + 1
+}
+
+func getRandomNextTrack(playlist *sp.Playlist) int {
+	return rand.Intn(playlist.Tracks())
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
@@ -173,11 +197,20 @@ func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func setRandomMode(g *gocui.Gui, v *gocui.View) error {
+	randomMode = !randomMode
+	updateStatus(currentMessage)
+	return nil
+}
+
 func keybindings(g *gocui.Gui) error {
 	if err := g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
 		return err
 	}
 	if err := g.SetKeybinding("", 'p', 0, pauseCurrentSelectedTrack); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("", 'r', 0, setRandomMode); err != nil {
 		return err
 	}
 
