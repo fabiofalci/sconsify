@@ -203,6 +203,11 @@ func setRandomMode(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func nextCommand(g *gocui.Gui, v *gocui.View) error {
+	playNext()
+	return nil
+}
+
 func keybindings(g *gocui.Gui) error {
 	if err := g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
 		return err
@@ -211,6 +216,9 @@ func keybindings(g *gocui.Gui) error {
 		return err
 	}
 	if err := g.SetKeybinding("", 'r', 0, setRandomMode); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("", '>', 0, nextCommand); err != nil {
 		return err
 	}
 
