@@ -18,10 +18,12 @@ var g *gocui.Gui
 var playlistsView *gocui.View
 var tracksView *gocui.View
 var statusView *gocui.View
+var queueView *gocui.View
 var currentIndexTrack int
 var currentPlaylist string
 var randomMode bool = false
 var currentMessage string
+var queue = make([]sp.Track, 0, 100)
 
 var playEvents *events.Events
 
@@ -143,7 +145,10 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func playNext() error {
-	if currentPlaylist != "" {
+	if len(queue) > 0 {
+		playEvents.ToPlay <- popFromQueue()
+		updateQueueView()
+	} else if currentPlaylist != "" {
 		playlist := spotify.Playlists[currentPlaylist]
 		if !randomMode {
 			currentIndexTrack = getNextTrack(playlist)
@@ -171,23 +176,9 @@ func getRandomNextTrack(playlist *sp.Playlist) int {
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	var errPlaylist error
-	currentPlaylist, errPlaylist = getSelectedPlaylist(g)
-	currentTrack, errTrack := getSelectedTrack(g)
-	if errPlaylist == nil && errTrack == nil && spotify.Playlists != nil {
-		playlist := spotify.Playlists[currentPlaylist]
-
-		if playlist != nil {
-			playlist.Wait()
-			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
-			currentIndexTrack, _ = strconv.Atoi(currentTrack)
-			currentIndexTrack = currentIndexTrack - 1
-			playlistTrack := playlist.Track(currentIndexTrack)
-			track := playlistTrack.Track()
-			track.Wait()
-
-			playEvents.ToPlay <- *track
-		}
+	track := getCurrentSelectedTrack()
+	if track != nil {
+		playEvents.ToPlay <- *track
 	}
 	return nil
 }
@@ -208,6 +199,36 @@ func nextCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func queueCommand(g *gocui.Gui, v *gocui.View) error {
+	track := getCurrentSelectedTrack()
+	if track != nil {
+		fmt.Fprintf(queueView, "%v - %v", track.Artist(0).Name(), track.Name())
+		addToQueue(track)
+	}
+	return nil
+}
+
+func getCurrentSelectedTrack() *sp.Track {
+	var errPlaylist error
+	currentPlaylist, errPlaylist = getSelectedPlaylist(g)
+	currentTrack, errTrack := getSelectedTrack(g)
+	if errPlaylist == nil && errTrack == nil && spotify.Playlists != nil {
+		playlist := spotify.Playlists[currentPlaylist]
+
+		if playlist != nil {
+			playlist.Wait()
+			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
+			currentIndexTrack, _ = strconv.Atoi(currentTrack)
+			currentIndexTrack = currentIndexTrack - 1
+			playlistTrack := playlist.Track(currentIndexTrack)
+			track := playlistTrack.Track()
+			track.Wait()
+			return track
+		}
+	}
+	return nil
+}
+
 func keybindings(g *gocui.Gui) error {
 	if err := g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
 		return err
@@ -219,6 +240,9 @@ func keybindings(g *gocui.Gui) error {
 		return err
 	}
 	if err := g.SetKeybinding("", '>', 0, nextCommand); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("", 'u', 0, queueCommand); err != nil {
 		return err
 	}
 
@@ -295,9 +319,18 @@ func updatePlaylistsView(g *gocui.Gui) {
 	}
 }
 
+func updateQueueView() {
+	queueView.Clear()
+	if len(queue) > 0 {
+		for _, track := range queue {
+			fmt.Fprintf(queueView, "%v - %v", track.Artist(0).Name(), track.Name())
+		}
+	}
+}
+
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("side", -1, -1, 30, maxY-2); err != nil {
+	if v, err := g.SetView("side", -1, -1, 25, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -306,7 +339,7 @@ func layout(g *gocui.Gui) error {
 
 		updatePlaylistsView(g)
 	}
-	if v, err := g.SetView("main", 30, -1, maxX, maxY-2); err != nil {
+	if v, err := g.SetView("main", 25, -1, maxX-50, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -319,6 +352,12 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 	}
+	if v, err := g.SetView("queue", maxX-50, -1, maxX, maxY-2); err != nil {
+		if err != gocui.ErrorUnkView {
+			return err
+		}
+		queueView = v
+	}
 	if v, err := g.SetView("status", -1, maxY-2, maxX, maxY); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
@@ -326,4 +365,19 @@ func layout(g *gocui.Gui) error {
 		statusView = v
 	}
 	return nil
+}
+
+func addToQueue(element *sp.Track) {
+	n := len(queue)
+	if n+1 >= cap(queue) {
+		return
+	}
+	queue = queue[0 : n+1]
+	queue[n] = *element
+}
+
+func popFromQueue() sp.Track {
+	element := queue[0]
+	queue = queue[1:len(queue)]
+	return element
 }
