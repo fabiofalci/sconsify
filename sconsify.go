@@ -17,7 +17,6 @@ func main() {
 	events := events.InitialiseEvents()
 
 	go spotify.Initialise(username, pass, events)
-
 	ui.Start(events)
 }
 

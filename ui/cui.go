@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/fabiofalci/sconsify/events"
-	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/jroimartin/gocui"
 	sp "github.com/op/go-libspotify/spotify"
 )
@@ -141,7 +140,8 @@ func getSelected(g *gocui.Gui, v *gocui.View) (string, error) {
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
-	spotify.ShutdownSpotify()
+	playEvents.Shutdown <- true
+	<-playEvents.Shutdown
 	return gocui.ErrorQuit
 }
 

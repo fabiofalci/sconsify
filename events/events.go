@@ -10,8 +10,9 @@ type Events struct {
 	ToPlay    chan *sp.Track
 	NextPlay  chan bool
 	Pause     chan bool
+	Shutdown  chan bool
 }
 
 func InitialiseEvents() *Events {
-	return &Events{Playlists: make(chan map[string]*sp.Playlist), Status: make(chan string), ToPlay: make(chan *sp.Track), NextPlay: make(chan bool), Pause: make(chan bool)}
+	return &Events{Playlists: make(chan map[string]*sp.Playlist), Status: make(chan string), ToPlay: make(chan *sp.Track), NextPlay: make(chan bool), Pause: make(chan bool), Shutdown: make(chan bool)}
 }

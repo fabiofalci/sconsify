@@ -86,8 +86,10 @@ func Initialise(username *string, pass *[]byte, allEvents *events.Events) {
 	}
 }
 
-func ShutdownSpotify() {
+func shutdownSpotify(session *sp.Session, allEvents *events.Events) {
+	session.Logout()
 	deleteCache()
+	allEvents.Shutdown <- true
 }
 
 func deleteCache() {
@@ -146,6 +148,8 @@ func finishInitialisation(session *sp.Session, pa *portAudio, allEvents *events.
 			Play(session, track, allEvents)
 		case <-allEvents.Pause:
 			Pause(session, allEvents)
+		case <-allEvents.Shutdown:
+			shutdownSpotify(session, allEvents)
 		}
 	}
 }
