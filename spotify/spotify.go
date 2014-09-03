@@ -40,14 +40,14 @@ var (
 	cacheLocation = "tmp"
 )
 
-func Initialise(username string, pass *[]byte, allEvents *events.Events) {
+func Initialise(username *string, pass *[]byte, allEvents *events.Events) {
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	credentials := sp.Credentials{
-		Username: username,
+		Username: *username,
 		Password: string(*pass),
 	}
 
