@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"code.google.com/p/portaudio-go/portaudio"
@@ -33,9 +34,10 @@ func newPortAudio() *portAudio {
 }
 
 var (
-	Playlists    = make(map[string]*sp.Playlist)
-	currentTrack *sp.Track
-	paused       bool
+	Playlists     = make(map[string]*sp.Playlist)
+	currentTrack  *sp.Track
+	paused        bool
+	cacheLocation = "tmp"
 )
 
 func Initialise(username string, pass *[]byte, allEvents *events.Events) {
@@ -54,11 +56,12 @@ func Initialise(username string, pass *[]byte, allEvents *events.Events) {
 
 	pa := newPortAudio()
 
+	deleteCache()
 	session, err := sp.NewSession(&sp.Config{
 		ApplicationKey:   appKey,
-		ApplicationName:  "testing",
-		CacheLocation:    "tmp",
-		SettingsLocation: "tmp",
+		ApplicationName:  "sconsify",
+		CacheLocation:    cacheLocation,
+		SettingsLocation: cacheLocation,
 		AudioConsumer:    pa,
 	})
 
@@ -81,6 +84,14 @@ func Initialise(username string, pass *[]byte, allEvents *events.Events) {
 		println("Could not login")
 		allEvents.Initialised <- false
 	}
+}
+
+func ShutdownSpotify() {
+	deleteCache()
+}
+
+func deleteCache() {
+	os.RemoveAll(cacheLocation)
 }
 
 func checkConnectionState(session *sp.Session) bool {

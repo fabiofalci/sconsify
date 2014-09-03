@@ -141,6 +141,7 @@ func getSelected(g *gocui.Gui, v *gocui.View) (string, error) {
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
+	spotify.ShutdownSpotify()
 	return gocui.ErrorQuit
 }
 
