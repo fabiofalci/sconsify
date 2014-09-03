@@ -143,7 +143,7 @@ func finishInitialisation(session *sp.Session, pa *portAudio, allEvents *events.
 	for {
 		select {
 		case track := <-allEvents.ToPlay:
-			Play(session, &track, allEvents)
+			Play(session, track, allEvents)
 		case <-allEvents.Pause:
 			Pause(session, allEvents)
 		}

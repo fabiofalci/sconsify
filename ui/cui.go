@@ -23,12 +23,14 @@ var currentIndexTrack int
 var currentPlaylist string
 var randomMode bool = false
 var currentMessage string
-var queue = make([]sp.Track, 0, 100)
+
+var queue *Queue
 
 var playEvents *events.Events
 
 func Start(allEvents *events.Events) {
 	playEvents = allEvents
+	queue = InitQueue()
 
 	go func() {
 		for {
@@ -146,8 +148,8 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func playNext() error {
-	if len(queue) > 0 {
-		playEvents.ToPlay <- popFromQueue()
+	if !queue.isEmpty() {
+		playEvents.ToPlay <- queue.Pop()
 		updateQueueView()
 	} else if currentPlaylist != "" {
 		playlist := spotify.Playlists[currentPlaylist]
@@ -160,7 +162,7 @@ func playNext() error {
 		track := playlistTrack.Track()
 		track.Wait()
 
-		playEvents.ToPlay <- *track
+		playEvents.ToPlay <- track
 	}
 	return nil
 }
@@ -179,7 +181,7 @@ func getRandomNextTrack(playlist *sp.Playlist) int {
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	track := getCurrentSelectedTrack()
 	if track != nil {
-		playEvents.ToPlay <- *track
+		playEvents.ToPlay <- track
 	}
 	return nil
 }
@@ -204,7 +206,7 @@ func queueCommand(g *gocui.Gui, v *gocui.View) error {
 	track := getCurrentSelectedTrack()
 	if track != nil {
 		fmt.Fprintf(queueView, "%v - %v", track.Artist(0).Name(), track.Name())
-		addToQueue(track)
+		queue.Add(track)
 	}
 	return nil
 }
@@ -322,8 +324,8 @@ func updatePlaylistsView(g *gocui.Gui) {
 
 func updateQueueView() {
 	queueView.Clear()
-	if len(queue) > 0 {
-		for _, track := range queue {
+	if !queue.isEmpty() {
+		for _, track := range queue.Contents() {
 			fmt.Fprintf(queueView, "%v - %v", track.Artist(0).Name(), track.Name())
 		}
 	}
@@ -366,19 +368,4 @@ func layout(g *gocui.Gui) error {
 		statusView = v
 	}
 	return nil
-}
-
-func addToQueue(element *sp.Track) {
-	n := len(queue)
-	if n+1 >= cap(queue) {
-		return
-	}
-	queue = queue[0 : n+1]
-	queue[n] = *element
-}
-
-func popFromQueue() sp.Track {
-	element := queue[0]
-	queue = queue[1:len(queue)]
-	return element
 }
