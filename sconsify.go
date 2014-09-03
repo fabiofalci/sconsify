@@ -18,9 +18,7 @@ func main() {
 
 	go spotify.Initialise(username, pass, events)
 
-	if <-events.Initialised {
-		ui.Start(events)
-	}
+	ui.Start(events)
 }
 
 func credentials() (*string, *[]byte) {

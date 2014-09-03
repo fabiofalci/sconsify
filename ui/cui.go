@@ -22,11 +22,18 @@ var queueView *gocui.View
 
 var queue *Queue
 var state *UiState
+var playlists map[string]*sp.Playlist
 
 var playEvents *events.Events
 
 func Start(allEvents *events.Events) {
 	playEvents = allEvents
+
+	playlists = <-playEvents.Playlists
+	if playlists == nil {
+		return
+	}
+
 	queue = InitQueue()
 	state = InitState()
 
@@ -143,7 +150,7 @@ func playNext() error {
 		playEvents.ToPlay <- queue.Pop()
 		updateQueueView()
 	} else if state.currentPlaylist != "" {
-		playlist := spotify.Playlists[state.currentPlaylist]
+		playlist := playlists[state.currentPlaylist]
 		if !state.randomMode {
 			state.currentIndexTrack = getNextTrack(playlist)
 		} else {
@@ -206,8 +213,8 @@ func getCurrentSelectedTrack() *sp.Track {
 	var errPlaylist error
 	state.currentPlaylist, errPlaylist = getSelectedPlaylist(g)
 	currentTrack, errTrack := getSelectedTrack(g)
-	if errPlaylist == nil && errTrack == nil && spotify.Playlists != nil {
-		playlist := spotify.Playlists[state.currentPlaylist]
+	if errPlaylist == nil && errTrack == nil && playlists != nil {
+		playlist := playlists[state.currentPlaylist]
 
 		if playlist != nil {
 			playlist.Wait()
@@ -282,8 +289,8 @@ func updateTracksView(g *gocui.Gui) {
 	tracksView.SetCursor(0, 0)
 	tracksView.SetOrigin(0, 0)
 	currentPlaylist, err := getSelectedPlaylist(g)
-	if err == nil && spotify.Playlists != nil {
-		playlist := spotify.Playlists[currentPlaylist]
+	if err == nil && playlists != nil {
+		playlist := playlists[currentPlaylist]
 
 		if playlist != nil {
 			playlist.Wait()
@@ -299,10 +306,10 @@ func updateTracksView(g *gocui.Gui) {
 
 func updatePlaylistsView(g *gocui.Gui) {
 	playlistsView.Clear()
-	if spotify.Playlists != nil {
-		keys := make([]string, len(spotify.Playlists))
+	if playlists != nil {
+		keys := make([]string, len(playlists))
 		i := 0
-		for k, _ := range spotify.Playlists {
+		for k, _ := range playlists {
 			keys[i] = k
 			i++
 		}
