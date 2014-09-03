@@ -19,18 +19,16 @@ var playlistsView *gocui.View
 var tracksView *gocui.View
 var statusView *gocui.View
 var queueView *gocui.View
-var currentIndexTrack int
-var currentPlaylist string
-var randomMode bool = false
-var currentMessage string
 
 var queue *Queue
+var state *UiState
 
 var playEvents *events.Events
 
 func Start(allEvents *events.Events) {
 	playEvents = allEvents
 	queue = InitQueue()
+	state = InitState()
 
 	go func() {
 		for {
@@ -68,18 +66,11 @@ func updateStatus(message string) {
 	statusView.SetCursor(0, 0)
 	statusView.SetOrigin(0, 0)
 
-	currentMessage = message
-	fmt.Fprintf(statusView, getMode()+"%v", currentMessage)
+	state.currentMessage = message
+	fmt.Fprintf(statusView, state.getModeAsString()+"%v", state.currentMessage)
 
 	// otherwise the update will appear only in the next keyboard move
 	g.Flush()
-}
-
-func getMode() string {
-	if randomMode {
-		return "Random - "
-	}
-	return ""
 }
 
 func nextView(g *gocui.Gui, v *gocui.View) error {
@@ -151,14 +142,14 @@ func playNext() error {
 	if !queue.isEmpty() {
 		playEvents.ToPlay <- queue.Pop()
 		updateQueueView()
-	} else if currentPlaylist != "" {
-		playlist := spotify.Playlists[currentPlaylist]
-		if !randomMode {
-			currentIndexTrack = getNextTrack(playlist)
+	} else if state.currentPlaylist != "" {
+		playlist := spotify.Playlists[state.currentPlaylist]
+		if !state.randomMode {
+			state.currentIndexTrack = getNextTrack(playlist)
 		} else {
-			currentIndexTrack = getRandomNextTrack(playlist)
+			state.currentIndexTrack = getRandomNextTrack(playlist)
 		}
-		playlistTrack := playlist.Track(currentIndexTrack)
+		playlistTrack := playlist.Track(state.currentIndexTrack)
 		track := playlistTrack.Track()
 		track.Wait()
 
@@ -168,10 +159,10 @@ func playNext() error {
 }
 
 func getNextTrack(playlist *sp.Playlist) int {
-	if currentIndexTrack >= playlist.Tracks()-1 {
+	if state.currentIndexTrack >= playlist.Tracks()-1 {
 		return 0
 	}
-	return currentIndexTrack + 1
+	return state.currentIndexTrack + 1
 }
 
 func getRandomNextTrack(playlist *sp.Playlist) int {
@@ -192,8 +183,8 @@ func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 }
 
 func setRandomMode(g *gocui.Gui, v *gocui.View) error {
-	randomMode = !randomMode
-	updateStatus(currentMessage)
+	state.invertMode()
+	updateStatus(state.currentMessage)
 	return nil
 }
 
@@ -213,17 +204,17 @@ func queueCommand(g *gocui.Gui, v *gocui.View) error {
 
 func getCurrentSelectedTrack() *sp.Track {
 	var errPlaylist error
-	currentPlaylist, errPlaylist = getSelectedPlaylist(g)
+	state.currentPlaylist, errPlaylist = getSelectedPlaylist(g)
 	currentTrack, errTrack := getSelectedTrack(g)
 	if errPlaylist == nil && errTrack == nil && spotify.Playlists != nil {
-		playlist := spotify.Playlists[currentPlaylist]
+		playlist := spotify.Playlists[state.currentPlaylist]
 
 		if playlist != nil {
 			playlist.Wait()
 			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
-			currentIndexTrack, _ = strconv.Atoi(currentTrack)
-			currentIndexTrack = currentIndexTrack - 1
-			playlistTrack := playlist.Track(currentIndexTrack)
+			converted, _ := strconv.Atoi(currentTrack)
+			state.currentIndexTrack = converted - 1
+			playlistTrack := playlist.Track(state.currentIndexTrack)
 			track := playlistTrack.Track()
 			track.Wait()
 			return track
