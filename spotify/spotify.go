@@ -6,10 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"code.google.com/p/portaudio-go/portaudio"
 	"github.com/fabiofalci/sconsify/events"
+	"github.com/mitchellh/go-homedir"
 	sp "github.com/op/go-libspotify/spotify"
 )
 
@@ -37,7 +39,7 @@ var (
 	Playlists     = make(map[string]*sp.Playlist)
 	currentTrack  *sp.Track
 	paused        bool
-	cacheLocation = "tmp"
+	cacheLocation string
 )
 
 func Initialise(username *string, pass *[]byte, allEvents *events.Events) {
@@ -55,6 +57,11 @@ func Initialise(username *string, pass *[]byte, allEvents *events.Events) {
 	defer portaudio.Terminate()
 
 	pa := newPortAudio()
+
+	initCacheLocation()
+	if cacheLocation == "" {
+		log.Fatal("Cannot find cache dir")
+	}
 
 	deleteCache()
 	session, err := sp.NewSession(&sp.Config{
@@ -86,6 +93,16 @@ func Initialise(username *string, pass *[]byte, allEvents *events.Events) {
 	}
 }
 
+func initCacheLocation() {
+	dir, err := homedir.Dir()
+	if err == nil {
+		dir, err = homedir.Expand(dir)
+		if err == nil && dir != "" {
+			cacheLocation = dir + "/.sconsify/cache/"
+		}
+	}
+}
+
 func shutdownSpotify(session *sp.Session, allEvents *events.Events) {
 	session.Logout()
 	deleteCache()
@@ -93,7 +110,9 @@ func shutdownSpotify(session *sp.Session, allEvents *events.Events) {
 }
 
 func deleteCache() {
-	os.RemoveAll(cacheLocation)
+	if strings.HasSuffix(cacheLocation, "/.sconsify/cache/") {
+		os.RemoveAll(cacheLocation)
+	}
 }
 
 func checkConnectionState(session *sp.Session) bool {
