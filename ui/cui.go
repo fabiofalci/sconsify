@@ -82,8 +82,12 @@ func updateStatus(message string) {
 func nextView(g *gocui.Gui, v *gocui.View) error {
 	currentView := g.CurrentView()
 	if currentView == nil || currentView.Name() == "side" {
+		tracksView.Highlight = true
+		playlistsView.Highlight = false
 		return g.SetCurrentView("main")
 	}
+	tracksView.Highlight = false
+	playlistsView.Highlight = true
 	return g.SetCurrentView("side")
 }
 
@@ -336,7 +340,6 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		playlistsView = v
-		playlistsView.Highlight = true
 
 		updatePlaylistsView(g)
 	}
