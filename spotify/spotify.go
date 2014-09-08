@@ -36,7 +36,6 @@ func newPortAudio() *portAudio {
 }
 
 var (
-	Playlists     = make(map[string]*sp.Playlist)
 	currentTrack  *sp.Track
 	paused        bool
 	cacheLocation string
@@ -138,18 +137,19 @@ func checkConnectionState(session *sp.Session) bool {
 }
 
 func finishInitialisation(session *sp.Session, pa *portAudio, allEvents *events.Events) {
-	playlists, _ := session.Playlists()
-	playlists.Wait()
-	for i := 0; i < playlists.Playlists(); i++ {
-		playlist := playlists.Playlist(i)
+	playlists := make(map[string]*sp.Playlist)
+	allPlaylists, _ := session.Playlists()
+	allPlaylists.Wait()
+	for i := 0; i < allPlaylists.Playlists(); i++ {
+		playlist := allPlaylists.Playlist(i)
 		playlist.Wait()
 
-		if playlists.PlaylistType(i) == sp.PlaylistTypePlaylist {
-			Playlists[playlist.Name()] = playlist
+		if allPlaylists.PlaylistType(i) == sp.PlaylistTypePlaylist {
+			playlists[playlist.Name()] = playlist
 		}
 	}
 
-	allEvents.Playlists <- Playlists
+	allEvents.Playlists <- playlists
 
 	go pa.player()
 
