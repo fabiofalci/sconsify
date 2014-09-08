@@ -2,6 +2,7 @@
 package spotify
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -29,92 +30,137 @@ type portAudio struct {
 	buffer chan *audio
 }
 
-func newPortAudio() *portAudio {
-	return &portAudio{
-		buffer: make(chan *audio, 8),
-	}
-}
-
-var (
+type Spotify struct {
 	currentTrack  *sp.Track
 	paused        bool
 	cacheLocation string
-)
+	events        *events.Events
+	pa            *portAudio
+	session       *sp.Session
+	appKey        *[]byte
+}
 
-func Initialise(username *string, pass *[]byte, allEvents *events.Events) {
-	appKey, err := ioutil.ReadFile("spotify_appkey.key")
+func Initialise(username *string, pass *[]byte, events *events.Events) error {
+	spotify := &Spotify{events: events}
+	err := spotify.initKey()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	credentials := sp.Credentials{
-		Username: *username,
-		Password: string(*pass),
-	}
-
-	portaudio.Initialize()
+	spotify.initAudio()
 	defer portaudio.Terminate()
 
-	pa := newPortAudio()
-
-	initCacheLocation()
-	if cacheLocation == "" {
-		log.Fatal("Cannot find cache dir")
+	err = spotify.initCache()
+	if err != nil {
+		return err
 	}
 
-	deleteCache()
-	session, err := sp.NewSession(&sp.Config{
-		ApplicationKey:   appKey,
+	spotify.initSession()
+
+	err = spotify.login(username, pass)
+	if err != nil {
+		return err
+	}
+
+	err = spotify.checkIfLoggedIn()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (spotify *Spotify) login(username *string, pass *[]byte) error {
+	credentials := sp.Credentials{Username: *username, Password: string(*pass)}
+	if err := spotify.session.Login(credentials, false); err != nil {
+		return err
+	}
+
+	err := <-spotify.session.LoginUpdates()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (spotify *Spotify) initSession() error {
+	var err error
+	spotify.session, err = sp.NewSession(&sp.Config{
+		ApplicationKey:   *spotify.appKey,
 		ApplicationName:  "sconsify",
-		CacheLocation:    cacheLocation,
-		SettingsLocation: cacheLocation,
-		AudioConsumer:    pa,
+		CacheLocation:    spotify.cacheLocation,
+		SettingsLocation: spotify.cacheLocation,
+		AudioConsumer:    spotify.pa,
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	if err = session.Login(credentials, false); err != nil {
-		log.Fatal(err)
-	}
-
-	err = <-session.LoginUpdates()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if checkConnectionState(session) {
-		finishInitialisation(session, pa, allEvents)
-	} else {
-		println("Could not login")
-		allEvents.NewPlaylist(nil)
-	}
+	return nil
 }
 
-func initCacheLocation() {
+func (spotify *Spotify) initKey() error {
+	appKey, err := ioutil.ReadFile("spotify_appkey.key")
+	if err != nil {
+		return err
+	}
+	spotify.appKey = &appKey
+	return nil
+}
+
+func newPortAudio() *portAudio {
+	return &portAudio{buffer: make(chan *audio, 8)}
+}
+
+func (spotify *Spotify) initAudio() {
+	portaudio.Initialize()
+
+	spotify.pa = newPortAudio()
+}
+
+func (spotify *Spotify) initCache() error {
+	spotify.initCacheLocation()
+	if spotify.cacheLocation == "" {
+		return errors.New("Cannot find cache dir")
+	}
+
+	spotify.deleteCache()
+	return nil
+}
+
+func (spotify *Spotify) initCacheLocation() {
 	dir, err := homedir.Dir()
 	if err == nil {
 		dir, err = homedir.Expand(dir)
 		if err == nil && dir != "" {
-			cacheLocation = dir + "/.sconsify/cache/"
+			spotify.cacheLocation = dir + "/.sconsify/cache/"
 		}
 	}
 }
 
-func shutdownSpotify(session *sp.Session, allEvents *events.Events) {
-	session.Logout()
-	deleteCache()
-	allEvents.Shutdown <- true
+func (spotify *Spotify) shutdownSpotify() {
+	spotify.session.Logout()
+	spotify.deleteCache()
+	spotify.events.Shutdown <- true
 }
 
-func deleteCache() {
-	if strings.HasSuffix(cacheLocation, "/.sconsify/cache/") {
-		os.RemoveAll(cacheLocation)
+func (spotify *Spotify) deleteCache() {
+	if strings.HasSuffix(spotify.cacheLocation, "/.sconsify/cache/") {
+		os.RemoveAll(spotify.cacheLocation)
 	}
 }
 
-func checkConnectionState(session *sp.Session) bool {
+func (spotify *Spotify) checkIfLoggedIn() error {
+	if spotify.checkConnectionState() {
+		spotify.finishInitialisation()
+	} else {
+		spotify.events.NewPlaylist(nil)
+		return errors.New("Could not login")
+	}
+	return nil
+}
+
+func (spotify *Spotify) checkConnectionState() bool {
 	timeout := make(chan bool)
 	go func() {
 		time.Sleep(3 * time.Second)
@@ -124,8 +170,8 @@ func checkConnectionState(session *sp.Session) bool {
 	running := true
 	for running {
 		select {
-		case <-session.ConnectionStateUpdates():
-			if session.ConnectionState() == sp.ConnectionStateLoggedIn {
+		case <-spotify.session.ConnectionStateUpdates():
+			if spotify.session.ConnectionState() == sp.ConnectionStateLoggedIn {
 				running = false
 				loggedIn = true
 			}
@@ -136,9 +182,9 @@ func checkConnectionState(session *sp.Session) bool {
 	return loggedIn
 }
 
-func finishInitialisation(session *sp.Session, pa *portAudio, allEvents *events.Events) {
+func (spotify *Spotify) finishInitialisation() {
 	playlists := make(map[string]*sp.Playlist)
-	allPlaylists, _ := session.Playlists()
+	allPlaylists, _ := spotify.session.Playlists()
 	allPlaylists.Wait()
 	for i := 0; i < allPlaylists.Playlists(); i++ {
 		playlist := allPlaylists.Playlist(i)
@@ -149,61 +195,61 @@ func finishInitialisation(session *sp.Session, pa *portAudio, allEvents *events.
 		}
 	}
 
-	allEvents.NewPlaylist(&playlists)
+	spotify.events.NewPlaylist(&playlists)
 
-	go pa.player()
+	go spotify.pa.player()
 
 	go func() {
 		for {
 			select {
-			case <-session.EndOfTrackUpdates():
-				allEvents.NextPlay <- true
+			case <-spotify.session.EndOfTrackUpdates():
+				spotify.events.NextPlay <- true
 			}
 		}
 	}()
 	for {
 		select {
-		case track := <-allEvents.ToPlay:
-			Play(session, track, allEvents)
-		case <-allEvents.Pause:
-			Pause(session, allEvents)
-		case <-allEvents.Shutdown:
-			shutdownSpotify(session, allEvents)
+		case track := <-spotify.events.ToPlay:
+			spotify.Play(track)
+		case <-spotify.events.Pause:
+			spotify.Pause()
+		case <-spotify.events.Shutdown:
+			spotify.shutdownSpotify()
 		}
 	}
 }
 
-func Pause(session *sp.Session, allEvents *events.Events) {
-	if currentTrack != nil {
-		if paused {
-			Play(session, currentTrack, allEvents)
-			paused = false
+func (spotify *Spotify) Pause() {
+	if spotify.currentTrack != nil {
+		if spotify.paused {
+			spotify.Play(spotify.currentTrack)
+			spotify.paused = false
 		} else {
-			player := session.Player()
+			player := spotify.session.Player()
 			player.Pause()
 
-			artist := currentTrack.Artist(0)
+			artist := spotify.currentTrack.Artist(0)
 			artist.Wait()
-			allEvents.Status <- fmt.Sprintf("Paused: %v - %v [%v]", artist.Name(), currentTrack.Name(), currentTrack.Duration().String())
-			paused = true
+			spotify.events.Status <- fmt.Sprintf("Paused: %v - %v [%v]", artist.Name(), spotify.currentTrack.Name(), spotify.currentTrack.Duration().String())
+			spotify.paused = true
 		}
 	}
 }
 
-func Play(session *sp.Session, track *sp.Track, allEvents *events.Events) {
+func (spotify *Spotify) Play(track *sp.Track) {
 	if track.Availability() != sp.TrackAvailabilityAvailable {
-		allEvents.Status <- "Not available"
+		spotify.events.Status <- "Not available"
 		return
 	}
-	player := session.Player()
+	player := spotify.session.Player()
 	if err := player.Load(track); err != nil {
 		log.Fatal(err)
 	}
 	player.Play()
 	artist := track.Artist(0)
 	artist.Wait()
-	currentTrack = track
-	allEvents.Status <- fmt.Sprintf("Playing: %v - %v [%v]", artist.Name(), currentTrack.Name(), currentTrack.Duration().String())
+	spotify.currentTrack = track
+	spotify.events.Status <- fmt.Sprintf("Playing: %v - %v [%v]", artist.Name(), spotify.currentTrack.Name(), spotify.currentTrack.Duration().String())
 }
 
 func (pa *portAudio) player() {
