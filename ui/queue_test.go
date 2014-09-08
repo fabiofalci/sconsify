@@ -61,7 +61,7 @@ func TestQueueEmpty(t *testing.T) {
 func TestQueueAddToLimit(t *testing.T) {
 	queue := InitQueue()
 
-	for i := 0; i < MAX; i++ {
+	for i := 0; i < QUEUE_MAX_ELEMENTS; i++ {
 		track := &sp.Track{}
 		trackAdded := queue.Add(track)
 		if track != trackAdded {

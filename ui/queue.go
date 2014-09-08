@@ -8,10 +8,10 @@ type Queue struct {
 	queue []*sp.Track
 }
 
-const MAX = 100
+const QUEUE_MAX_ELEMENTS = 100
 
 func InitQueue() *Queue {
-	return &Queue{queue: make([]*sp.Track, 0, MAX)}
+	return &Queue{queue: make([]*sp.Track, 0, QUEUE_MAX_ELEMENTS)}
 }
 
 func (queue *Queue) Add(track *sp.Track) *sp.Track {
