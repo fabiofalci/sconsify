@@ -88,7 +88,7 @@ func Initialise(username *string, pass *[]byte, allEvents *events.Events) {
 		finishInitialisation(session, pa, allEvents)
 	} else {
 		println("Could not login")
-		allEvents.Playlists <- nil
+		allEvents.NewPlaylist(nil)
 	}
 }
 
@@ -149,7 +149,7 @@ func finishInitialisation(session *sp.Session, pa *portAudio, allEvents *events.
 		}
 	}
 
-	allEvents.Playlists <- playlists
+	allEvents.NewPlaylist(&playlists)
 
 	go pa.player()
 

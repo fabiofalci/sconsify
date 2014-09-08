@@ -28,7 +28,7 @@ var playEvents *events.Events
 func Start(allEvents *events.Events) {
 	playEvents = allEvents
 
-	playlists = <-playEvents.Playlists
+	playlists = <-playEvents.WaitForPlaylists()
 	if playlists == nil {
 		return
 	}
