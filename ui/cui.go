@@ -151,7 +151,7 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 
 func playNext() error {
 	if !queue.isEmpty() {
-		playEvents.ToPlay <- queue.Pop()
+		playEvents.Play(queue.Pop())
 		updateQueueView()
 	} else if state.currentPlaylist != "" {
 		playlist := playlists[state.currentPlaylist]
@@ -164,7 +164,7 @@ func playNext() error {
 		track := playlistTrack.Track()
 		track.Wait()
 
-		playEvents.ToPlay <- track
+		playEvents.Play(track)
 	}
 	return nil
 }
@@ -183,7 +183,7 @@ func getRandomNextTrack(playlist *sp.Playlist) int {
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	track := getCurrentSelectedTrack()
 	if track != nil {
-		playEvents.ToPlay <- track
+		playEvents.Play(track)
 	}
 	return nil
 }

@@ -22,3 +22,7 @@ func InitialiseEvents() *Events {
 		Pause:     make(chan bool),
 		Shutdown:  make(chan bool)}
 }
+
+func (events *Events) Play(track *sp.Track) {
+	events.ToPlay <- track
+}
