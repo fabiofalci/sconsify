@@ -13,22 +13,26 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 )
 
-var g *gocui.Gui
-var playlistsView *gocui.View
-var tracksView *gocui.View
-var statusView *gocui.View
-var queueView *gocui.View
+var (
+	gui       *Gui
+	queue     *Queue
+	state     *UiState
+	playlists map[string]*sp.Playlist
+)
 
-var queue *Queue
-var state *UiState
-var playlists map[string]*sp.Playlist
+type Gui struct {
+	g             *gocui.Gui
+	playlistsView *gocui.View
+	tracksView    *gocui.View
+	statusView    *gocui.View
+	queueView     *gocui.View
+	events        *events.Events
+}
 
-var playEvents *events.Events
+func Start(events *events.Events) {
+	gui = &Gui{events: events}
 
-func Start(allEvents *events.Events) {
-	playEvents = allEvents
-
-	playlists = <-playEvents.WaitForPlaylists()
+	playlists = <-gui.events.WaitForPlaylists()
 	if playlists == nil {
 		return
 	}
@@ -39,56 +43,56 @@ func Start(allEvents *events.Events) {
 	go func() {
 		for {
 			select {
-			case message := <-playEvents.Status:
-				updateStatus(message)
-			case <-playEvents.NextPlay:
-				playNext()
+			case message := <-gui.events.Status:
+				gui.updateStatus(message)
+			case <-gui.events.NextPlay:
+				gui.playNext()
 			}
 		}
 	}()
 
-	g = gocui.NewGui()
-	if err := g.Init(); err != nil {
+	gui.g = gocui.NewGui()
+	if err := gui.g.Init(); err != nil {
 		log.Panicln(err)
 	}
-	defer g.Close()
+	defer gui.g.Close()
 
-	g.SetLayout(layout)
-	if err := keybindings(g); err != nil {
+	gui.g.SetLayout(layout)
+	if err := keybindings(); err != nil {
 		log.Panicln(err)
 	}
-	g.SelBgColor = gocui.ColorGreen
-	g.SelFgColor = gocui.ColorBlack
-	g.ShowCursor = true
+	gui.g.SelBgColor = gocui.ColorGreen
+	gui.g.SelFgColor = gocui.ColorBlack
+	gui.g.ShowCursor = true
 
-	err := g.MainLoop()
+	err := gui.g.MainLoop()
 	if err != nil && err != gocui.ErrorQuit {
 		log.Panicln(err)
 	}
 }
 
-func updateStatus(message string) {
-	statusView.Clear()
-	statusView.SetCursor(0, 0)
-	statusView.SetOrigin(0, 0)
+func (gui *Gui) updateStatus(message string) {
+	gui.statusView.Clear()
+	gui.statusView.SetCursor(0, 0)
+	gui.statusView.SetOrigin(0, 0)
 
 	state.currentMessage = message
-	fmt.Fprintf(statusView, state.getModeAsString()+"%v", state.currentMessage)
+	fmt.Fprintf(gui.statusView, state.getModeAsString()+"%v", state.currentMessage)
 
 	// otherwise the update will appear only in the next keyboard move
-	g.Flush()
+	gui.g.Flush()
 }
 
 func nextView(g *gocui.Gui, v *gocui.View) error {
 	currentView := g.CurrentView()
 	if currentView == nil || currentView.Name() == "side" {
-		tracksView.Highlight = true
-		playlistsView.Highlight = false
-		return g.SetCurrentView("main")
+		gui.tracksView.Highlight = true
+		gui.playlistsView.Highlight = false
+		return gui.g.SetCurrentView("main")
 	}
-	tracksView.Highlight = false
-	playlistsView.Highlight = true
-	return g.SetCurrentView("side")
+	gui.tracksView.Highlight = false
+	gui.playlistsView.Highlight = true
+	return gui.g.SetCurrentView("side")
 }
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
@@ -100,8 +104,8 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
-		if v == playlistsView {
-			updateTracksView(g)
+		if v == gui.playlistsView {
+			gui.updateTracksView()
 		}
 	}
 	return nil
@@ -116,22 +120,22 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
-		if v == playlistsView {
-			updateTracksView(g)
+		if v == gui.playlistsView {
+			gui.updateTracksView()
 		}
 	}
 	return nil
 }
 
-func getSelectedPlaylist(g *gocui.Gui) (string, error) {
-	return getSelected(g, playlistsView)
+func (gui *Gui) getSelectedPlaylist() (string, error) {
+	return gui.getSelected(gui.playlistsView)
 }
 
-func getSelectedTrack(g *gocui.Gui) (string, error) {
-	return getSelected(g, tracksView)
+func (gui *Gui) getSelectedTrack() (string, error) {
+	return gui.getSelected(gui.tracksView)
 }
 
-func getSelected(g *gocui.Gui, v *gocui.View) (string, error) {
+func (gui *Gui) getSelected(v *gocui.View) (string, error) {
 	var l string
 	var err error
 
@@ -144,15 +148,15 @@ func getSelected(g *gocui.Gui, v *gocui.View) (string, error) {
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
-	playEvents.Shutdown <- true
-	<-playEvents.Shutdown
+	gui.events.Shutdown <- true
+	<-gui.events.Shutdown
 	return gocui.ErrorQuit
 }
 
-func playNext() error {
+func (gui *Gui) playNext() error {
 	if !queue.isEmpty() {
-		playEvents.Play(queue.Pop())
-		updateQueueView()
+		gui.events.Play(queue.Pop())
+		gui.updateQueueView()
 	} else if state.currentPlaylist != "" {
 		playlist := playlists[state.currentPlaylist]
 		if !state.randomMode {
@@ -164,7 +168,7 @@ func playNext() error {
 		track := playlistTrack.Track()
 		track.Wait()
 
-		playEvents.Play(track)
+		gui.events.Play(track)
 	}
 	return nil
 }
@@ -183,31 +187,31 @@ func getRandomNextTrack(playlist *sp.Playlist) int {
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	track := getCurrentSelectedTrack()
 	if track != nil {
-		playEvents.Play(track)
+		gui.events.Play(track)
 	}
 	return nil
 }
 
 func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	playEvents.Pause <- true
+	gui.events.Pause <- true
 	return nil
 }
 
 func setRandomMode(g *gocui.Gui, v *gocui.View) error {
 	state.invertMode()
-	updateStatus(state.currentMessage)
+	gui.updateStatus(state.currentMessage)
 	return nil
 }
 
 func nextCommand(g *gocui.Gui, v *gocui.View) error {
-	playNext()
+	gui.playNext()
 	return nil
 }
 
 func queueCommand(g *gocui.Gui, v *gocui.View) error {
 	track := getCurrentSelectedTrack()
 	if track != nil {
-		fmt.Fprintf(queueView, "%v - %v", track.Artist(0).Name(), track.Name())
+		fmt.Fprintf(gui.queueView, "%v - %v", track.Artist(0).Name(), track.Name())
 		queue.Add(track)
 	}
 	return nil
@@ -215,8 +219,8 @@ func queueCommand(g *gocui.Gui, v *gocui.View) error {
 
 func getCurrentSelectedTrack() *sp.Track {
 	var errPlaylist error
-	state.currentPlaylist, errPlaylist = getSelectedPlaylist(g)
-	currentTrack, errTrack := getSelectedTrack(g)
+	state.currentPlaylist, errPlaylist = gui.getSelectedPlaylist()
+	currentTrack, errTrack := gui.getSelectedTrack()
 	if errPlaylist == nil && errTrack == nil && playlists != nil {
 		playlist := playlists[state.currentPlaylist]
 
@@ -234,65 +238,65 @@ func getCurrentSelectedTrack() *sp.Track {
 	return nil
 }
 
-func keybindings(g *gocui.Gui) error {
-	if err := g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
+func keybindings() error {
+	if err := gui.g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", 'p', 0, pauseCurrentSelectedTrack); err != nil {
+	if err := gui.g.SetKeybinding("", 'p', 0, pauseCurrentSelectedTrack); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", 'r', 0, setRandomMode); err != nil {
+	if err := gui.g.SetKeybinding("", 'r', 0, setRandomMode); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", '>', 0, nextCommand); err != nil {
+	if err := gui.g.SetKeybinding("", '>', 0, nextCommand); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", 'u', 0, queueCommand); err != nil {
+	if err := gui.g.SetKeybinding("", 'u', 0, queueCommand); err != nil {
 		return err
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyArrowDown, 0, cursorDown); err != nil {
+	if err := gui.g.SetKeybinding("", gocui.KeyArrowDown, 0, cursorDown); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", gocui.KeyArrowUp, 0, cursorUp); err != nil {
+	if err := gui.g.SetKeybinding("", gocui.KeyArrowUp, 0, cursorUp); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("main", gocui.KeyArrowLeft, 0, nextView); err != nil {
+	if err := gui.g.SetKeybinding("main", gocui.KeyArrowLeft, 0, nextView); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("side", gocui.KeyArrowRight, 0, nextView); err != nil {
+	if err := gui.g.SetKeybinding("side", gocui.KeyArrowRight, 0, nextView); err != nil {
 		return err
 	}
 
 	// vi navigation
-	if err := g.SetKeybinding("", 'j', 0, cursorDown); err != nil {
+	if err := gui.g.SetKeybinding("", 'j', 0, cursorDown); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", 'k', 0, cursorUp); err != nil {
+	if err := gui.g.SetKeybinding("", 'k', 0, cursorUp); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("main", 'h', 0, nextView); err != nil {
+	if err := gui.g.SetKeybinding("main", 'h', 0, nextView); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("side", 'l', 0, nextView); err != nil {
+	if err := gui.g.SetKeybinding("side", 'l', 0, nextView); err != nil {
 		return err
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyCtrlC, 0, quit); err != nil {
+	if err := gui.g.SetKeybinding("", gocui.KeyCtrlC, 0, quit); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", 'q', 0, quit); err != nil {
+	if err := gui.g.SetKeybinding("", 'q', 0, quit); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func updateTracksView(g *gocui.Gui) {
-	tracksView.Clear()
-	tracksView.SetCursor(0, 0)
-	tracksView.SetOrigin(0, 0)
-	currentPlaylist, err := getSelectedPlaylist(g)
+func (gui *Gui) updateTracksView() {
+	gui.tracksView.Clear()
+	gui.tracksView.SetCursor(0, 0)
+	gui.tracksView.SetOrigin(0, 0)
+	currentPlaylist, err := gui.getSelectedPlaylist()
 	if err == nil && playlists != nil {
 		playlist := playlists[currentPlaylist]
 
@@ -302,14 +306,14 @@ func updateTracksView(g *gocui.Gui) {
 				playlistTrack := playlist.Track(i)
 				track := playlistTrack.Track()
 				track.Wait()
-				fmt.Fprintf(tracksView, "%v. %v - %v", (i + 1), track.Artist(0).Name(), track.Name())
+				fmt.Fprintf(gui.tracksView, "%v. %v - %v", (i + 1), track.Artist(0).Name(), track.Name())
 			}
 		}
 	}
 }
 
-func updatePlaylistsView(g *gocui.Gui) {
-	playlistsView.Clear()
+func (gui *Gui) updatePlaylistsView() {
+	gui.playlistsView.Clear()
 	if playlists != nil {
 		keys := make([]string, len(playlists))
 		i := 0
@@ -319,16 +323,16 @@ func updatePlaylistsView(g *gocui.Gui) {
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			fmt.Fprintln(playlistsView, key)
+			fmt.Fprintln(gui.playlistsView, key)
 		}
 	}
 }
 
-func updateQueueView() {
-	queueView.Clear()
+func (gui *Gui) updateQueueView() {
+	gui.queueView.Clear()
 	if !queue.isEmpty() {
 		for _, track := range queue.Contents() {
-			fmt.Fprintf(queueView, "%v - %v", track.Artist(0).Name(), track.Name())
+			fmt.Fprintf(gui.queueView, "%v - %v", track.Artist(0).Name(), track.Name())
 		}
 	}
 }
@@ -339,18 +343,18 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
-		playlistsView = v
+		gui.playlistsView = v
 
-		updatePlaylistsView(g)
+		gui.updatePlaylistsView()
 	}
 	if v, err := g.SetView("main", 25, -1, maxX-50, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
-		tracksView = v
-		tracksView.Highlight = true
+		gui.tracksView = v
+		gui.tracksView.Highlight = true
 
-		updateTracksView(g)
+		gui.updateTracksView()
 
 		if err := g.SetCurrentView("main"); err != nil {
 			return err
@@ -360,13 +364,13 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
-		queueView = v
+		gui.queueView = v
 	}
 	if v, err := g.SetView("status", -1, maxY-2, maxX, maxY); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
-		statusView = v
+		gui.statusView = v
 	}
 	return nil
 }
