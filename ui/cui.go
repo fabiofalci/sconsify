@@ -98,17 +98,40 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
 		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy+1); err != nil {
-			ox, oy := v.Origin()
-			if err := v.SetOrigin(ox, oy+1); err != nil {
-				return err
+		if canGoToNewPosition(cy + 1) {
+			if err := v.SetCursor(cx, cy+1); err != nil {
+				ox, oy := v.Origin()
+				if err := v.SetOrigin(ox, oy+1); err != nil {
+					return err
+				}
 			}
-		}
-		if v == gui.playlistsView {
-			gui.updateTracksView()
+			if v == gui.playlistsView {
+				gui.updateTracksView()
+			}
 		}
 	}
 	return nil
+}
+
+func canGoToNewPosition(newPosition int) bool {
+	currentView := gui.g.CurrentView()
+	if gui.playlistsView == currentView {
+		if newPosition >= len(playlists) {
+			return false
+		}
+	} else if gui.tracksView == currentView {
+		currentPlaylist, err := gui.getSelectedPlaylist()
+		if err == nil && playlists != nil {
+			playlist := playlists[currentPlaylist]
+			if playlist != nil {
+				playlist.Wait()
+				if newPosition >= playlist.Tracks() {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }
 
 func cursorUp(g *gocui.Gui, v *gocui.View) error {
