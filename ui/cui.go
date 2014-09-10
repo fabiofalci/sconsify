@@ -30,12 +30,16 @@ type Gui struct {
 }
 
 func Start(events *events.Events) {
-	gui = &Gui{events: events}
-
-	playlists = <-gui.events.WaitForPlaylists()
-	if playlists == nil {
+	select {
+	case playlists = <-events.WaitForPlaylists():
+		if playlists == nil {
+			return
+		}
+	case <-events.Shutdown:
 		return
 	}
+
+	gui = &Gui{events: events}
 
 	queue = InitQueue()
 	state = InitState()

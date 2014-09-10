@@ -40,7 +40,14 @@ type Spotify struct {
 	appKey        *[]byte
 }
 
-func Initialise(username *string, pass *[]byte, events *events.Events) error {
+func Initialise(username *string, pass *[]byte, events *events.Events) {
+	if err := initialiseSpotify(username, pass, events); err != nil {
+		fmt.Printf("Error: %v\n", err)
+		events.Shutdown <- true
+	}
+}
+
+func initialiseSpotify(username *string, pass *[]byte, events *events.Events) error {
 	spotify := &Spotify{events: events}
 	err := spotify.initKey()
 	if err != nil {
