@@ -47,7 +47,7 @@ func Start(events *events.Events) {
 	go func() {
 		for {
 			select {
-			case message := <-gui.events.Status:
+			case message := <-gui.events.WaitForStatus():
 				gui.updateStatus(message)
 			case <-gui.events.NextPlay:
 				gui.playNext()

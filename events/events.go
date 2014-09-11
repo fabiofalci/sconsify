@@ -6,7 +6,7 @@ import (
 
 type Events struct {
 	playlists chan map[string]*sp.Playlist
-	Status    chan string
+	status    chan string
 	ToPlay    chan *sp.Track
 	NextPlay  chan bool
 	Pause     chan bool
@@ -16,7 +16,7 @@ type Events struct {
 func InitialiseEvents() *Events {
 	return &Events{
 		playlists: make(chan map[string]*sp.Playlist),
-		Status:    make(chan string),
+		status:    make(chan string),
 		ToPlay:    make(chan *sp.Track),
 		NextPlay:  make(chan bool),
 		Pause:     make(chan bool),
@@ -33,4 +33,12 @@ func (events *Events) WaitForPlaylists() <-chan map[string]*sp.Playlist {
 
 func (events *Events) NewPlaylist(playlists *map[string]*sp.Playlist) {
 	events.playlists <- *playlists
+}
+
+func (events *Events) WaitForStatus() <-chan string {
+	return events.status
+}
+
+func (events *Events) SetStatus(message string) {
+	events.status <- message
 }
