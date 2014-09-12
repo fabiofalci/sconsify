@@ -19,10 +19,10 @@ func InitState() *UiState {
 
 func (state *UiState) getModeAsString() string {
 	if state.playMode == randomMode {
-		return "Random - "
+		return "[Random] "
 	}
 	if state.playMode == allRandomMode {
-		return "All Random - "
+		return "[All Random] "
 	}
 	return ""
 }
