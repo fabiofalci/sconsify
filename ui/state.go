@@ -3,22 +3,35 @@ package ui
 type UiState struct {
 	currentIndexTrack int
 	currentPlaylist   string
-	randomMode        bool
+	playMode          int
 	currentMessage    string
 }
 
+const (
+	normalMode    = iota
+	randomMode    = iota
+	allRandomMode = iota
+)
+
 func InitState() *UiState {
-	return &UiState{randomMode: false}
+	return &UiState{playMode: normalMode}
 }
 
 func (state *UiState) getModeAsString() string {
-	if state.randomMode {
+	if state.playMode == randomMode {
 		return "Random - "
+	}
+	if state.playMode == allRandomMode {
+		return "All Random - "
 	}
 	return ""
 }
 
-func (state *UiState) invertMode() bool {
-	state.randomMode = !state.randomMode
-	return state.randomMode
+func (state *UiState) invertMode(mode int) int {
+	if mode == state.playMode {
+		state.playMode = normalMode
+	} else {
+		state.playMode = mode
+	}
+	return state.playMode
 }

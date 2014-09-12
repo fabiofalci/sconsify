@@ -186,10 +186,13 @@ func (gui *Gui) playNext() error {
 		gui.updateQueueView()
 	} else if state.currentPlaylist != "" {
 		playlist := playlists[state.currentPlaylist]
-		if !state.randomMode {
-			state.currentIndexTrack = getNextTrack(playlist)
-		} else {
+		if state.playMode == allRandomMode {
+			state.currentPlaylist, state.currentIndexTrack = getRandomNextPlaylistAndTrack()
+			playlist = playlists[state.currentPlaylist]
+		} else if state.playMode == randomMode {
 			state.currentIndexTrack = getRandomNextTrack(playlist)
+		} else {
+			state.currentIndexTrack = getNextTrack(playlist)
 		}
 		playlistTrack := playlist.Track(state.currentIndexTrack)
 		track := playlistTrack.Track()
@@ -211,6 +214,22 @@ func getRandomNextTrack(playlist *sp.Playlist) int {
 	return rand.Intn(playlist.Tracks())
 }
 
+func getRandomNextPlaylistAndTrack() (string, int) {
+	index := rand.Intn(len(playlists))
+	count := 0
+	var playlist *sp.Playlist
+	var newPlaylistName string
+	for key, value := range playlists {
+		if index == count {
+			newPlaylistName = key
+			playlist = value
+			break
+		}
+		count++
+	}
+	return newPlaylistName, rand.Intn(playlist.Tracks())
+}
+
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	track := getCurrentSelectedTrack()
 	if track != nil {
@@ -225,7 +244,13 @@ func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 }
 
 func setRandomMode(g *gocui.Gui, v *gocui.View) error {
-	state.invertMode()
+	state.invertMode(randomMode)
+	gui.updateStatus(state.currentMessage)
+	return nil
+}
+
+func setAllRandomMode(g *gocui.Gui, v *gocui.View) error {
+	state.invertMode(allRandomMode)
 	gui.updateStatus(state.currentMessage)
 	return nil
 }
@@ -273,6 +298,9 @@ func keybindings() error {
 		return err
 	}
 	if err := gui.g.SetKeybinding("", 'r', 0, setRandomMode); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding("", 'R', 0, setAllRandomMode); err != nil {
 		return err
 	}
 	if err := gui.g.SetKeybinding("", '>', 0, nextCommand); err != nil {
