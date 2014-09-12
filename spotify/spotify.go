@@ -4,7 +4,6 @@ package spotify
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -107,11 +106,11 @@ func (spotify *Spotify) initSession() error {
 }
 
 func (spotify *Spotify) initKey() error {
-	appKey, err := ioutil.ReadFile("spotify_appkey.key")
+	var err error
+	spotify.appKey, err = getKey()
 	if err != nil {
 		return err
 	}
-	spotify.appKey = &appKey
 	return nil
 }
 
