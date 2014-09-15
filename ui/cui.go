@@ -182,25 +182,33 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) playNext() error {
 	if !queue.isEmpty() {
-		gui.events.Play(queue.Pop())
-		gui.updateQueueView()
-	} else if state.currentPlaylist != "" {
-		playlist := playlists[state.currentPlaylist]
-		if state.playMode == allRandomMode {
-			state.currentPlaylist, state.currentIndexTrack = getRandomNextPlaylistAndTrack()
-			playlist = playlists[state.currentPlaylist]
-		} else if state.playMode == randomMode {
-			state.currentIndexTrack = getRandomNextTrack(playlist)
-		} else {
-			state.currentIndexTrack = getNextTrack(playlist)
-		}
-		playlistTrack := playlist.Track(state.currentIndexTrack)
-		track := playlistTrack.Track()
-		track.Wait()
-
-		gui.events.Play(track)
+		gui.playNextFromQueue()
+	} else if state.hasPlaylistSelected() {
+		gui.playNextFromPlaylist()
 	}
 	return nil
+}
+
+func (gui *Gui) playNextFromPlaylist() {
+	playlist := playlists[state.currentPlaylist]
+	if state.isAllRandomMode() {
+		state.currentPlaylist, state.currentIndexTrack = getRandomNextPlaylistAndTrack()
+		playlist = playlists[state.currentPlaylist]
+	} else if state.isRandomMode() {
+		state.currentIndexTrack = getRandomNextTrack(playlist)
+	} else {
+		state.currentIndexTrack = getNextTrack(playlist)
+	}
+	playlistTrack := playlist.Track(state.currentIndexTrack)
+	track := playlistTrack.Track()
+	track.Wait()
+
+	gui.events.Play(track)
+}
+
+func (gui *Gui) playNextFromQueue() {
+	gui.events.Play(queue.Pop())
+	gui.updateQueueView()
 }
 
 func getNextTrack(playlist *sp.Playlist) int {

@@ -35,3 +35,15 @@ func (state *UiState) invertMode(mode int) int {
 	}
 	return state.playMode
 }
+
+func (state *UiState) hasPlaylistSelected() bool {
+	return state.currentPlaylist != ""
+}
+
+func (state *UiState) isAllRandomMode() bool {
+	return state.playMode == allRandomMode
+}
+
+func (state *UiState) isRandomMode() bool {
+	return state.playMode == randomMode
+}
