@@ -216,33 +216,45 @@ func (spotify *Spotify) finishInitialisation() {
 	for {
 		select {
 		case track := <-spotify.events.ToPlay:
-			spotify.Play(track)
+			spotify.play(track)
 		case <-spotify.events.WaitForPause():
-			spotify.Pause()
+			spotify.pause()
 		case <-spotify.events.Shutdown:
 			spotify.shutdownSpotify()
 		}
 	}
 }
 
-func (spotify *Spotify) Pause() {
-	if spotify.currentTrack != nil {
+func (spotify *Spotify) pause() {
+	if spotify.isPausedOrPlaying() {
 		if spotify.paused {
-			spotify.Play(spotify.currentTrack)
-			spotify.paused = false
+			spotify.playCurrentTrack()
 		} else {
-			player := spotify.session.Player()
-			player.Pause()
-
-			artist := spotify.currentTrack.Artist(0)
-			artist.Wait()
-			spotify.events.SetStatus(fmt.Sprintf("Paused: %v - %v [%v]", artist.Name(), spotify.currentTrack.Name(), spotify.currentTrack.Duration().String()))
-			spotify.paused = true
+			spotify.pauseCurrentTrack()
 		}
 	}
 }
 
-func (spotify *Spotify) Play(track *sp.Track) {
+func (spotify *Spotify) playCurrentTrack() {
+	spotify.play(spotify.currentTrack)
+	spotify.paused = false
+}
+
+func (spotify *Spotify) pauseCurrentTrack() {
+	player := spotify.session.Player()
+	player.Pause()
+
+	artist := spotify.currentTrack.Artist(0)
+	artist.Wait()
+	spotify.events.SetStatus(fmt.Sprintf("Paused: %v - %v [%v]", artist.Name(), spotify.currentTrack.Name(), spotify.currentTrack.Duration().String()))
+	spotify.paused = true
+}
+
+func (spotify *Spotify) isPausedOrPlaying() bool {
+	return spotify.currentTrack != nil
+}
+
+func (spotify *Spotify) play(track *sp.Track) {
 	if track.Availability() != sp.TrackAvailabilityAvailable {
 		spotify.events.SetStatus("Not available")
 		return
