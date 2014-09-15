@@ -247,7 +247,7 @@ func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 }
 
 func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	gui.events.Pause <- true
+	gui.events.Pause()
 	return nil
 }
 

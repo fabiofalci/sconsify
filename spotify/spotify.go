@@ -217,7 +217,7 @@ func (spotify *Spotify) finishInitialisation() {
 		select {
 		case track := <-spotify.events.ToPlay:
 			spotify.Play(track)
-		case <-spotify.events.Pause:
+		case <-spotify.events.WaitForPause():
 			spotify.Pause()
 		case <-spotify.events.Shutdown:
 			spotify.shutdownSpotify()
