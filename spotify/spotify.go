@@ -169,7 +169,7 @@ func (spotify *Spotify) checkIfLoggedIn() error {
 func (spotify *Spotify) checkConnectionState() bool {
 	timeout := make(chan bool)
 	go func() {
-		time.Sleep(3 * time.Second)
+		time.Sleep(9 * time.Second)
 		timeout <- true
 	}()
 	loggedIn := false
