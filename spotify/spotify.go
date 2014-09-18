@@ -42,7 +42,7 @@ type Spotify struct {
 func Initialise(username *string, pass *[]byte, events *events.Events) {
 	if err := initialiseSpotify(username, pass, events); err != nil {
 		fmt.Printf("Error: %v\n", err)
-		events.Shutdown <- true
+		events.Shutdown()
 	}
 }
 
@@ -147,7 +147,7 @@ func (spotify *Spotify) initCacheLocation() {
 func (spotify *Spotify) shutdownSpotify() {
 	spotify.session.Logout()
 	spotify.deleteCache()
-	spotify.events.Shutdown <- true
+	spotify.events.Shutdown()
 }
 
 func (spotify *Spotify) deleteCache() {
@@ -219,7 +219,7 @@ func (spotify *Spotify) finishInitialisation() {
 			spotify.play(track)
 		case <-spotify.events.WaitForPause():
 			spotify.pause()
-		case <-spotify.events.Shutdown:
+		case <-spotify.events.WaitForShutdown():
 			spotify.shutdownSpotify()
 		}
 	}

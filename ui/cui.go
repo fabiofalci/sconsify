@@ -35,7 +35,7 @@ func Start(events *events.Events) {
 		if playlists == nil {
 			return
 		}
-	case <-events.Shutdown:
+	case <-events.WaitForShutdown():
 		return
 	}
 
@@ -175,8 +175,8 @@ func (gui *Gui) getSelected(v *gocui.View) (string, error) {
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
-	gui.events.Shutdown <- true
-	<-gui.events.Shutdown
+	gui.events.Shutdown()
+	<-gui.events.WaitForShutdown()
 	return gocui.ErrorQuit
 }
 
