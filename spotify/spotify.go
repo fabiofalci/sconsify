@@ -137,16 +137,14 @@ func (spotify *Spotify) deleteCache() {
 }
 
 func (spotify *Spotify) checkIfLoggedIn() error {
-	if spotify.waitForConnectionStateUpdates() {
-		spotify.finishInitialisation()
-	} else {
-		spotify.events.NewPlaylist(nil)
+	if !spotify.waitForSuccessfulConnectionStateUpdates() {
 		return errors.New("Could not login")
 	}
+	spotify.finishInitialisation()
 	return nil
 }
 
-func (spotify *Spotify) waitForConnectionStateUpdates() bool {
+func (spotify *Spotify) waitForSuccessfulConnectionStateUpdates() bool {
 	timeout := make(chan bool)
 	go func() {
 		time.Sleep(9 * time.Second)
