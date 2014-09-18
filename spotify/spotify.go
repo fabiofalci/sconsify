@@ -157,7 +157,7 @@ func (spotify *Spotify) deleteCache() {
 }
 
 func (spotify *Spotify) checkIfLoggedIn() error {
-	if spotify.checkConnectionState() {
+	if spotify.waitForConnectionStateUpdates() {
 		spotify.finishInitialisation()
 	} else {
 		spotify.events.NewPlaylist(nil)
@@ -166,7 +166,7 @@ func (spotify *Spotify) checkIfLoggedIn() error {
 	return nil
 }
 
-func (spotify *Spotify) checkConnectionState() bool {
+func (spotify *Spotify) waitForConnectionStateUpdates() bool {
 	timeout := make(chan bool)
 	go func() {
 		time.Sleep(9 * time.Second)
@@ -177,7 +177,7 @@ func (spotify *Spotify) checkConnectionState() bool {
 	for running {
 		select {
 		case <-spotify.session.ConnectionStateUpdates():
-			if spotify.session.ConnectionState() == sp.ConnectionStateLoggedIn {
+			if spotify.isLoggedIn() {
 				running = false
 				loggedIn = true
 			}
@@ -186,6 +186,10 @@ func (spotify *Spotify) checkConnectionState() bool {
 		}
 	}
 	return loggedIn
+}
+
+func (spotify *Spotify) isLoggedIn() bool {
+	return spotify.session.ConnectionState() == sp.ConnectionStateLoggedIn
 }
 
 func (spotify *Spotify) finishInitialisation() {
@@ -252,7 +256,7 @@ func (spotify *Spotify) isPausedOrPlaying() bool {
 }
 
 func (spotify *Spotify) play(track *sp.Track) {
-	if track.Availability() != sp.TrackAvailabilityAvailable {
+	if !spotify.isTrackAvailable(track) {
 		spotify.events.SetStatus("Not available")
 		return
 	}
@@ -263,6 +267,10 @@ func (spotify *Spotify) play(track *sp.Track) {
 	player.Play()
 
 	spotify.updateStatus("Playing", track)
+}
+
+func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {
+	return track.Availability() == sp.TrackAvailabilityAvailable
 }
 
 func (spotify *Spotify) updateStatus(status string, track *sp.Track) {
