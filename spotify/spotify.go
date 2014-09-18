@@ -1,4 +1,3 @@
-// A lot of pieces copied from the awesome library github.com/op/go-libspotify by Örjan Persson
 package spotify
 
 import (
@@ -14,20 +13,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	sp "github.com/op/go-libspotify/spotify"
 )
-
-type audio struct {
-	format sp.AudioFormat
-	frames []byte
-}
-
-type audio2 struct {
-	format sp.AudioFormat
-	frames []int16
-}
-
-type portAudio struct {
-	buffer chan *audio
-}
 
 type Spotify struct {
 	currentTrack  *sp.Track
@@ -75,6 +60,11 @@ func initialiseSpotify(username *string, pass *[]byte, events *events.Events) er
 	return nil
 }
 
+func (spotify *Spotify) initAudio() {
+	portaudio.Initialize()
+	spotify.pa = newPortAudio()
+}
+
 func (spotify *Spotify) login(username *string, pass *[]byte) error {
 	credentials := sp.Credentials{Username: *username, Password: string(*pass)}
 	if err := spotify.session.Login(credentials, false); err != nil {
@@ -112,16 +102,6 @@ func (spotify *Spotify) initKey() error {
 		return err
 	}
 	return nil
-}
-
-func newPortAudio() *portAudio {
-	return &portAudio{buffer: make(chan *audio, 8)}
-}
-
-func (spotify *Spotify) initAudio() {
-	portaudio.Initialize()
-
-	spotify.pa = newPortAudio()
 }
 
 func (spotify *Spotify) initCache() error {
@@ -278,60 +258,4 @@ func (spotify *Spotify) updateStatus(status string, track *sp.Track) {
 	artist := track.Artist(0)
 	artist.Wait()
 	spotify.events.SetStatus(fmt.Sprintf("%v: %v - %v [%v]", status, artist.Name(), spotify.currentTrack.Name(), spotify.currentTrack.Duration().String()))
-}
-
-func (pa *portAudio) player() {
-	out := make([]int16, 2048*2)
-
-	stream, err := portaudio.OpenDefaultStream(
-		0,
-		2,     // audio.format.Channels,
-		44100, // float64(audio.format.SampleRate),
-		len(out),
-		&out,
-	)
-	if err != nil {
-		panic(err)
-	}
-	defer stream.Close()
-
-	stream.Start()
-	defer stream.Stop()
-
-	for {
-		// Decode the incoming data which is expected to be 2 channels and
-		// delivered as int16 in []byte, hence we need to convert it.
-
-		select {
-		case audio := <-pa.buffer:
-			if len(audio.frames) != 2048*2*2 {
-				// panic("unexpected")
-				// don't know if it's a panic or track just ended
-				break
-			}
-
-			j := 0
-			for i := 0; i < len(audio.frames); i += 2 {
-				out[j] = int16(audio.frames[i]) | int16(audio.frames[i+1])<<8
-				j++
-			}
-
-			stream.Write()
-		}
-	}
-}
-
-func (pa *portAudio) WriteAudio(format sp.AudioFormat, frames []byte) int {
-	audio := &audio{format, frames}
-
-	if len(frames) == 0 {
-		return 0
-	}
-
-	select {
-	case pa.buffer <- audio:
-		return len(frames)
-	default:
-		return 0
-	}
 }
