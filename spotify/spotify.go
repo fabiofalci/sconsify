@@ -192,6 +192,8 @@ func (spotify *Spotify) finishInitialisation() {
 			select {
 			case <-spotify.session.EndOfTrackUpdates():
 				spotify.events.NextPlay <- true
+			case <-spotify.session.PlayTokenLostUpdates():
+				spotify.playTokenLost()
 			}
 		}
 	}()
@@ -205,6 +207,10 @@ func (spotify *Spotify) finishInitialisation() {
 			spotify.shutdownSpotify()
 		}
 	}
+}
+
+func (spotify *Spotify) playTokenLost() {
+	spotify.events.SetStatus("Play token lost")
 }
 
 func (spotify *Spotify) pause() {
