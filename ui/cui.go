@@ -119,21 +119,9 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 
 func canGoToNewPosition(newPosition int) bool {
 	currentView := gui.g.CurrentView()
-	if gui.playlistsView == currentView {
-		if newPosition >= len(playlists) {
-			return false
-		}
-	} else if gui.tracksView == currentView {
-		currentPlaylist, err := gui.getSelectedPlaylist()
-		if err == nil && playlists != nil {
-			playlist := playlists[currentPlaylist]
-			if playlist != nil {
-				playlist.Wait()
-				if newPosition >= playlist.Tracks() {
-					return false
-				}
-			}
-		}
+	line, err := currentView.Line(newPosition)
+	if err != nil || len(line) == 0 {
+		return false
 	}
 	return true
 }
