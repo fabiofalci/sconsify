@@ -395,21 +395,21 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		gui.playlistsView = v
+		gui.playlistsView.Highlight = true
 
 		gui.updatePlaylistsView()
+
+		if err := g.SetCurrentView("side"); err != nil {
+			return err
+		}
 	}
 	if v, err := g.SetView("main", 25, -1, maxX-50, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
 		gui.tracksView = v
-		gui.tracksView.Highlight = true
 
 		gui.updateTracksView()
-
-		if err := g.SetCurrentView("main"); err != nil {
-			return err
-		}
 	}
 	if v, err := g.SetView("queue", maxX-50, -1, maxX, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
