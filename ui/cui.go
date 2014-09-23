@@ -99,6 +99,42 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 	return gui.g.SetCurrentView("side")
 }
 
+func cursorEnd(g *gocui.Gui, v *gocui.View) error {
+	if v != nil {
+		selectedPlaylist, err := gui.getSelectedPlaylist()
+		if err == nil {
+			playlist := playlists[selectedPlaylist]
+			if playlist != nil {
+				playlist.Wait()
+				newIndex := playlist.Tracks() - 1
+
+				ox, _ := v.Origin()
+				cx, _ := v.Cursor()
+				_, sizeY := v.Size()
+				sizeY--
+
+				if newIndex > sizeY {
+					v.SetOrigin(ox, newIndex-sizeY)
+					v.SetCursor(cx, sizeY)
+				} else {
+					v.SetCursor(cx, newIndex)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func cursorHome(g *gocui.Gui, v *gocui.View) error {
+	if v != nil {
+		ox, _ := v.Origin()
+		cx, _ := v.Cursor()
+		v.SetCursor(cx, 0)
+		v.SetOrigin(ox, 0)
+	}
+	return nil
+}
+
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
 		cx, cy := v.Cursor()
@@ -303,6 +339,13 @@ func keybindings() error {
 		return err
 	}
 	if err := gui.g.SetKeybinding("", 'u', 0, queueCommand); err != nil {
+		return err
+	}
+
+	if err := gui.g.SetKeybinding("main", gocui.KeyHome, 0, cursorHome); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding("main", gocui.KeyEnd, 0, cursorEnd); err != nil {
 		return err
 	}
 
