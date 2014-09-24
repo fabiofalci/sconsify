@@ -213,6 +213,13 @@ func keybindings() error {
 		return err
 	}
 
+	if err := gui.g.SetKeybinding("main", gocui.KeyPgup, 0, cursorPgup); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding("main", gocui.KeyPgdn, 0, cursorPgdn); err != nil {
+		return err
+	}
+
 	if err := gui.g.SetKeybinding("", gocui.KeyArrowDown, 0, cursorDown); err != nil {
 		return err
 	}
