@@ -206,10 +206,10 @@ func keybindings() error {
 		return err
 	}
 
-	if err := gui.g.SetKeybinding("main", gocui.KeyHome, 0, cursorHome); err != nil {
+	if err := gui.g.SetKeybinding("", gocui.KeyHome, 0, cursorHome); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("main", gocui.KeyEnd, 0, cursorEnd); err != nil {
+	if err := gui.g.SetKeybinding("", gocui.KeyEnd, 0, cursorEnd); err != nil {
 		return err
 	}
 

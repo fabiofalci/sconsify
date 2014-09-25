@@ -18,28 +18,38 @@ func nextView(g *gocui.Gui, v *gocui.View) error {
 
 func cursorEnd(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
+		newIndex := getCurrentViewSize(v)
+		if newIndex > -1 {
+			ox, _ := v.Origin()
+			cx, _ := v.Cursor()
+			_, sizeY := v.Size()
+			sizeY--
+
+			if newIndex > sizeY {
+				v.SetOrigin(ox, newIndex-sizeY)
+				v.SetCursor(cx, sizeY)
+			} else {
+				v.SetCursor(cx, newIndex)
+			}
+		}
+	}
+	return nil
+}
+
+func getCurrentViewSize(v *gocui.View) int {
+	if v == gui.tracksView {
 		selectedPlaylist, err := gui.getSelectedPlaylist()
 		if err == nil {
 			playlist := playlists[selectedPlaylist]
 			if playlist != nil {
 				playlist.Wait()
-				newIndex := playlist.Tracks() - 1
-
-				ox, _ := v.Origin()
-				cx, _ := v.Cursor()
-				_, sizeY := v.Size()
-				sizeY--
-
-				if newIndex > sizeY {
-					v.SetOrigin(ox, newIndex-sizeY)
-					v.SetCursor(cx, sizeY)
-				} else {
-					v.SetCursor(cx, newIndex)
-				}
+				return playlist.Tracks() - 1
 			}
 		}
+	} else if v == gui.playlistsView {
+		return len(playlists) - 1
 	}
-	return nil
+	return -1
 }
 
 func cursorHome(g *gocui.Gui, v *gocui.View) error {
