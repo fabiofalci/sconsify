@@ -36,22 +36,6 @@ func cursorEnd(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func getCurrentViewSize(v *gocui.View) int {
-	if v == gui.tracksView {
-		selectedPlaylist, err := gui.getSelectedPlaylist()
-		if err == nil {
-			playlist := playlists[selectedPlaylist]
-			if playlist != nil {
-				playlist.Wait()
-				return playlist.Tracks() - 1
-			}
-		}
-	} else if v == gui.playlistsView {
-		return len(playlists) - 1
-	}
-	return -1
-}
-
 func cursorHome(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
 		ox, _ := v.Origin()
@@ -83,31 +67,41 @@ func cursorPgup(g *gocui.Gui, v *gocui.View) error {
 
 func cursorPgdn(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
+		maxSize := getCurrentViewSize(v)
+		if maxSize > -1 {
+			ox, oy := v.Origin()
+			cx, cy := v.Cursor()
+			_, pageSizeY := v.Size()
+			pageSizeY--
+
+			newOriginY := oy + pageSizeY
+
+			if hasMorePages(newOriginY, cy, maxSize) {
+				v.SetOrigin(ox, newOriginY)
+				v.SetCursor(cx, cy)
+			} else if isNotInLastPage(oy, pageSizeY, maxSize) {
+				v.SetOrigin(ox, maxSize-pageSizeY)
+				v.SetCursor(cx, pageSizeY)
+			}
+		}
+	}
+	return nil
+}
+
+func getCurrentViewSize(v *gocui.View) int {
+	if v == gui.tracksView {
 		selectedPlaylist, err := gui.getSelectedPlaylist()
 		if err == nil {
 			playlist := playlists[selectedPlaylist]
 			if playlist != nil {
 				playlist.Wait()
-				maxSize := playlist.Tracks() - 1
-
-				ox, oy := v.Origin()
-				cx, cy := v.Cursor()
-				_, pageSizeY := v.Size()
-				pageSizeY--
-
-				newOriginY := oy + pageSizeY
-
-				if hasMorePages(newOriginY, cy, maxSize) {
-					v.SetOrigin(ox, newOriginY)
-					v.SetCursor(cx, cy)
-				} else if isNotInLastPage(oy, pageSizeY, maxSize) {
-					v.SetOrigin(ox, maxSize-pageSizeY)
-					v.SetCursor(cx, pageSizeY)
-				}
+				return playlist.Tracks() - 1
 			}
 		}
+	} else if v == gui.playlistsView {
+		return len(playlists) - 1
 	}
-	return nil
+	return -1
 }
 
 func hasMorePages(newOriginY int, cursorY int, maxSize int) bool {
