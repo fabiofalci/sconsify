@@ -154,6 +154,29 @@ func (spotify *Spotify) isLoggedIn() bool {
 }
 
 func (spotify *Spotify) finishInitialisation() {
+	spotify.initPlaylist()
+	go spotify.runPlayer()
+	spotify.waitForEvents()
+}
+
+func (spotify *Spotify) waitForEvents() {
+	for {
+		select {
+		case <-spotify.session.EndOfTrackUpdates():
+			spotify.events.NextPlay <- true
+		case <-spotify.session.PlayTokenLostUpdates():
+			spotify.playTokenLost()
+		case track := <-spotify.events.ToPlay:
+			spotify.play(track)
+		case <-spotify.events.WaitForPause():
+			spotify.pause()
+		case <-spotify.events.WaitForShutdown():
+			spotify.shutdownSpotify()
+		}
+	}
+}
+
+func (spotify *Spotify) initPlaylist() {
 	playlists := make(map[string]*sp.Playlist)
 	allPlaylists, _ := spotify.session.Playlists()
 	allPlaylists.Wait()
@@ -167,29 +190,10 @@ func (spotify *Spotify) finishInitialisation() {
 	}
 
 	spotify.events.NewPlaylist(&playlists)
+}
 
-	go spotify.pa.player()
-
-	go func() {
-		for {
-			select {
-			case <-spotify.session.EndOfTrackUpdates():
-				spotify.events.NextPlay <- true
-			case <-spotify.session.PlayTokenLostUpdates():
-				spotify.playTokenLost()
-			}
-		}
-	}()
-	for {
-		select {
-		case track := <-spotify.events.ToPlay:
-			spotify.play(track)
-		case <-spotify.events.WaitForPause():
-			spotify.pause()
-		case <-spotify.events.WaitForShutdown():
-			spotify.shutdownSpotify()
-		}
-	}
+func (spotify *Spotify) runPlayer() {
+	spotify.pa.player()
 }
 
 func (spotify *Spotify) playTokenLost() {
