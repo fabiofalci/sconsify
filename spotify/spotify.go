@@ -41,23 +41,17 @@ func initialiseSpotify(username *string, pass *[]byte, events *events.Events) er
 	defer portaudio.Terminate()
 
 	err = spotify.initCache()
-	if err != nil {
-		return err
+	if err == nil {
+		err = spotify.initSession()
+		if err == nil {
+			err = spotify.login(username, pass)
+			if err == nil {
+				err = spotify.checkIfLoggedIn()
+			}
+		}
 	}
 
-	spotify.initSession()
-
-	err = spotify.login(username, pass)
-	if err != nil {
-		return err
-	}
-
-	err = spotify.checkIfLoggedIn()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (spotify *Spotify) initAudio() {
@@ -71,12 +65,7 @@ func (spotify *Spotify) login(username *string, pass *[]byte) error {
 		return err
 	}
 
-	err := <-spotify.session.LoginUpdates()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return <-spotify.session.LoginUpdates()
 }
 
 func (spotify *Spotify) initSession() error {
@@ -89,19 +78,13 @@ func (spotify *Spotify) initSession() error {
 		AudioConsumer:    spotify.pa,
 	})
 
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (spotify *Spotify) initKey() error {
 	var err error
 	spotify.appKey, err = getKey()
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (spotify *Spotify) initCache() error {
