@@ -1,3 +1,5 @@
+default: binary
+
 test:
 	go test -v ./...
 
@@ -14,4 +16,17 @@ run:
 #        0xA1}
 #
 build:
-	sed -i '$$ d' spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go && go install && git checkout spotify/key.go
+	go get ./...
+	sed -i '$$ d' spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go && go build -o "bundles/sconsify" && git checkout spotify/key.go
+
+container-build: bundles
+	docker build -t sconsify-build .
+
+binary: container-build
+	docker run --rm -it -v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" sconsify-build make build
+
+shell: container-build
+	docker run --rm -it -v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" sconsify-build bash
+
+bundles:
+	mkdir -p bundles
