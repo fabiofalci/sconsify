@@ -11,21 +11,13 @@ Requirements: [Libspotify SDK](https://developer.spotify.com/technologies/libspo
     yaourt -S libspotify
 
 
-Dev: How to run
----------------
+How to build using docker
+----------------------------
 
-* Get a Spotify application key and copy to `/sconsify/spotify_appkey.key`
+* Get a Spotify application key and copy to `/sconsify/spotify_appkey.key` or as a byte array to `/sconsify/spotify/spotify_key_array.key`.
 
-* `make run`
+* `make binary`
+
+* `./bundles/sconsify`
 
 ![alt tag](https://raw.githubusercontent.com/wiki/fabiofalci/sconsify/sconsify.png)
-
-
-Binary build
-------------
-
-* Copy Spotify application key as a byte array to `/sconsify/spotify/spotify_key_array.key`.
-
-* `make build`
-
-* Run `$GOPATH/bin/sconsify` 
