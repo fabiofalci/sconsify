@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -21,9 +22,17 @@ func main() {
 }
 
 func credentials() (*string, *[]byte) {
+	providedUsername := flag.String("username", "", "Spotify username")
+	flag.Parse()
+
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Username: ")
-	username, _ := reader.ReadString('\n')
+	username := ""
+	if *providedUsername == "" {
+		fmt.Print("Username: ")
+		username, _ = reader.ReadString('\n')
+	} else {
+		username = *providedUsername
+	}
 	username = strings.Trim(username, " \n\r")
 	fmt.Print("Password: ")
 	pass := gopass.GetPasswd()
