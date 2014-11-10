@@ -65,7 +65,7 @@ func (spotify *Spotify) login(username *string, pass *[]byte) error {
 		return err
 	}
 
-	return <-spotify.session.LoginUpdates()
+	return <-spotify.session.LoggedInUpdates()
 }
 
 func (spotify *Spotify) initSession() error {
