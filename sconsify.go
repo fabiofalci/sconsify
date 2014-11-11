@@ -41,7 +41,18 @@ func credentials(providedUsername *string) (*string, *[]byte) {
 		username = *providedUsername
 	}
 	username = strings.Trim(username, " \n\r")
+	return &username, getPassword()
+}
+
+func getPassword() *[]byte {
+	passFromEnv := os.Getenv("SCONSIFY_PASSWORD")
+	if passFromEnv != "" {
+		fmt.Println("Password from environment variable SCONSIFY_PASSWORD.")
+		fmt.Println("Unset if you don't want to use it (unset SCONSIFY_PASSWORD).")
+		b := []byte(passFromEnv)
+		return &b
+	}
 	fmt.Print("Password: ")
-	pass := gopass.GetPasswd()
-	return &username, &pass
+	b := gopass.GetPasswd()
+	return &b
 }
