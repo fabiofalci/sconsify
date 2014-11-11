@@ -3,12 +3,15 @@ package test
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/spotify"
+	ui "github.com/fabiofalci/sconsify/ui"
 	"github.com/howeyc/gopass"
+	sp "github.com/op/go-libspotify/spotify"
 )
 
 func main2() {
@@ -18,16 +21,32 @@ func main2() {
 	go spotify.Initialise(username, pass, events)
 	playlists := <-events.WaitForPlaylists()
 
-	playlist := playlists["Ramones"]
-	playlist.Wait()
-	track := playlist.Track(3).Track()
-	track.Wait()
+	allTracks := getAllTracks(playlists).Contents()
 
-	events.ToPlay <- track
+	for {
+		index := rand.Intn(len(allTracks))
+		track := allTracks[index]
 
-	println(track.Name())
-	<-events.WaitForStatus()
-	<-events.NextPlay
+		events.ToPlay <- track
+
+		println(<-events.WaitForStatus())
+		<-events.NextPlay
+	}
+}
+
+func getAllTracks(playlists map[string]*sp.Playlist) *ui.Queue {
+	queue := ui.InitQueue()
+
+	for _, playlist := range playlists {
+		playlist.Wait()
+		for i := 0; i < playlist.Tracks(); i++ {
+			track := playlist.Track(i).Track()
+			track.Wait()
+			queue.Add(track)
+		}
+	}
+
+	return queue
 }
 
 func credentials() (*string, *[]byte) {
