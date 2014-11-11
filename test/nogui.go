@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/spotify"
@@ -27,10 +26,8 @@ func main2() {
 	events.ToPlay <- track
 
 	println(track.Name())
-
-	for {
-		time.Sleep(100 * time.Millisecond)
-	}
+	<-events.WaitForStatus()
+	<-events.NextPlay
 }
 
 func credentials() (*string, *[]byte) {
