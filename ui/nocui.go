@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"os/signal"
 
 	"github.com/fabiofalci/sconsify/events"
 	sp "github.com/op/go-libspotify/spotify"
@@ -12,6 +13,8 @@ import (
 func StartNoUserInterface(events *events.Events, silent *bool) {
 	playlists := <-events.WaitForPlaylists()
 	go listenForKeyboardEvents(events.NextPlay)
+
+	listenForTermination(events)
 
 	allTracks := getAllTracks(playlists).Contents()
 
@@ -28,6 +31,18 @@ func StartNoUserInterface(events *events.Events, silent *bool) {
 		}
 		<-events.NextPlay
 	}
+}
+
+func listenForTermination(events *events.Events) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for _ = range c {
+			events.Shutdown()
+			<-events.WaitForShutdown()
+			os.Exit(0)
+		}
+	}()
 }
 
 func listenForKeyboardEvents(nextPlay chan bool) {
