@@ -7,7 +7,7 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 )
 
-func StartNoUserInterface(events *events.Events) {
+func StartNoUserInterface(events *events.Events, silent *bool) {
 	playlists := <-events.WaitForPlaylists()
 
 	allTracks := getAllTracks(playlists).Contents()
@@ -18,7 +18,11 @@ func StartNoUserInterface(events *events.Events) {
 
 		events.ToPlay <- track
 
-		println(<-events.WaitForStatus())
+		if *silent {
+			<-events.WaitForStatus()
+		} else {
+			println(<-events.WaitForStatus())
+		}
 		<-events.NextPlay
 	}
 }

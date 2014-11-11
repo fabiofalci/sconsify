@@ -16,6 +16,7 @@ import (
 func main() {
 	providedUsername := flag.String("username", "", "Spotify username.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only random between Playlists.")
+	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no User Interface is used.")
 	flag.Parse()
 
 	username, pass := credentials(providedUsername)
@@ -26,7 +27,7 @@ func main() {
 	if *providedUi {
 		ui.StartConsoleUserInterface(events)
 	} else {
-		ui.StartNoUserInterface(events)
+		ui.StartNoUserInterface(events, providedNoUiSilent)
 	}
 }
 
