@@ -14,21 +14,27 @@ import (
 )
 
 func main() {
-	username, pass := credentials()
+	providedUsername := flag.String("username", "", "Spotify username.")
+	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only random between Playlists.")
+	flag.Parse()
+
+	username, pass := credentials(providedUsername)
 	events := events.InitialiseEvents()
 
 	go spotify.Initialise(username, pass, events)
-	ui.Start(events)
+
+	if *providedUi {
+		ui.StartConsoleUserInterface(events)
+	} else {
+		ui.StartNoUserInterface(events)
+	}
 }
 
-func credentials() (*string, *[]byte) {
-	providedUsername := flag.String("username", "", "Spotify username")
-	flag.Parse()
-
-	reader := bufio.NewReader(os.Stdin)
+func credentials(providedUsername *string) (*string, *[]byte) {
 	username := ""
 	if *providedUsername == "" {
 		fmt.Print("Username: ")
+		reader := bufio.NewReader(os.Stdin)
 		username, _ = reader.ReadString('\n')
 	} else {
 		username = *providedUsername

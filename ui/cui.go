@@ -29,7 +29,7 @@ type Gui struct {
 	events        *events.Events
 }
 
-func Start(events *events.Events) {
+func StartConsoleUserInterface(events *events.Events) {
 	select {
 	case playlists = <-events.WaitForPlaylists():
 		if playlists == nil {
