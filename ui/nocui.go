@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"time"
 
 	"github.com/fabiofalci/sconsify/events"
 	sp "github.com/op/go-libspotify/spotify"
@@ -16,11 +17,12 @@ func StartNoUserInterface(events *events.Events, silent *bool) {
 
 	listenForTermination(events)
 
-	allTracks := getAllTracks(playlists).Contents()
+	tracks := getTracksInRandomOrder(playlists)
+	nextToPlayIndex := 0
+	numberOfTracks := len(tracks)
 
 	for {
-		index := rand.Intn(len(allTracks))
-		track := allTracks[index]
+		track := tracks[nextToPlayIndex]
 
 		events.ToPlay <- track
 
@@ -30,6 +32,11 @@ func StartNoUserInterface(events *events.Events, silent *bool) {
 			println(<-events.WaitForStatus())
 		}
 		<-events.NextPlay
+
+		nextToPlayIndex++
+		if nextToPlayIndex >= numberOfTracks {
+			nextToPlayIndex = 0
+		}
 	}
 }
 
@@ -66,17 +73,32 @@ func listenForKeyboardEvents(nextPlay chan bool) {
 	}
 }
 
-func getAllTracks(playlists map[string]*sp.Playlist) *Queue {
-	queue := InitQueue()
+func getTracksInRandomOrder(playlists map[string]*sp.Playlist) []*sp.Track {
+	numberOfTracks := 0
+	for _, playlist := range playlists {
+		playlist.Wait()
+		numberOfTracks += playlist.Tracks()
+	}
+
+	tracks := make([]*sp.Track, numberOfTracks)
+	perm := getRandomPermutation(numberOfTracks)
+	permIndex := 0
 
 	for _, playlist := range playlists {
 		playlist.Wait()
 		for i := 0; i < playlist.Tracks(); i++ {
 			track := playlist.Track(i).Track()
 			track.Wait()
-			queue.Add(track)
+
+			tracks[perm[permIndex]] = track
+			permIndex++
 		}
 	}
 
-	return queue
+	return tracks
+}
+
+func getRandomPermutation(numberOfTracks int) []int {
+	rand.Seed(time.Now().Unix())
+	return rand.Perm(numberOfTracks)
 }
