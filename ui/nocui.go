@@ -20,7 +20,7 @@ type NoGui struct {
 	tracks         []*sp.Track
 }
 
-func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *string) error {
+func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *string, repeatOn *bool) error {
 	nogui := &NoGui{silent: silent}
 	nogui.setPlaylistFilter(*playlistFilter)
 
@@ -55,7 +55,11 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 
 		nextToPlayIndex++
 		if nextToPlayIndex >= numberOfTracks {
-			nextToPlayIndex = 0
+			if *repeatOn {
+				nextToPlayIndex = 0
+			} else {
+				return nil
+			}
 		}
 	}
 
