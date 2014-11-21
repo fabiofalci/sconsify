@@ -6,19 +6,20 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/fabiofalci/sconsify/events"
 	sp "github.com/op/go-libspotify/spotify"
 )
 
-func StartNoUserInterface(events *events.Events, silent *bool, onlyPlaylist *string) error {
+func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *string) error {
 	playlists := <-events.WaitForPlaylists()
 	go listenForKeyboardEvents(events.NextPlay)
 
 	listenForTermination(events)
 
-	tracks, err := getTracksInRandomOrder(playlists, *onlyPlaylist)
+	tracks, err := getTracksInRandomOrder(playlists, *playlistFilter)
 	if err != nil {
 		return err
 	}
@@ -79,11 +80,16 @@ func listenForKeyboardEvents(nextPlay chan bool) {
 	}
 }
 
-func getTracksInRandomOrder(playlists map[string]*sp.Playlist, onlyPlaylist string) ([]*sp.Track, error) {
+func getTracksInRandomOrder(playlists map[string]*sp.Playlist, playlistFilter string) ([]*sp.Track, error) {
+	filters := strings.Split(playlistFilter, ",")
+	for i := range filters {
+		filters[i] = strings.Trim(filters[i], " ")
+	}
+
 	numberOfTracks := 0
 	for _, playlist := range playlists {
 		playlist.Wait()
-		if onlyPlaylist == "" || playlist.Name() == onlyPlaylist {
+		if playlistFilter == "" || isOnFilter(&filters, playlist.Name()) {
 			numberOfTracks += playlist.Tracks()
 		}
 	}
@@ -98,7 +104,7 @@ func getTracksInRandomOrder(playlists map[string]*sp.Playlist, onlyPlaylist stri
 
 	for _, playlist := range playlists {
 		playlist.Wait()
-		if onlyPlaylist == "" || playlist.Name() == onlyPlaylist {
+		if playlistFilter == "" || isOnFilter(&filters, playlist.Name()) {
 			for i := 0; i < playlist.Tracks(); i++ {
 				track := playlist.Track(i).Track()
 				track.Wait()
@@ -110,6 +116,15 @@ func getTracksInRandomOrder(playlists map[string]*sp.Playlist, onlyPlaylist stri
 	}
 
 	return tracks, nil
+}
+
+func isOnFilter(playlistFilter *[]string, playlist string) bool {
+	for _, filter := range *playlistFilter {
+		if filter == playlist {
+			return true
+		}
+	}
+	return false
 }
 
 func getRandomPermutation(numberOfTracks int) []int {
