@@ -2,6 +2,7 @@ package ui
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -32,6 +33,11 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 	if err != nil {
 		return err
 	}
+
+	if !*silent {
+		nogui.printPlaylistInfo()
+	}
+
 	nextToPlayIndex := 0
 	numberOfTracks := len(nogui.tracks)
 
@@ -43,7 +49,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 		if *silent {
 			<-events.WaitForStatus()
 		} else {
-			println(<-events.WaitForStatus())
+			fmt.Println(<-events.WaitForStatus())
 		}
 		<-events.NextPlay
 
@@ -54,6 +60,15 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 	}
 
 	return nil
+}
+
+func (nogui *NoGui) printPlaylistInfo() {
+	fmt.Printf("%v track(s) from ", len(nogui.tracks))
+	if nogui.playlistFilter == nil {
+		fmt.Printf("all playlist(s)\n")
+	} else {
+		fmt.Printf("%v playlist(s)\n", len(nogui.playlistFilter))
+	}
 }
 
 func listenForNoCuiTermination(events *events.Events) {
@@ -83,7 +98,7 @@ func listenForKeyboardEvents(nextPlay chan bool) {
 
 		key := string(b)
 		if key == ">" {
-			println()
+			fmt.Println("")
 			nextPlay <- true
 		}
 	}
