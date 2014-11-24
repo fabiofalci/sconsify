@@ -14,35 +14,35 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 )
 
-type NoGui struct {
+type NoUi struct {
 	silent         *bool
 	playlistFilter []string
 	tracks         []*sp.Track
 }
 
 func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *string, repeatOn *bool) error {
-	nogui := &NoGui{silent: silent}
-	nogui.setPlaylistFilter(*playlistFilter)
+	noui := &NoUi{silent: silent}
+	noui.setPlaylistFilter(*playlistFilter)
 
 	playlists := <-events.WaitForPlaylists()
 	go listenForKeyboardEvents(events.NextPlay)
 
 	listenForNoCuiTermination(events)
 
-	err := nogui.randomTracks(playlists)
+	err := noui.randomTracks(playlists)
 	if err != nil {
 		return err
 	}
 
 	if !*silent {
-		nogui.printPlaylistInfo()
+		noui.printPlaylistInfo()
 	}
 
 	nextToPlayIndex := 0
-	numberOfTracks := len(nogui.tracks)
+	numberOfTracks := len(noui.tracks)
 
 	for {
-		track := nogui.tracks[nextToPlayIndex]
+		track := noui.tracks[nextToPlayIndex]
 
 		events.ToPlay <- track
 
@@ -66,12 +66,12 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 	return nil
 }
 
-func (nogui *NoGui) printPlaylistInfo() {
-	fmt.Printf("%v track(s) from ", len(nogui.tracks))
-	if nogui.playlistFilter == nil {
+func (noui *NoUi) printPlaylistInfo() {
+	fmt.Printf("%v track(s) from ", len(noui.tracks))
+	if noui.playlistFilter == nil {
 		fmt.Printf("all playlist(s)\n")
 	} else {
-		fmt.Printf("%v playlist(s)\n", len(nogui.playlistFilter))
+		fmt.Printf("%v playlist(s)\n", len(noui.playlistFilter))
 	}
 }
 
@@ -108,11 +108,11 @@ func listenForKeyboardEvents(nextPlay chan bool) {
 	}
 }
 
-func (nogui *NoGui) randomTracks(playlists map[string]*sp.Playlist) error {
+func (noui *NoUi) randomTracks(playlists map[string]*sp.Playlist) error {
 	numberOfTracks := 0
 	for _, playlist := range playlists {
 		playlist.Wait()
-		if nogui.isOnFilter(playlist.Name()) {
+		if noui.isOnFilter(playlist.Name()) {
 			numberOfTracks += playlist.Tracks()
 		}
 	}
@@ -121,18 +121,18 @@ func (nogui *NoGui) randomTracks(playlists map[string]*sp.Playlist) error {
 		return errors.New("No tracks selected")
 	}
 
-	nogui.tracks = make([]*sp.Track, numberOfTracks)
+	noui.tracks = make([]*sp.Track, numberOfTracks)
 	perm := getRandomPermutation(numberOfTracks)
 	permIndex := 0
 
 	for _, playlist := range playlists {
 		playlist.Wait()
-		if nogui.isOnFilter(playlist.Name()) {
+		if noui.isOnFilter(playlist.Name()) {
 			for i := 0; i < playlist.Tracks(); i++ {
 				track := playlist.Track(i).Track()
 				track.Wait()
 
-				nogui.tracks[perm[permIndex]] = track
+				noui.tracks[perm[permIndex]] = track
 				permIndex++
 			}
 		}
@@ -141,21 +141,21 @@ func (nogui *NoGui) randomTracks(playlists map[string]*sp.Playlist) error {
 	return nil
 }
 
-func (nogui *NoGui) setPlaylistFilter(playlistFilter string) {
+func (noui *NoUi) setPlaylistFilter(playlistFilter string) {
 	if playlistFilter == "" {
 		return
 	}
-	nogui.playlistFilter = strings.Split(playlistFilter, ",")
-	for i := range nogui.playlistFilter {
-		nogui.playlistFilter[i] = strings.Trim(nogui.playlistFilter[i], " ")
+	noui.playlistFilter = strings.Split(playlistFilter, ",")
+	for i := range noui.playlistFilter {
+		noui.playlistFilter[i] = strings.Trim(noui.playlistFilter[i], " ")
 	}
 }
 
-func (nogui *NoGui) isOnFilter(playlist string) bool {
-	if nogui.playlistFilter == nil {
+func (noui *NoUi) isOnFilter(playlist string) bool {
+	if noui.playlistFilter == nil {
 		return true
 	}
-	for _, filter := range nogui.playlistFilter {
+	for _, filter := range noui.playlistFilter {
 		if filter == playlist {
 			return true
 		}

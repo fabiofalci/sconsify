@@ -16,8 +16,8 @@ import (
 func main() {
 	providedUsername := flag.String("username", "", "Spotify username.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only random between Playlists.")
-	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no User Interface is used.")
-	providedNoUiPlaylists := flag.String("noui-playlists", "", "Select just some Playlists to play when no User Interface is used. Comma separated list.")
+	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no UI is used.")
+	providedNoUiPlaylists := flag.String("noui-playlists", "", "Select just some Playlists to play when no UI is used. Comma separated list.")
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
 	flag.Parse()
 
