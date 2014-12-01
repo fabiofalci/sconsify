@@ -24,7 +24,15 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 	noui := &NoUi{silent: silent}
 	noui.setPlaylistFilter(*playlistFilter)
 
-	playlists := <-events.WaitForPlaylists()
+	select {
+	case playlists = <-events.WaitForPlaylists():
+		if playlists == nil {
+			return nil
+		}
+	case <-events.WaitForShutdown():
+		return nil
+	}
+
 	go listenForKeyboardEvents(events.NextPlay)
 
 	listenForNoCuiTermination(events)
