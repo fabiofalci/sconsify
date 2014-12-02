@@ -32,7 +32,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 
 	go noui.listenForKeyboardEvents()
 
-	listenForNoCuiTermination(events)
+	noui.listenForTermination()
 
 	err := noui.randomTracks(playlists)
 	if err != nil {
@@ -91,19 +91,19 @@ func (noui *NoUi) printPlaylistInfo() {
 	}
 }
 
-func listenForNoCuiTermination(events *events.Events) {
+func (noui *NoUi) listenForTermination() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for _ = range c {
-			shutdownNogui(events)
+			noui.shutdownNogui()
 		}
 	}()
 }
 
-func shutdownNogui(events *events.Events) {
-	events.Shutdown()
-	<-events.WaitForShutdown()
+func (noui *NoUi) shutdownNogui() {
+	noui.events.Shutdown()
+	<-noui.events.WaitForShutdown()
 	os.Exit(0)
 }
 
