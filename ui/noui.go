@@ -25,7 +25,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 	noui := &NoUi{silent: silent, events: events}
 	noui.setPlaylistFilter(*playlistFilter)
 
-	playlists := noui.waitForPlaylists(events)
+	playlists := noui.waitForPlaylists()
 	if playlists == nil {
 		return nil
 	}
@@ -71,13 +71,13 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 	return nil
 }
 
-func (noui *NoUi) waitForPlaylists(events *events.Events) map[string]*sp.Playlist {
+func (noui *NoUi) waitForPlaylists() map[string]*sp.Playlist {
 	select {
-	case playlists := <-events.WaitForPlaylists():
+	case playlists := <-noui.events.WaitForPlaylists():
 		if playlists != nil {
 			return playlists
 		}
-	case <-events.WaitForShutdown():
+	case <-noui.events.WaitForShutdown():
 	}
 	return nil
 }
