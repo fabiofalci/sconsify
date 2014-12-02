@@ -18,10 +18,11 @@ type NoUi struct {
 	silent         *bool
 	playlistFilter []string
 	tracks         []*sp.Track
+	events         *events.Events
 }
 
 func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *string, repeatOn *bool) error {
-	noui := &NoUi{silent: silent}
+	noui := &NoUi{silent: silent, events: events}
 	noui.setPlaylistFilter(*playlistFilter)
 
 	playlists := noui.waitForPlaylists(events)
@@ -29,7 +30,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *s
 		return nil
 	}
 
-	go listenForKeyboardEvents(events.NextPlay)
+	go noui.listenForKeyboardEvents()
 
 	listenForNoCuiTermination(events)
 
@@ -106,7 +107,7 @@ func shutdownNogui(events *events.Events) {
 	os.Exit(0)
 }
 
-func listenForKeyboardEvents(nextPlay chan bool) {
+func (noui *NoUi) listenForKeyboardEvents() {
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
 
 	// we could disable echo but I can't enable it back
@@ -122,7 +123,7 @@ func listenForKeyboardEvents(nextPlay chan bool) {
 		key := string(b)
 		if key == ">" {
 			fmt.Println("")
-			nextPlay <- true
+			noui.events.NextPlay <- true
 		}
 	}
 }
