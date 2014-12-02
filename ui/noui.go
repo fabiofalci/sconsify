@@ -95,11 +95,15 @@ func listenForNoCuiTermination(events *events.Events) {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for _ = range c {
-			events.Shutdown()
-			<-events.WaitForShutdown()
-			os.Exit(0)
+			shutdownNogui(events)
 		}
 	}()
+}
+
+func shutdownNogui(events *events.Events) {
+	events.Shutdown()
+	<-events.WaitForShutdown()
+	os.Exit(0)
 }
 
 func listenForKeyboardEvents(nextPlay chan bool) {
