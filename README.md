@@ -37,11 +37,11 @@ Parameters
 
 * `-ui=true/false`: Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only random between Playlists.
 
+* `-playlists=""`: Select just some playlists to play. Comma separated list.
+
 
 No UI Parameters
 ----------------
-
-* `-noui-playlists=""`: Select just some playlists to play when no UI is used. Comma separated list.
 
 * `-noui-repeat-on=true/false`: Play your playlist and repeat it after the last track.
 
