@@ -15,24 +15,26 @@ import (
 )
 
 type Spotify struct {
-	currentTrack  *sp.Track
-	paused        bool
-	cacheLocation string
-	events        *events.Events
-	pa            *portAudio
-	session       *sp.Session
-	appKey        *[]byte
+	currentTrack   *sp.Track
+	paused         bool
+	cacheLocation  string
+	events         *events.Events
+	pa             *portAudio
+	session        *sp.Session
+	appKey         *[]byte
+	playlistFilter []string
 }
 
-func Initialise(username *string, pass *[]byte, events *events.Events) {
-	if err := initialiseSpotify(username, pass, events); err != nil {
+func Initialise(username *string, pass *[]byte, events *events.Events, playlistFilter *string) {
+	if err := initialiseSpotify(username, pass, events, playlistFilter); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		events.Shutdown()
 	}
 }
 
-func initialiseSpotify(username *string, pass *[]byte, events *events.Events) error {
+func initialiseSpotify(username *string, pass *[]byte, events *events.Events, playlistFilter *string) error {
 	spotify := &Spotify{events: events}
+	spotify.setPlaylistFilter(*playlistFilter)
 	err := spotify.initKey()
 	if err != nil {
 		return err
@@ -184,12 +186,34 @@ func (spotify *Spotify) initPlaylist() {
 		playlist := allPlaylists.Playlist(i)
 		playlist.Wait()
 
-		if allPlaylists.PlaylistType(i) == sp.PlaylistTypePlaylist {
+		if allPlaylists.PlaylistType(i) == sp.PlaylistTypePlaylist && spotify.isOnFilter(playlist.Name()) {
 			playlists[playlist.Name()] = playlist
 		}
 	}
 
 	spotify.events.NewPlaylist(&playlists)
+}
+
+func (spotify *Spotify) isOnFilter(playlist string) bool {
+	if spotify.playlistFilter == nil {
+		return true
+	}
+	for _, filter := range spotify.playlistFilter {
+		if filter == playlist {
+			return true
+		}
+	}
+	return false
+}
+
+func (spotify *Spotify) setPlaylistFilter(playlistFilter string) {
+	if playlistFilter == "" {
+		return
+	}
+	spotify.playlistFilter = strings.Split(playlistFilter, ",")
+	for i := range spotify.playlistFilter {
+		spotify.playlistFilter[i] = strings.Trim(spotify.playlistFilter[i], " ")
+	}
 }
 
 func (spotify *Spotify) runPlayer() {

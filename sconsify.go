@@ -16,20 +16,20 @@ import (
 func main() {
 	providedUsername := flag.String("username", "", "Spotify username.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only random between Playlists.")
+	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
 	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no UI is used.")
-	providedNoUiPlaylists := flag.String("noui-playlists", "", "Select just some Playlists to play when no UI is used. Comma separated list.")
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
 	flag.Parse()
 
 	username, pass := credentials(providedUsername)
 	events := events.InitialiseEvents()
 
-	go spotify.Initialise(username, pass, events)
+	go spotify.Initialise(username, pass, events, providedPlaylists)
 
 	if *providedUi {
 		ui.StartConsoleUserInterface(events)
 	} else {
-		err := ui.StartNoUserInterface(events, providedNoUiSilent, providedNoUiPlaylists, providedNoUiRepeatOn)
+		err := ui.StartNoUserInterface(events, providedNoUiSilent, providedNoUiRepeatOn)
 		if err != nil {
 			fmt.Println(err)
 		}

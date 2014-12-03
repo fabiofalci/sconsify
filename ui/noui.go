@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"strings"
 	"time"
 
 	"github.com/fabiofalci/sconsify/events"
@@ -15,15 +14,13 @@ import (
 )
 
 type NoUi struct {
-	silent         *bool
-	playlistFilter []string
-	tracks         []*sp.Track
-	events         *events.Events
+	silent *bool
+	tracks []*sp.Track
+	events *events.Events
 }
 
-func StartNoUserInterface(events *events.Events, silent *bool, playlistFilter *string, repeatOn *bool) error {
+func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool) error {
 	noui := &NoUi{silent: silent, events: events}
-	noui.setPlaylistFilter(*playlistFilter)
 
 	playlists := noui.waitForPlaylists()
 	if playlists == nil {
@@ -83,12 +80,7 @@ func (noui *NoUi) waitForPlaylists() map[string]*sp.Playlist {
 }
 
 func (noui *NoUi) printPlaylistInfo() {
-	fmt.Printf("%v track(s) from ", len(noui.tracks))
-	if noui.playlistFilter == nil {
-		fmt.Printf("all playlist(s)\n")
-	} else {
-		fmt.Printf("%v playlist(s)\n", len(noui.playlistFilter))
-	}
+	fmt.Printf("%v track(s)\n", len(noui.tracks))
 }
 
 func (noui *NoUi) listenForTermination() {
@@ -134,9 +126,7 @@ func (noui *NoUi) randomTracks(playlists map[string]*sp.Playlist) error {
 	numberOfTracks := 0
 	for _, playlist := range playlists {
 		playlist.Wait()
-		if noui.isOnFilter(playlist.Name()) {
-			numberOfTracks += playlist.Tracks()
-		}
+		numberOfTracks += playlist.Tracks()
 	}
 
 	if numberOfTracks == 0 {
@@ -149,40 +139,16 @@ func (noui *NoUi) randomTracks(playlists map[string]*sp.Playlist) error {
 
 	for _, playlist := range playlists {
 		playlist.Wait()
-		if noui.isOnFilter(playlist.Name()) {
-			for i := 0; i < playlist.Tracks(); i++ {
-				track := playlist.Track(i).Track()
-				track.Wait()
+		for i := 0; i < playlist.Tracks(); i++ {
+			track := playlist.Track(i).Track()
+			track.Wait()
 
-				noui.tracks[perm[permIndex]] = track
-				permIndex++
-			}
+			noui.tracks[perm[permIndex]] = track
+			permIndex++
 		}
 	}
 
 	return nil
-}
-
-func (noui *NoUi) setPlaylistFilter(playlistFilter string) {
-	if playlistFilter == "" {
-		return
-	}
-	noui.playlistFilter = strings.Split(playlistFilter, ",")
-	for i := range noui.playlistFilter {
-		noui.playlistFilter[i] = strings.Trim(noui.playlistFilter[i], " ")
-	}
-}
-
-func (noui *NoUi) isOnFilter(playlist string) bool {
-	if noui.playlistFilter == nil {
-		return true
-	}
-	for _, filter := range noui.playlistFilter {
-		if filter == playlist {
-			return true
-		}
-	}
-	return false
 }
 
 func getRandomPermutation(numberOfTracks int) []int {
