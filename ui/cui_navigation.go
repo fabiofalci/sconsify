@@ -31,6 +31,8 @@ func cursorEnd(g *gocui.Gui, v *gocui.View) error {
 			} else {
 				v.SetCursor(cx, newIndex)
 			}
+
+			updateTracksView(g, v)
 		}
 	}
 	return nil
@@ -42,6 +44,8 @@ func cursorHome(g *gocui.Gui, v *gocui.View) error {
 		cx, _ := v.Cursor()
 		v.SetCursor(cx, 0)
 		v.SetOrigin(ox, 0)
+
+		updateTracksView(g, v)
 	}
 	return nil
 }
@@ -61,6 +65,7 @@ func cursorPgup(g *gocui.Gui, v *gocui.View) error {
 			v.SetOrigin(ox, 0)
 			v.SetCursor(cx, cy)
 		}
+		updateTracksView(g, v)
 	}
 	return nil
 }
@@ -83,9 +88,16 @@ func cursorPgdn(g *gocui.Gui, v *gocui.View) error {
 				v.SetOrigin(ox, maxSize-pageSizeY)
 				v.SetCursor(cx, pageSizeY)
 			}
+			updateTracksView(g, v)
 		}
 	}
 	return nil
+}
+
+func updateTracksView(g *gocui.Gui, v *gocui.View) {
+	if v == gui.playlistsView {
+		gui.updateTracksView()
+	}
 }
 
 func getCurrentViewSize(v *gocui.View) int {
