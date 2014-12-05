@@ -167,7 +167,7 @@ func (spotify *Spotify) waitForEvents() {
 		case <-spotify.session.EndOfTrackUpdates():
 			spotify.events.NextPlay <- true
 		case <-spotify.session.PlayTokenLostUpdates():
-			spotify.playTokenLost()
+			spotify.events.PlayTokenLost()
 		case track := <-spotify.events.ToPlay:
 			spotify.play(track)
 		case <-spotify.events.WaitForPause():
@@ -218,10 +218,6 @@ func (spotify *Spotify) setPlaylistFilter(playlistFilter string) {
 
 func (spotify *Spotify) runPlayer() {
 	spotify.pa.player()
-}
-
-func (spotify *Spotify) playTokenLost() {
-	spotify.events.SetStatus("Play token lost")
 }
 
 func (spotify *Spotify) pause() {
