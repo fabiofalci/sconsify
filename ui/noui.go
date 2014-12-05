@@ -48,12 +48,16 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool) e
 
 		events.ToPlay <- track
 
-		if *silent {
-			<-events.WaitForStatus()
-		} else {
-			fmt.Println(<-events.WaitForStatus())
+		message := <-events.WaitForStatus()
+		if !*silent {
+			fmt.Println(message)
 		}
-		<-events.NextPlay
+		select {
+		case <-events.NextPlay:
+		case <-events.WaitForPlayTokenLost():
+			fmt.Printf("Play token lost\n")
+			return nil
+		}
 
 		nextToPlayIndex++
 		if nextToPlayIndex >= numberOfTracks {
