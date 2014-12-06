@@ -19,7 +19,7 @@ type NoUi struct {
 	events *events.Events
 }
 
-func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool) error {
+func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, random *bool) error {
 	noui := &NoUi{silent: silent, events: events}
 
 	playlists := noui.waitForPlaylists()
@@ -31,8 +31,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool) e
 
 	noui.listenForTermination()
 
-	err := noui.randomTracks(playlists)
-	if err != nil {
+	if err := noui.setTracks(playlists, random); err != nil {
 		return err
 	}
 
@@ -126,7 +125,7 @@ func (noui *NoUi) listenForKeyboardEvents() {
 	}
 }
 
-func (noui *NoUi) randomTracks(playlists map[string]*sp.Playlist) error {
+func (noui *NoUi) setTracks(playlists map[string]*sp.Playlist, random *bool) error {
 	numberOfTracks := 0
 	for _, playlist := range playlists {
 		playlist.Wait()
@@ -138,8 +137,12 @@ func (noui *NoUi) randomTracks(playlists map[string]*sp.Playlist) error {
 	}
 
 	noui.tracks = make([]*sp.Track, numberOfTracks)
-	perm := getRandomPermutation(numberOfTracks)
-	permIndex := 0
+
+	var perm []int
+	if *random {
+		perm = getRandomPermutation(numberOfTracks)
+	}
+	index := 0
 
 	for _, playlist := range playlists {
 		playlist.Wait()
@@ -147,8 +150,12 @@ func (noui *NoUi) randomTracks(playlists map[string]*sp.Playlist) error {
 			track := playlist.Track(i).Track()
 			track.Wait()
 
-			noui.tracks[perm[permIndex]] = track
-			permIndex++
+			if *random {
+				noui.tracks[perm[index]] = track
+			} else {
+				noui.tracks[index] = track
+			}
+			index++
 		}
 	}
 

@@ -19,6 +19,7 @@ func main() {
 	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
 	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no UI is used.")
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
+	providedNoUiRandom := flag.Bool("noui-random", true, "Random between tracks or follow playlist order.")
 	flag.Parse()
 
 	username, pass := credentials(providedUsername)
@@ -29,7 +30,7 @@ func main() {
 	if *providedUi {
 		ui.StartConsoleUserInterface(events)
 	} else {
-		err := ui.StartNoUserInterface(events, providedNoUiSilent, providedNoUiRepeatOn)
+		err := ui.StartNoUserInterface(events, providedNoUiSilent, providedNoUiRepeatOn, providedNoUiRandom)
 		if err != nil {
 			fmt.Println(err)
 		}
