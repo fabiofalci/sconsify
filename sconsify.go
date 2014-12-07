@@ -59,6 +59,6 @@ func getPassword() *[]byte {
 		return &b
 	}
 	fmt.Print("Password: ")
-	b := gopass.GetPasswd()
+	b := gopass.GetPasswdMasked()
 	return &b
 }
