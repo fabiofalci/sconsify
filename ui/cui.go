@@ -27,6 +27,7 @@ type Gui struct {
 	statusView    *gocui.View
 	queueView     *gocui.View
 	events        *events.Events
+	currentTrack  *sp.Track
 }
 
 func StartConsoleUserInterface(events *events.Events) {
@@ -132,12 +133,17 @@ func (gui *Gui) playNextFromPlaylist() {
 	track := playlistTrack.Track()
 	track.Wait()
 
-	gui.events.Play(track)
+	gui.play(track)
 }
 
 func (gui *Gui) playNextFromQueue() {
-	gui.events.Play(queue.Pop())
+	gui.play(queue.Pop())
 	gui.updateQueueView()
+}
+
+func (gui *Gui) play(track *sp.Track) {
+	gui.currentTrack = track
+	gui.events.Play(gui.currentTrack)
 }
 
 func getNextTrack(playlist *sp.Playlist) int {
