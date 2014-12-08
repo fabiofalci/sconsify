@@ -90,18 +90,18 @@ func (spotify *Spotify) initKey() error {
 
 func (spotify *Spotify) initCache() error {
 	location := sconsify.GetCacheLocation()
-	if location == nil {
+	if location == "" {
 		return errors.New("Cannot find cache dir")
 	}
 
-	spotify.cacheLocation = *location
-	sconsify.DeleteCache(&spotify.cacheLocation)
+	spotify.cacheLocation = location
+	sconsify.DeleteCache(spotify.cacheLocation)
 	return nil
 }
 
 func (spotify *Spotify) shutdownSpotify() {
 	spotify.session.Logout()
-	sconsify.DeleteCache(&spotify.cacheLocation)
+	sconsify.DeleteCache(spotify.cacheLocation)
 	spotify.events.Shutdown()
 }
 

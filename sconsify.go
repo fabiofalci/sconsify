@@ -8,12 +8,15 @@ import (
 	"strings"
 
 	"github.com/fabiofalci/sconsify/events"
+	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/fabiofalci/sconsify/ui"
 	"github.com/howeyc/gopass"
 )
 
 func main() {
+	sconsify.ProcessSconsifyrc()
+
 	providedUsername := flag.String("username", "", "Spotify username.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only random between Playlists.")
 	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
