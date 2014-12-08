@@ -19,7 +19,7 @@ func GetCacheLocation() string {
 }
 
 func DeleteCache(cacheLocation string) {
-	if strings.HasSuffix(cacheLocation, SCONSIFY_CONF_LOCATION) {
+	if strings.HasSuffix(cacheLocation, SCONSIFY_CONF_LOCATION+"/cache") {
 		os.RemoveAll(cacheLocation)
 	}
 }
