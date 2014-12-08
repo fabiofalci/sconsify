@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"time"
 
 	"code.google.com/p/portaudio-go/portaudio"
 	"github.com/fabiofalci/sconsify/events"
-	"github.com/mitchellh/go-homedir"
+	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
 )
 
@@ -90,35 +89,20 @@ func (spotify *Spotify) initKey() error {
 }
 
 func (spotify *Spotify) initCache() error {
-	spotify.initCacheLocation()
-	if spotify.cacheLocation == "" {
+	location := sconsify.GetCacheLocation()
+	if location == nil {
 		return errors.New("Cannot find cache dir")
 	}
 
-	spotify.deleteCache()
+	spotify.cacheLocation = *location
+	sconsify.DeleteCache(&spotify.cacheLocation)
 	return nil
-}
-
-func (spotify *Spotify) initCacheLocation() {
-	dir, err := homedir.Dir()
-	if err == nil {
-		dir, err = homedir.Expand(dir)
-		if err == nil && dir != "" {
-			spotify.cacheLocation = dir + "/.sconsify/cache/"
-		}
-	}
 }
 
 func (spotify *Spotify) shutdownSpotify() {
 	spotify.session.Logout()
-	spotify.deleteCache()
+	sconsify.DeleteCache(&spotify.cacheLocation)
 	spotify.events.Shutdown()
-}
-
-func (spotify *Spotify) deleteCache() {
-	if strings.HasSuffix(spotify.cacheLocation, "/.sconsify/cache/") {
-		os.RemoveAll(spotify.cacheLocation)
-	}
 }
 
 func (spotify *Spotify) checkIfLoggedIn() error {
