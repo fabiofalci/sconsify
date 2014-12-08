@@ -1,4 +1,4 @@
-default: binary
+default: build
 
 test:
 	go test -v ./...
