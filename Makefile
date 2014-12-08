@@ -3,8 +3,8 @@ default: build
 test:
 	go test -v ./...
 
-run:
-	go build && ./sconsify
+run: build
+	bundles/sconsify
 
 #
 # To build create spotify/spotify_key_array.key containing your application key
@@ -17,7 +17,7 @@ run:
 #
 build:
 	go get ./...
-	sed -i '$$ d' spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go && go build -o "bundles/sconsify" && git checkout spotify/key.go
+	sed -i '$$ d' spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go && go build -o bundles/sconsify && git checkout spotify/key.go
 
 container-build: bundles
 	docker build -t sconsify-build .
