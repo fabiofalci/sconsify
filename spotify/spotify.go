@@ -170,12 +170,16 @@ func (spotify *Spotify) initPlaylist() {
 		playlist := allPlaylists.Playlist(i)
 		playlist.Wait()
 
-		if allPlaylists.PlaylistType(i) == sp.PlaylistTypePlaylist && spotify.isOnFilter(playlist.Name()) {
+		if spotify.canAddPlaylist(playlist, allPlaylists.PlaylistType(i)) {
 			playlists[playlist.Name()] = playlist
 		}
 	}
 
 	spotify.events.NewPlaylist(&playlists)
+}
+
+func (spotify *Spotify) canAddPlaylist(playlist *sp.Playlist, playlistType sp.PlaylistType) bool {
+	return playlistType == sp.PlaylistTypePlaylist && spotify.isOnFilter(playlist.Name())
 }
 
 func (spotify *Spotify) isOnFilter(playlist string) bool {
