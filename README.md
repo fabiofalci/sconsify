@@ -47,6 +47,8 @@ No UI Parameters
 
 * `-noui-silent=true/false`: Silent mode when no UI is used.
 
+* `-noui-random=true/false`: Random between tracks or follow playlist order.
+
 
 UI mode keyboard 
 ----------------
@@ -76,3 +78,13 @@ No UI mode keyboard
 * `>`: play next track.
 
 * `Control C`: exit.
+
+
+sconsifyrc
+----------
+
+Similar to [.ackrc](http://beyondgrep.com/documentation/) you can define default parameters in `~/.sconsify/sconsifyrc`:
+
+	-username=you-username
+	-noui-silent=true 
+	-noui-repeat-on=false
