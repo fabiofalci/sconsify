@@ -50,23 +50,32 @@ func ProcessSconsifyrc() {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		line := strings.Trim(scanner.Text(), " ")
-		key := line
-		if index := strings.Index(line, "="); index > 0 {
-			key = line[0:index]
-		}
-		contains := false
-		for i, value := range os.Args {
-			if i > 0 {
-				if strings.HasPrefix(value, key) {
-					contains = true
-					break
-				}
-			}
-		}
-
-		if !contains {
-			os.Args = append(os.Args, line)
+		argument := strings.Trim(scanner.Text(), " ")
+		argumentName := getOnlyArgumentName(argument)
+		if !containsArgument(argumentName) {
+			appendArgument(argument)
 		}
 	}
+}
+
+func getOnlyArgumentName(line string) string {
+	if index := strings.Index(line, "="); index > 0 {
+		return line[0:index]
+	}
+	return line
+}
+
+func containsArgument(argumentName string) bool {
+	for i, value := range os.Args {
+		if i > 0 {
+			if strings.HasPrefix(value, argumentName) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func appendArgument(argument string) {
+	os.Args = append(os.Args, argument)
 }
