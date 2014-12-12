@@ -149,7 +149,7 @@ func (spotify *Spotify) waitForEvents() {
 	for {
 		select {
 		case <-spotify.session.EndOfTrackUpdates():
-			spotify.events.NextPlay <- true
+			spotify.events.NextPlay()
 		case <-spotify.session.PlayTokenLostUpdates():
 			spotify.events.PlayTokenLost()
 		case track := <-spotify.events.WaitPlay():

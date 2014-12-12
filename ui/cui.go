@@ -52,7 +52,7 @@ func StartConsoleUserInterface(events *events.Events) {
 				gui.updateStatus(message)
 			case <-gui.events.WaitForPlayTokenLost():
 				gui.updateStatus("Play token lost")
-			case <-gui.events.NextPlay:
+			case <-gui.events.WaitForNextPlay():
 				gui.playNext()
 			}
 		}

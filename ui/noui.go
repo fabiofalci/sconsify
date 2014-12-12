@@ -52,7 +52,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 			fmt.Println(message)
 		}
 		select {
-		case <-events.NextPlay:
+		case <-events.WaitForNextPlay():
 		case <-events.WaitForPlayTokenLost():
 			fmt.Printf("Play token lost\n")
 			return nil
@@ -118,7 +118,7 @@ func (noui *NoUi) listenForKeyboardEvents() {
 		key := string(b)
 		if key == ">" {
 			fmt.Println("")
-			noui.events.NextPlay <- true
+			noui.events.NextPlay()
 		} else if key == "q" {
 			noui.shutdownNogui()
 		}

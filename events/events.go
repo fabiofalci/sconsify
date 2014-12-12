@@ -8,7 +8,7 @@ type Events struct {
 	playlists     chan map[string]*sp.Playlist
 	status        chan string
 	play          chan *sp.Track
-	NextPlay      chan bool
+	nextPlay      chan bool
 	pause         chan bool
 	shutdown      chan bool
 	playTokenLost chan bool
@@ -19,10 +19,18 @@ func InitialiseEvents() *Events {
 		playlists:     make(chan map[string]*sp.Playlist),
 		status:        make(chan string),
 		play:          make(chan *sp.Track),
-		NextPlay:      make(chan bool),
+		nextPlay:      make(chan bool),
 		pause:         make(chan bool),
 		playTokenLost: make(chan bool),
 		shutdown:      make(chan bool)}
+}
+
+func (events *Events) NextPlay() {
+	events.nextPlay <- true
+}
+
+func (events *Events) WaitForNextPlay() <-chan bool {
+	return events.nextPlay
 }
 
 func (events *Events) Play(track *sp.Track) {
