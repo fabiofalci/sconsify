@@ -45,7 +45,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 	for {
 		track := noui.tracks[nextToPlayIndex]
 
-		events.ToPlay <- track
+		events.Play(track)
 
 		message := <-events.WaitForStatus()
 		if !*silent {
