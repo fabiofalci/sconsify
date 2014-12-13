@@ -119,6 +119,10 @@ func (noui *NoUi) listenForKeyboardEvents() {
 		if key == ">" {
 			fmt.Println("")
 			noui.events.NextPlay()
+		} else if key == "p" {
+			fmt.Println("")
+			noui.events.Pause()
+			<-noui.events.WaitForStatus()
 		} else if key == "q" {
 			noui.shutdownNogui()
 		}
