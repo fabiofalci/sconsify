@@ -47,8 +47,8 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 
 		events.Play(track)
 
-		message := <-events.WaitForStatus()
 		if !*silent {
+			message := <-events.WaitForStatus()
 			fmt.Println(message)
 		}
 		select {
@@ -122,7 +122,6 @@ func (noui *NoUi) listenForKeyboardEvents() {
 		} else if key == "p" {
 			fmt.Println("")
 			noui.events.Pause()
-			<-noui.events.WaitForStatus()
 		} else if key == "q" {
 			noui.shutdownNogui()
 		}

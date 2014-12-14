@@ -62,7 +62,10 @@ func (events *Events) WaitForStatus() <-chan string {
 }
 
 func (events *Events) SetStatus(message string) {
-	events.status <- message
+	select {
+	case events.status <- message:
+	default:
+	}
 }
 
 func (events *Events) WaitForShutdown() <-chan bool {
