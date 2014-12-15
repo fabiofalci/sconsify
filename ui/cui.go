@@ -234,10 +234,18 @@ func keybindings() error {
 	if err := gui.g.SetKeybinding("", gocui.KeyArrowUp, 0, cursorUp); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("main", gocui.KeyArrowLeft, 0, nextView); err != nil {
+
+	if err := gui.g.SetKeybinding("main", gocui.KeyArrowLeft, 0, mainNextViewLeft); err != nil {
 		return err
 	}
+	if err := gui.g.SetKeybinding("queue", gocui.KeyArrowLeft, 0, nextView); err != nil {
+		return err
+	}
+
 	if err := gui.g.SetKeybinding("side", gocui.KeyArrowRight, 0, nextView); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding("main", gocui.KeyArrowRight, 0, mainNextViewRight); err != nil {
 		return err
 	}
 
@@ -248,10 +256,16 @@ func keybindings() error {
 	if err := gui.g.SetKeybinding("", 'k', 0, cursorUp); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("main", 'h', 0, nextView); err != nil {
+	if err := gui.g.SetKeybinding("main", 'h', 0, mainNextViewLeft); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding("queue", 'h', 0, nextView); err != nil {
 		return err
 	}
 	if err := gui.g.SetKeybinding("side", 'l', 0, nextView); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding("main", 'l', 0, mainNextViewRight); err != nil {
 		return err
 	}
 

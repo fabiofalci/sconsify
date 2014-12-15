@@ -4,16 +4,26 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+// nextView is shared between Side and Queue and they all go to main
 func nextView(g *gocui.Gui, v *gocui.View) error {
-	currentView := g.CurrentView()
-	if currentView == nil || currentView.Name() == "side" {
-		gui.tracksView.Highlight = true
-		gui.playlistsView.Highlight = false
-		return gui.g.SetCurrentView("main")
-	}
+	gui.tracksView.Highlight = true
+	gui.playlistsView.Highlight = false
+	gui.queueView.Highlight = false
+	return gui.g.SetCurrentView("main")
+}
+
+func mainNextViewLeft(g *gocui.Gui, v *gocui.View) error {
 	gui.tracksView.Highlight = false
 	gui.playlistsView.Highlight = true
+	gui.queueView.Highlight = false
 	return gui.g.SetCurrentView("side")
+}
+
+func mainNextViewRight(g *gocui.Gui, v *gocui.View) error {
+	gui.tracksView.Highlight = false
+	gui.playlistsView.Highlight = false
+	gui.queueView.Highlight = true
+	return gui.g.SetCurrentView("queue")
 }
 
 func cursorEnd(g *gocui.Gui, v *gocui.View) error {
