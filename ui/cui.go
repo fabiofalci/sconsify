@@ -210,7 +210,7 @@ func keybindings() error {
 	if err := gui.g.SetKeybinding("", '>', 0, nextCommand); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("", 'u', 0, queueCommand); err != nil {
+	if err := gui.g.SetKeybinding("main", 'u', 0, queueCommand); err != nil {
 		return err
 	}
 
