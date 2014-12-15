@@ -98,6 +98,11 @@ func (gui *Gui) getSelectedTrack() (string, error) {
 	return gui.getSelected(gui.tracksView)
 }
 
+func (gui *Gui) getQeueuSelectedTrackIndex() int {
+	_, cy := gui.queueView.Cursor()
+	return cy
+}
+
 func (gui *Gui) getSelected(v *gocui.View) (string, error) {
 	var l string
 	var err error
@@ -211,6 +216,9 @@ func keybindings() error {
 		return err
 	}
 	if err := gui.g.SetKeybinding("main", 'u', 0, queueCommand); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding("queue", 'd', 0, removeFromQueueCommand); err != nil {
 		return err
 	}
 

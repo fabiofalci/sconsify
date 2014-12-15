@@ -44,6 +44,15 @@ func queueCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
+	index := gui.getQeueuSelectedTrackIndex()
+	if index > -1 {
+		queue.Remove(index)
+		gui.updateQueueView()
+	}
+	return nil
+}
+
 func quit(g *gocui.Gui, v *gocui.View) error {
 	gui.events.Shutdown()
 	<-gui.events.WaitForShutdown()

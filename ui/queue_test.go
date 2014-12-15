@@ -46,6 +46,30 @@ func TestQueueAddPopEmptyAndContents(t *testing.T) {
 	}
 }
 
+func TestQueueRemove(t *testing.T) {
+	queue := InitQueue()
+
+	track0 := &sp.Track{}
+	queue.Add(track0)
+
+	track1 := &sp.Track{}
+	queue.Add(track1)
+
+	track2 := &sp.Track{}
+	queue.Add(track2)
+
+	trackRemoved := queue.Remove(1)
+
+	if trackRemoved != track1 {
+		t.Error("Queue is not removing correctly")
+	}
+
+	contents := queue.Contents()
+	if contents[0] != track0 || contents[1] != track2 {
+		t.Error("Queue content is not correct")
+	}
+}
+
 func TestQueueEmpty(t *testing.T) {
 	queue := InitQueue()
 	if !queue.isEmpty() {

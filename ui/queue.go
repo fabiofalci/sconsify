@@ -34,6 +34,15 @@ func (queue *Queue) Pop() *sp.Track {
 	return track
 }
 
+func (queue *Queue) Remove(index int) *sp.Track {
+	if len(queue.queue) == 0 {
+		return nil
+	}
+	track := queue.queue[index]
+	queue.queue = append(queue.queue[:index], queue.queue[index+1:]...)
+	return track
+}
+
 func (queue *Queue) Contents() []*sp.Track {
 	return queue.queue
 }
