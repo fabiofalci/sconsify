@@ -1,3 +1,10 @@
+UNAME := $(shell uname)
+
+SED := sed -i '$$ d'
+ifeq ($(UNAME), Darwin)
+	SED := sed -i '' -e '$$ d'
+endif
+
 default: build
 
 test:
@@ -17,7 +24,7 @@ run: build
 #
 build:
 	go get ./...
-	sed -i '$$ d' spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go && go build -o bundles/sconsify && git checkout spotify/key.go
+	$(SED) spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go && go build -o bundles/sconsify ; git checkout spotify/key.go
 
 container-build: bundles
 	docker build -t sconsify-build .
