@@ -53,6 +53,33 @@ func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
+	gui.statusView.Clear()
+	gui.statusView.SetCursor(0, 0)
+	gui.statusView.SetOrigin(0, 0)
+
+	gui.statusView.Editable = true
+	gui.g.SetCurrentView("status")
+
+	return nil
+}
+
+func searchCommand(g *gocui.Gui, v *gocui.View) error {
+	// after the enter the command is at -1
+	line, _ := gui.statusView.Line(-1)
+
+	fmt.Fprintf(gui.playlistsView, line)
+	gui.g.SetCurrentView("side")
+	gui.events.Search(line)
+
+	gui.statusView.Clear()
+	gui.statusView.SetCursor(0, 0)
+	gui.statusView.SetOrigin(0, 0)
+
+	gui.statusView.Editable = false
+	return nil
+}
+
 func quit(g *gocui.Gui, v *gocui.View) error {
 	gui.events.Shutdown()
 	<-gui.events.WaitForShutdown()

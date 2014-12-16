@@ -158,6 +158,8 @@ func (spotify *Spotify) waitForEvents() {
 			spotify.pause()
 		case <-spotify.events.WaitForShutdown():
 			spotify.shutdownSpotify()
+		case query := <-spotify.events.WaitForSearch():
+			spotify.search(query)
 		}
 	}
 }
@@ -251,4 +253,29 @@ func (spotify *Spotify) play(track *sp.Track) {
 
 func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {
 	return track.Availability() == sp.TrackAvailabilityAvailable
+}
+
+func (spotify *Spotify) search(query string) {
+	searchOptions := &sp.SearchOptions{
+		Tracks:    sp.SearchSpec{Offset: 0, Count: 50},
+		Albums:    sp.SearchSpec{Offset: 0, Count: 50},
+		Artists:   sp.SearchSpec{Offset: 0, Count: 50},
+		Playlists: sp.SearchSpec{Offset: 0, Count: 50},
+		Type:      sp.SearchStandard,
+	}
+	search, _ := spotify.session.Search(query, searchOptions)
+	search.Wait()
+
+	numberOfTracks := search.Tracks()
+	if numberOfTracks > 100 {
+		numberOfTracks = 100
+	}
+
+	tracks := make([]*sp.Track, numberOfTracks)
+	for i := 0; i < numberOfTracks; i++ {
+		tracks[i] = search.Track(i)
+	}
+
+	m := make(map[string][]*sp.Track)
+	m[query] = tracks
 }

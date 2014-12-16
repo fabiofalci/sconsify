@@ -14,6 +14,7 @@ type Events struct {
 	trackPaused       chan *sp.Track
 	shutdown          chan bool
 	playTokenLost     chan bool
+	search            chan string
 }
 
 func InitialiseEvents() *Events {
@@ -26,6 +27,7 @@ func InitialiseEvents() *Events {
 		trackPlaying:      make(chan *sp.Track),
 		trackPaused:       make(chan *sp.Track),
 		playTokenLost:     make(chan bool),
+		search:            make(chan string),
 		shutdown:          make(chan bool)}
 }
 
@@ -105,4 +107,12 @@ func (events *Events) PlayTokenLost() {
 
 func (events *Events) WaitForPlayTokenLost() <-chan bool {
 	return events.playTokenLost
+}
+
+func (events *Events) WaitForSearch() <-chan string {
+	return events.search
+}
+
+func (events *Events) Search(query string) {
+	events.search <- query
 }

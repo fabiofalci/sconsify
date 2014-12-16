@@ -245,6 +245,12 @@ func keybindings() error {
 	if err := gui.g.SetKeybinding("queue", 'd', 0, removeFromQueueCommand); err != nil {
 		return err
 	}
+	if err := gui.g.SetKeybinding("", '/', 0, enableSearchInputCommand); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding("status", gocui.KeyEnter, 0, searchCommand); err != nil {
+		return err
+	}
 
 	if err := gui.g.SetKeybinding("", gocui.KeyHome, 0, cursorHome); err != nil {
 		return err
