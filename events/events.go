@@ -6,11 +6,12 @@ import (
 
 type Events struct {
 	playlists         chan map[string]*sp.Playlist
-	status            chan string
 	play              chan *sp.Track
 	nextPlay          chan bool
 	pause             chan bool
 	trackNotAvailable chan bool
+	trackPlaying      chan *sp.Track
+	trackPaused       chan *sp.Track
 	shutdown          chan bool
 	playTokenLost     chan bool
 }
@@ -18,13 +19,36 @@ type Events struct {
 func InitialiseEvents() *Events {
 	return &Events{
 		playlists:         make(chan map[string]*sp.Playlist),
-		status:            make(chan string),
 		play:              make(chan *sp.Track),
 		nextPlay:          make(chan bool),
 		pause:             make(chan bool),
 		trackNotAvailable: make(chan bool),
+		trackPlaying:      make(chan *sp.Track),
+		trackPaused:       make(chan *sp.Track),
 		playTokenLost:     make(chan bool),
 		shutdown:          make(chan bool)}
+}
+
+func (events *Events) TrackPlaying(track *sp.Track) {
+	select {
+	case events.trackPlaying <- track:
+	default:
+	}
+}
+
+func (events *Events) WaitForTrackPlaying() <-chan *sp.Track {
+	return events.trackPlaying
+}
+
+func (events *Events) TrackPaused(track *sp.Track) {
+	select {
+	case events.trackPaused <- track:
+	default:
+	}
+}
+
+func (events *Events) WaitForTrackPaused() <-chan *sp.Track {
+	return events.trackPaused
 }
 
 func (events *Events) TrackNotAvailable() {
@@ -65,17 +89,6 @@ func (events *Events) WaitForPause() <-chan bool {
 
 func (events *Events) NewPlaylist(playlists *map[string]*sp.Playlist) {
 	events.playlists <- *playlists
-}
-
-func (events *Events) WaitForStatus() <-chan string {
-	return events.status
-}
-
-func (events *Events) SetStatus(message string) {
-	select {
-	case events.status <- message:
-	default:
-	}
 }
 
 func (events *Events) WaitForShutdown() <-chan bool {

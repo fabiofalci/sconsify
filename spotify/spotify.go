@@ -226,7 +226,7 @@ func (spotify *Spotify) playCurrentTrack() {
 func (spotify *Spotify) pauseCurrentTrack() {
 	player := spotify.session.Player()
 	player.Pause()
-	spotify.updateStatus("Paused", spotify.currentTrack)
+	spotify.events.TrackPaused(spotify.currentTrack)
 	spotify.paused = true
 }
 
@@ -245,16 +245,10 @@ func (spotify *Spotify) play(track *sp.Track) {
 	}
 	player.Play()
 
-	spotify.updateStatus("Playing", track)
+	spotify.events.TrackPlaying(track)
+	spotify.currentTrack = track
 }
 
 func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {
 	return track.Availability() == sp.TrackAvailabilityAvailable
-}
-
-func (spotify *Spotify) updateStatus(status string, track *sp.Track) {
-	spotify.currentTrack = track
-	artist := track.Artist(0)
-	artist.Wait()
-	spotify.events.SetStatus(fmt.Sprintf("%v: %v - %v [%v]", status, artist.Name(), spotify.currentTrack.Name(), spotify.currentTrack.Duration().String()))
 }

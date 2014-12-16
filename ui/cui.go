@@ -48,8 +48,10 @@ func StartConsoleUserInterface(events *events.Events) {
 	go func() {
 		for {
 			select {
-			case message := <-gui.events.WaitForStatus():
-				gui.updateStatus(message)
+			case track := <-gui.events.WaitForTrackPaused():
+				gui.trackPaused(track)
+			case track := <-gui.events.WaitForTrackPlaying():
+				gui.trackPlaying(track)
 			case <-gui.events.WaitForTrackNotAvailable():
 				gui.trackNotAvailable()
 			case <-gui.events.WaitForPlayTokenLost():
@@ -94,6 +96,14 @@ func (gui *Gui) updateStatus(message string) {
 
 func (gui *Gui) trackNotAvailable() {
 	gui.updateStatus("Track not available")
+}
+
+func (gui *Gui) trackPlaying(track *sp.Track) {
+	gui.updateStatus(formatTrack("Playing", track))
+}
+
+func (gui *Gui) trackPaused(track *sp.Track) {
+	gui.updateStatus(formatTrack("Paused", track))
 }
 
 func (gui *Gui) getSelectedPlaylist() (string, error) {
