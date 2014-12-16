@@ -5,24 +5,34 @@ import (
 )
 
 type Events struct {
-	playlists     chan map[string]*sp.Playlist
-	status        chan string
-	play          chan *sp.Track
-	nextPlay      chan bool
-	pause         chan bool
-	shutdown      chan bool
-	playTokenLost chan bool
+	playlists         chan map[string]*sp.Playlist
+	status            chan string
+	play              chan *sp.Track
+	nextPlay          chan bool
+	pause             chan bool
+	trackNotAvailable chan bool
+	shutdown          chan bool
+	playTokenLost     chan bool
 }
 
 func InitialiseEvents() *Events {
 	return &Events{
-		playlists:     make(chan map[string]*sp.Playlist),
-		status:        make(chan string),
-		play:          make(chan *sp.Track),
-		nextPlay:      make(chan bool),
-		pause:         make(chan bool),
-		playTokenLost: make(chan bool),
-		shutdown:      make(chan bool)}
+		playlists:         make(chan map[string]*sp.Playlist),
+		status:            make(chan string),
+		play:              make(chan *sp.Track),
+		nextPlay:          make(chan bool),
+		pause:             make(chan bool),
+		trackNotAvailable: make(chan bool),
+		playTokenLost:     make(chan bool),
+		shutdown:          make(chan bool)}
+}
+
+func (events *Events) TrackNotAvailable() {
+	events.trackNotAvailable <- true
+}
+
+func (events *Events) WaitForTrackNotAvailable() <-chan bool {
+	return events.trackNotAvailable
 }
 
 func (events *Events) NextPlay() {

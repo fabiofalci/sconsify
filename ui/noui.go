@@ -47,15 +47,24 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 
 		events.Play(track)
 
+		goToNext := false
 		if !*silent {
-			message := <-events.WaitForStatus()
-			fmt.Println(message)
+			select {
+			case <-events.WaitForTrackNotAvailable():
+				goToNext = true
+			case message := <-events.WaitForStatus():
+				fmt.Println(message)
+			}
 		}
-		select {
-		case <-events.WaitForNextPlay():
-		case <-events.WaitForPlayTokenLost():
-			fmt.Printf("Play token lost\n")
-			return nil
+
+		if !goToNext {
+			select {
+			case <-events.WaitForTrackNotAvailable():
+			case <-events.WaitForNextPlay():
+			case <-events.WaitForPlayTokenLost():
+				fmt.Printf("Play token lost\n")
+				return nil
+			}
 		}
 
 		nextToPlayIndex++

@@ -50,6 +50,8 @@ func StartConsoleUserInterface(events *events.Events) {
 			select {
 			case message := <-gui.events.WaitForStatus():
 				gui.updateStatus(message)
+			case <-gui.events.WaitForTrackNotAvailable():
+				gui.trackNotAvailable()
 			case <-gui.events.WaitForPlayTokenLost():
 				gui.updateStatus("Play token lost")
 			case <-gui.events.WaitForNextPlay():
@@ -88,6 +90,10 @@ func (gui *Gui) updateStatus(message string) {
 
 	// otherwise the update will appear only in the next keyboard move
 	gui.g.Flush()
+}
+
+func (gui *Gui) trackNotAvailable() {
+	gui.updateStatus("Track not available")
 }
 
 func (gui *Gui) getSelectedPlaylist() (string, error) {
