@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/jroimartin/gocui"
@@ -55,7 +56,7 @@ func StartConsoleUserInterface(events *events.Events) {
 			case <-gui.events.WaitForTrackNotAvailable():
 				gui.trackNotAvailable()
 			case <-gui.events.WaitForPlayTokenLost():
-				gui.updateStatus("Play token lost")
+				gui.updateStatus("Play token lost", false)
 			case <-gui.events.WaitForNextPlay():
 				gui.playNext()
 			}
@@ -82,28 +83,35 @@ func StartConsoleUserInterface(events *events.Events) {
 	}
 }
 
-func (gui *Gui) updateStatus(message string) {
+func (gui *Gui) updateStatus(message string, temporary bool) {
 	gui.statusView.Clear()
 	gui.statusView.SetCursor(0, 0)
 	gui.statusView.SetOrigin(0, 0)
 
-	state.currentMessage = message
-	fmt.Fprintf(gui.statusView, state.getModeAsString()+"%v", state.currentMessage)
+	if !temporary {
+		state.currentMessage = message
+	} else {
+		go func() {
+			time.Sleep(4 * time.Second)
+			gui.updateStatus(state.currentMessage, false)
+		}()
+	}
+	fmt.Fprintf(gui.statusView, state.getModeAsString()+"%v", message)
 
 	// otherwise the update will appear only in the next keyboard move
 	gui.g.Flush()
 }
 
 func (gui *Gui) trackNotAvailable() {
-	gui.updateStatus("Track not available")
+	gui.updateStatus("Track not available", true)
 }
 
 func (gui *Gui) trackPlaying(track *sp.Track) {
-	gui.updateStatus(formatTrack("Playing", track))
+	gui.updateStatus(formatTrack("Playing", track), false)
 }
 
 func (gui *Gui) trackPaused(track *sp.Track) {
-	gui.updateStatus(formatTrack("Paused", track))
+	gui.updateStatus(formatTrack("Paused", track), false)
 }
 
 func (gui *Gui) getSelectedPlaylist() (string, error) {

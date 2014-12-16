@@ -20,13 +20,13 @@ func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 
 func setRandomMode(g *gocui.Gui, v *gocui.View) error {
 	state.invertMode(randomMode)
-	gui.updateStatus(state.currentMessage)
+	gui.updateStatus(state.currentMessage, false)
 	return nil
 }
 
 func setAllRandomMode(g *gocui.Gui, v *gocui.View) error {
 	state.invertMode(allRandomMode)
-	gui.updateStatus(state.currentMessage)
+	gui.updateStatus(state.currentMessage, false)
 	return nil
 }
 
