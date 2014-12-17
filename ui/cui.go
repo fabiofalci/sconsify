@@ -60,6 +60,8 @@ func StartConsoleUserInterface(events *events.Events) {
 				gui.updateStatus("Play token lost", false)
 			case <-gui.events.WaitForNextPlay():
 				gui.playNext()
+			case newPlaylist := <-events.WaitForPlaylists():
+				gui.newPlaylist(&newPlaylist)
 			}
 		}
 	}()
@@ -300,6 +302,14 @@ func keybindings() error {
 	}
 
 	return nil
+}
+
+func (gui *Gui) newPlaylist(newPlaylist *map[string]*sconsify.TrackContainer) {
+	for key, value := range *newPlaylist {
+		playlists[key] = value
+	}
+	gui.updatePlaylistsView()
+	gui.g.Flush()
 }
 
 func (gui *Gui) updateTracksView() {

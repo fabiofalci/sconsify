@@ -68,7 +68,8 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	// after the enter the command is at -1
 	line, _ := gui.statusView.Line(-1)
 
-	fmt.Fprintf(gui.playlistsView, line)
+	//fmt.Fprintf(gui.playlistsView, line)
+	// FIXME go to previous view
 	gui.g.SetCurrentView("side")
 	gui.events.Search(line)
 

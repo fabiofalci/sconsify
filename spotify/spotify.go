@@ -284,6 +284,11 @@ func (spotify *Spotify) search(query string) {
 		tracks[i] = search.Track(i)
 	}
 
-	m := make(map[string][]*sp.Track)
-	m[query] = tracks
+	trackContainer := &sconsify.TrackContainer{}
+	trackContainer.SetTracks(tracks)
+
+	m := make(map[string]*sconsify.TrackContainer)
+	m[query] = trackContainer
+
+	spotify.events.NewPlaylist(&m)
 }
