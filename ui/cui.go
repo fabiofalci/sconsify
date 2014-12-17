@@ -211,28 +211,42 @@ func getCurrentSelectedTrack() *sp.Track {
 }
 
 func keybindings() error {
+	views := []string{"main", "side", "queue"}
+	for _, view := range views {
+		if err := gui.g.SetKeybinding(view, 'p', 0, pauseCurrentSelectedTrack); err != nil {
+			return err
+		}
+		if err := gui.g.SetKeybinding(view, 'r', 0, setRandomMode); err != nil {
+			return err
+		}
+		if err := gui.g.SetKeybinding(view, 'R', 0, setAllRandomMode); err != nil {
+			return err
+		}
+		if err := gui.g.SetKeybinding(view, '>', 0, nextCommand); err != nil {
+			return err
+		}
+		if err := gui.g.SetKeybinding(view, '/', 0, enableSearchInputCommand); err != nil {
+			return err
+		}
+		if err := gui.g.SetKeybinding(view, 'j', 0, cursorDown); err != nil {
+			return err
+		}
+		if err := gui.g.SetKeybinding(view, 'k', 0, cursorUp); err != nil {
+			return err
+		}
+		if err := gui.g.SetKeybinding(view, 'q', 0, quit); err != nil {
+			return err
+		}
+	}
+
 	if err := gui.g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("", 'p', 0, pauseCurrentSelectedTrack); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("", 'r', 0, setRandomMode); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("", 'R', 0, setAllRandomMode); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("", '>', 0, nextCommand); err != nil {
-		return err
-	}
+
 	if err := gui.g.SetKeybinding("main", 'u', 0, queueCommand); err != nil {
 		return err
 	}
 	if err := gui.g.SetKeybinding("queue", 'd', 0, removeFromQueueCommand); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("", '/', 0, enableSearchInputCommand); err != nil {
 		return err
 	}
 	if err := gui.g.SetKeybinding("status", gocui.KeyEnter, 0, searchCommand); err != nil {
@@ -274,13 +288,6 @@ func keybindings() error {
 		return err
 	}
 
-	// vi navigation
-	if err := gui.g.SetKeybinding("", 'j', 0, cursorDown); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("", 'k', 0, cursorUp); err != nil {
-		return err
-	}
 	if err := gui.g.SetKeybinding("main", 'h', 0, mainNextViewLeft); err != nil {
 		return err
 	}
@@ -297,9 +304,6 @@ func keybindings() error {
 	if err := gui.g.SetKeybinding("", gocui.KeyCtrlC, 0, quit); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("", 'q', 0, quit); err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -309,6 +313,7 @@ func (gui *Gui) newPlaylist(newPlaylist *map[string]*sconsify.TrackContainer) {
 		playlists[key] = value
 	}
 	gui.updatePlaylistsView()
+	gui.updateTracksView()
 	gui.g.Flush()
 }
 

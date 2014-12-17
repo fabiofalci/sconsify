@@ -288,7 +288,7 @@ func (spotify *Spotify) search(query string) {
 	trackContainer.SetTracks(tracks)
 
 	m := make(map[string]*sconsify.TrackContainer)
-	m[query] = trackContainer
+	m["*"+query] = trackContainer
 
 	spotify.events.NewPlaylist(&m)
 }
