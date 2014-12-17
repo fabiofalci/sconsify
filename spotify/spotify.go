@@ -179,8 +179,7 @@ func (spotify *Spotify) initPlaylist() {
 				tracks[i] = playlistTrack.Track()
 				tracks[i].Wait()
 			}
-			trackContainer := &sconsify.TrackContainer{Playlist: playlist}
-			trackContainer.SetTracks(tracks)
+			trackContainer := sconsify.InitTrackContainer(tracks)
 			playlists[playlist.Name()] = trackContainer
 		}
 	}
@@ -284,8 +283,7 @@ func (spotify *Spotify) search(query string) {
 		tracks[i] = search.Track(i)
 	}
 
-	trackContainer := &sconsify.TrackContainer{}
-	trackContainer.SetTracks(tracks)
+	trackContainer := sconsify.InitTrackContainer(tracks)
 
 	m := make(map[string]*sconsify.TrackContainer)
 	m["*"+query] = trackContainer

@@ -7,12 +7,13 @@ import (
 )
 
 type TrackContainer struct {
-	Playlist *sp.Playlist
-	tracks   []*sp.Track
+	tracks []*sp.Track
 }
 
-func (trackContainer *TrackContainer) SetTracks(inTracks []*sp.Track) {
-	trackContainer.tracks = inTracks
+func InitTrackContainer(tracks []*sp.Track) *TrackContainer {
+	trackContainer := &TrackContainer{}
+	trackContainer.tracks = tracks
+	return trackContainer
 }
 
 func (trackContainer *TrackContainer) GetRandomNextTrack() int {
