@@ -165,7 +165,7 @@ func (spotify *Spotify) waitForEvents() {
 }
 
 func (spotify *Spotify) initPlaylist() {
-	playlists := make(map[string]*sconsify.TrackContainer)
+	playlists := make(map[string]*sconsify.Playlist)
 	allPlaylists, _ := spotify.session.Playlists()
 	allPlaylists.Wait()
 	for i := 0; i < allPlaylists.Playlists(); i++ {
@@ -179,8 +179,7 @@ func (spotify *Spotify) initPlaylist() {
 				tracks[i] = playlistTrack.Track()
 				tracks[i].Wait()
 			}
-			trackContainer := sconsify.InitTrackContainer(tracks)
-			playlists[playlist.Name()] = trackContainer
+			playlists[playlist.Name()] = sconsify.InitPlaylist(tracks)
 		}
 	}
 
@@ -283,10 +282,10 @@ func (spotify *Spotify) search(query string) {
 		tracks[i] = search.Track(i)
 	}
 
-	trackContainer := sconsify.InitTrackContainer(tracks)
+	playlist := sconsify.InitPlaylist(tracks)
 
-	m := make(map[string]*sconsify.TrackContainer)
-	m["*"+query] = trackContainer
+	m := make(map[string]*sconsify.Playlist)
+	m["*"+query] = playlist
 
 	spotify.events.NewPlaylist(&m)
 }

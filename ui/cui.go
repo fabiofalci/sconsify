@@ -19,7 +19,7 @@ var (
 	gui       *Gui
 	queue     *Queue
 	state     *UiState
-	playlists map[string]*sconsify.TrackContainer
+	playlists map[string]*sconsify.Playlist
 )
 
 type Gui struct {
@@ -179,7 +179,7 @@ func (gui *Gui) play(track *sp.Track) {
 func getRandomNextPlaylistAndTrack() (string, int) {
 	index := rand.Intn(len(playlists))
 	count := 0
-	var playlist *sconsify.TrackContainer
+	var playlist *sconsify.Playlist
 	var newPlaylistName string
 	for key, value := range playlists {
 		if index == count {
@@ -308,7 +308,7 @@ func keybindings() error {
 	return nil
 }
 
-func (gui *Gui) newPlaylist(newPlaylist *map[string]*sconsify.TrackContainer) {
+func (gui *Gui) newPlaylist(newPlaylist *map[string]*sconsify.Playlist) {
 	for key, value := range *newPlaylist {
 		playlists[key] = value
 	}

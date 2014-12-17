@@ -81,7 +81,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 	return nil
 }
 
-func (noui *NoUi) waitForPlaylists() map[string]*sconsify.TrackContainer {
+func (noui *NoUi) waitForPlaylists() map[string]*sconsify.Playlist {
 	select {
 	case playlists := <-noui.events.WaitForPlaylists():
 		if playlists != nil {
@@ -138,7 +138,7 @@ func (noui *NoUi) listenForKeyboardEvents() {
 	}
 }
 
-func (noui *NoUi) setTracks(playlists map[string]*sconsify.TrackContainer, random *bool) error {
+func (noui *NoUi) setTracks(playlists map[string]*sconsify.Playlist, random *bool) error {
 	numberOfTracks := 0
 	for _, playlist := range playlists {
 		numberOfTracks += playlist.Tracks()

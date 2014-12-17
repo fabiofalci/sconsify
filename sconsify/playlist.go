@@ -6,31 +6,31 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 )
 
-type TrackContainer struct {
+type Playlist struct {
 	tracks []*sp.Track
 }
 
-func InitTrackContainer(tracks []*sp.Track) *TrackContainer {
-	trackContainer := &TrackContainer{}
-	trackContainer.tracks = tracks
-	return trackContainer
+func InitPlaylist(tracks []*sp.Track) *Playlist {
+	playlist := &Playlist{}
+	playlist.tracks = tracks
+	return playlist
 }
 
-func (trackContainer *TrackContainer) GetRandomNextTrack() int {
-	return rand.Intn(len(trackContainer.tracks))
+func (playlist *Playlist) GetRandomNextTrack() int {
+	return rand.Intn(len(playlist.tracks))
 }
 
-func (trackContainer *TrackContainer) GetNextTrack(currentIndexTrack int) int {
-	if currentIndexTrack >= len(trackContainer.tracks)-1 {
+func (playlist *Playlist) GetNextTrack(currentIndexTrack int) int {
+	if currentIndexTrack >= len(playlist.tracks)-1 {
 		return 0
 	}
 	return currentIndexTrack + 1
 }
 
-func (trackContainer *TrackContainer) Track(index int) *sp.Track {
-	return trackContainer.tracks[index]
+func (playlist *Playlist) Track(index int) *sp.Track {
+	return playlist.tracks[index]
 }
 
-func (trackContainer *TrackContainer) Tracks() int {
-	return len(trackContainer.tracks)
+func (playlist *Playlist) Tracks() int {
+	return len(playlist.tracks)
 }
