@@ -246,7 +246,7 @@ func (spotify *Spotify) isPausedOrPlaying() bool {
 
 func (spotify *Spotify) play(track *sp.Track) {
 	if !spotify.isTrackAvailable(track) {
-		spotify.events.TrackNotAvailable()
+		spotify.events.TrackNotAvailable(track)
 		return
 	}
 	player := spotify.session.Player()

@@ -11,7 +11,7 @@ type Events struct {
 	play              chan *sp.Track
 	nextPlay          chan bool
 	pause             chan bool
-	trackNotAvailable chan bool
+	trackNotAvailable chan *sp.Track
 	trackPlaying      chan *sp.Track
 	trackPaused       chan *sp.Track
 	shutdown          chan bool
@@ -25,7 +25,7 @@ func InitialiseEvents() *Events {
 		play:              make(chan *sp.Track),
 		nextPlay:          make(chan bool),
 		pause:             make(chan bool),
-		trackNotAvailable: make(chan bool),
+		trackNotAvailable: make(chan *sp.Track),
 		trackPlaying:      make(chan *sp.Track),
 		trackPaused:       make(chan *sp.Track),
 		playTokenLost:     make(chan bool),
@@ -55,11 +55,11 @@ func (events *Events) WaitForTrackPaused() <-chan *sp.Track {
 	return events.trackPaused
 }
 
-func (events *Events) TrackNotAvailable() {
-	events.trackNotAvailable <- true
+func (events *Events) TrackNotAvailable(track *sp.Track) {
+	events.trackNotAvailable <- track
 }
 
-func (events *Events) WaitForTrackNotAvailable() <-chan bool {
+func (events *Events) WaitForTrackNotAvailable() <-chan *sp.Track {
 	return events.trackNotAvailable
 }
 

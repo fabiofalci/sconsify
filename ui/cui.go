@@ -54,8 +54,8 @@ func StartConsoleUserInterface(events *events.Events) {
 				gui.trackPaused(track)
 			case track := <-gui.events.WaitForTrackPlaying():
 				gui.trackPlaying(track)
-			case <-gui.events.WaitForTrackNotAvailable():
-				gui.trackNotAvailable()
+			case track := <-gui.events.WaitForTrackNotAvailable():
+				gui.trackNotAvailable(track)
 			case <-gui.events.WaitForPlayTokenLost():
 				gui.updateStatus("Play token lost", false)
 			case <-gui.events.WaitForNextPlay():
@@ -105,8 +105,8 @@ func (gui *Gui) updateStatus(message string, temporary bool) {
 	gui.g.Flush()
 }
 
-func (gui *Gui) trackNotAvailable() {
-	gui.updateStatus("Track not available", true)
+func (gui *Gui) trackNotAvailable(track *sp.Track) {
+	gui.updateStatus(formatTrack("Not available", track), true)
 }
 
 func (gui *Gui) trackPlaying(track *sp.Track) {
