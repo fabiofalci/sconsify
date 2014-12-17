@@ -116,7 +116,6 @@ func getCurrentViewSize(v *gocui.View) int {
 		if err == nil {
 			playlist := playlists[selectedPlaylist]
 			if playlist != nil {
-				playlist.Wait()
 				return playlist.Tracks() - 1
 			}
 		}

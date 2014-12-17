@@ -1,11 +1,13 @@
 package events
 
 import (
+	"github.com/fabiofalci/sconsify/sconsify"
+
 	sp "github.com/op/go-libspotify/spotify"
 )
 
 type Events struct {
-	playlists         chan map[string]*sp.Playlist
+	playlists         chan map[string]*sconsify.TrackContainer
 	play              chan *sp.Track
 	nextPlay          chan bool
 	pause             chan bool
@@ -19,7 +21,7 @@ type Events struct {
 
 func InitialiseEvents() *Events {
 	return &Events{
-		playlists:         make(chan map[string]*sp.Playlist),
+		playlists:         make(chan map[string]*sconsify.TrackContainer),
 		play:              make(chan *sp.Track),
 		nextPlay:          make(chan bool),
 		pause:             make(chan bool),
@@ -81,7 +83,7 @@ func (events *Events) Pause() {
 	events.pause <- true
 }
 
-func (events *Events) WaitForPlaylists() <-chan map[string]*sp.Playlist {
+func (events *Events) WaitForPlaylists() <-chan map[string]*sconsify.TrackContainer {
 	return events.playlists
 }
 
@@ -89,7 +91,7 @@ func (events *Events) WaitForPause() <-chan bool {
 	return events.pause
 }
 
-func (events *Events) NewPlaylist(playlists *map[string]*sp.Playlist) {
+func (events *Events) NewPlaylist(playlists *map[string]*sconsify.TrackContainer) {
 	events.playlists <- *playlists
 }
 

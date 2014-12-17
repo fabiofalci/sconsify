@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/fabiofalci/sconsify/events"
+	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
 )
 
@@ -80,7 +81,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 	return nil
 }
 
-func (noui *NoUi) waitForPlaylists() map[string]*sp.Playlist {
+func (noui *NoUi) waitForPlaylists() map[string]*sconsify.TrackContainer {
 	select {
 	case playlists := <-noui.events.WaitForPlaylists():
 		if playlists != nil {
@@ -137,10 +138,9 @@ func (noui *NoUi) listenForKeyboardEvents() {
 	}
 }
 
-func (noui *NoUi) setTracks(playlists map[string]*sp.Playlist, random *bool) error {
+func (noui *NoUi) setTracks(playlists map[string]*sconsify.TrackContainer, random *bool) error {
 	numberOfTracks := 0
 	for _, playlist := range playlists {
-		playlist.Wait()
 		numberOfTracks += playlist.Tracks()
 	}
 
@@ -157,10 +157,8 @@ func (noui *NoUi) setTracks(playlists map[string]*sp.Playlist, random *bool) err
 	index := 0
 
 	for _, playlist := range playlists {
-		playlist.Wait()
 		for i := 0; i < playlist.Tracks(); i++ {
-			track := playlist.Track(i).Track()
-			track.Wait()
+			track := playlist.Track(i)
 
 			if *random {
 				noui.tracks[perm[index]] = track

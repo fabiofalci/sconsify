@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/fabiofalci/sconsify/events"
+	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/jroimartin/gocui"
 	sp "github.com/op/go-libspotify/spotify"
 )
@@ -18,7 +19,7 @@ var (
 	gui       *Gui
 	queue     *Queue
 	state     *UiState
-	playlists map[string]*sp.Playlist
+	playlists map[string]*sconsify.TrackContainer
 )
 
 type Gui struct {
@@ -154,13 +155,11 @@ func (gui *Gui) playNextFromPlaylist() {
 		state.currentPlaylist, state.currentIndexTrack = getRandomNextPlaylistAndTrack()
 		playlist = playlists[state.currentPlaylist]
 	} else if state.isRandomMode() {
-		state.currentIndexTrack = getRandomNextTrack(playlist)
+		state.currentIndexTrack = playlist.GetRandomNextTrack()
 	} else {
-		state.currentIndexTrack = getNextTrack(playlist)
+		state.currentIndexTrack = playlist.GetNextTrack(state.currentIndexTrack)
 	}
-	playlistTrack := playlist.Track(state.currentIndexTrack)
-	track := playlistTrack.Track()
-	track.Wait()
+	track := playlist.Track(state.currentIndexTrack)
 
 	gui.play(track)
 }
@@ -175,21 +174,10 @@ func (gui *Gui) play(track *sp.Track) {
 	gui.events.Play(gui.currentTrack)
 }
 
-func getNextTrack(playlist *sp.Playlist) int {
-	if state.currentIndexTrack >= playlist.Tracks()-1 {
-		return 0
-	}
-	return state.currentIndexTrack + 1
-}
-
-func getRandomNextTrack(playlist *sp.Playlist) int {
-	return rand.Intn(playlist.Tracks())
-}
-
 func getRandomNextPlaylistAndTrack() (string, int) {
 	index := rand.Intn(len(playlists))
 	count := 0
-	var playlist *sp.Playlist
+	var playlist *sconsify.TrackContainer
 	var newPlaylistName string
 	for key, value := range playlists {
 		if index == count {
@@ -199,7 +187,7 @@ func getRandomNextPlaylistAndTrack() (string, int) {
 		}
 		count++
 	}
-	return newPlaylistName, rand.Intn(playlist.Tracks())
+	return newPlaylistName, playlist.GetRandomNextTrack()
 }
 
 func getCurrentSelectedTrack() *sp.Track {
@@ -210,13 +198,10 @@ func getCurrentSelectedTrack() *sp.Track {
 		playlist := playlists[state.currentPlaylist]
 
 		if playlist != nil {
-			playlist.Wait()
 			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
 			converted, _ := strconv.Atoi(currentTrack)
 			state.currentIndexTrack = converted - 1
-			playlistTrack := playlist.Track(state.currentIndexTrack)
-			track := playlistTrack.Track()
-			track.Wait()
+			track := playlist.Track(state.currentIndexTrack)
 			return track
 		}
 	}
@@ -326,11 +311,8 @@ func (gui *Gui) updateTracksView() {
 		playlist := playlists[currentPlaylist]
 
 		if playlist != nil {
-			playlist.Wait()
 			for i := 0; i < playlist.Tracks(); i++ {
-				playlistTrack := playlist.Track(i)
-				track := playlistTrack.Track()
-				track.Wait()
+				track := playlist.Track(i)
 				fmt.Fprintf(gui.tracksView, "%v. %v - %v", (i + 1), track.Artist(0).Name(), track.Name())
 			}
 		}
