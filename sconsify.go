@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
@@ -13,6 +15,10 @@ import (
 	"github.com/fabiofalci/sconsify/ui"
 	"github.com/howeyc/gopass"
 )
+
+func init() {
+	rand.Seed(time.Now().Unix())
+}
 
 func main() {
 	sconsify.ProcessSconsifyrc()

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"math/rand"
 	"sort"
-	"time"
 )
 
 type Playlists struct {
@@ -23,8 +22,6 @@ const (
 )
 
 func InitPlaylists() *Playlists {
-	rand.Seed(time.Now().Unix())
-
 	playlists := &Playlists{
 		playlists: make(map[string]*Playlist),
 		playMode:  NormalMode,
