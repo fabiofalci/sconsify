@@ -179,7 +179,7 @@ func getCurrentSelectedTrack() *sconsify.Track {
 	var errPlaylist error
 	state.currentPlaylist, errPlaylist = gui.getSelectedPlaylist()
 	currentTrack, errTrack := gui.getSelectedTrack()
-	if errPlaylist == nil && errTrack == nil && playlists != nil {
+	if errPlaylist == nil && errTrack == nil {
 		playlist := playlists.Get(state.currentPlaylist)
 
 		if playlist != nil {
@@ -303,7 +303,7 @@ func (gui *Gui) updateTracksView() {
 	gui.tracksView.SetCursor(0, 0)
 	gui.tracksView.SetOrigin(0, 0)
 	currentPlaylist, err := gui.getSelectedPlaylist()
-	if err == nil && playlists != nil {
+	if err == nil {
 		playlist := playlists.Get(currentPlaylist)
 
 		if playlist != nil {
