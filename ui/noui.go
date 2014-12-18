@@ -1,13 +1,10 @@
 package ui
 
 import (
-	"errors"
 	"fmt"
-	"math/rand"
 	"os"
 	"os/exec"
 	"os/signal"
-	"time"
 
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
@@ -80,12 +77,10 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 	return nil
 }
 
-func (noui *NoUi) waitForPlaylists() map[string]*sconsify.Playlist {
+func (noui *NoUi) waitForPlaylists() *sconsify.Playlists {
 	select {
 	case playlists := <-noui.events.WaitForPlaylists():
-		if playlists != nil {
-			return playlists
-		}
+		return &playlists
 	case <-noui.events.WaitForShutdown():
 	}
 	return nil
@@ -137,41 +132,12 @@ func (noui *NoUi) listenForKeyboardEvents() {
 	}
 }
 
-func (noui *NoUi) setTracks(playlists map[string]*sconsify.Playlist, random *bool) error {
-	numberOfTracks := 0
-	for _, playlist := range playlists {
-		numberOfTracks += playlist.Tracks()
-	}
-
-	if numberOfTracks == 0 {
-		return errors.New("No tracks selected")
-	}
-
-	noui.tracks = make([]*sconsify.Track, numberOfTracks)
-
-	var perm []int
-	if *random {
-		perm = getRandomPermutation(numberOfTracks)
-	}
-	index := 0
-
-	for _, playlist := range playlists {
-		for i := 0; i < playlist.Tracks(); i++ {
-			track := playlist.Track(i)
-
-			if *random {
-				noui.tracks[perm[index]] = track
-			} else {
-				noui.tracks[index] = track
-			}
-			index++
-		}
+func (noui *NoUi) setTracks(playlists *sconsify.Playlists, random *bool) error {
+	var err error
+	noui.tracks, err = playlists.GetTracks(random)
+	if err != nil {
+		return err
 	}
 
 	return nil
-}
-
-func getRandomPermutation(numberOfTracks int) []int {
-	rand.Seed(time.Now().Unix())
-	return rand.Perm(numberOfTracks)
 }

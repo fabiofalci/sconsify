@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
@@ -18,7 +17,7 @@ var (
 	gui       *Gui
 	queue     *Queue
 	state     *UiState
-	playlists map[string]*sconsify.Playlist
+	playlists *sconsify.Playlists
 )
 
 type Gui struct {
@@ -33,7 +32,8 @@ type Gui struct {
 
 func StartConsoleUserInterface(events *events.Events) {
 	select {
-	case playlists = <-events.WaitForPlaylists():
+	case p := <-events.WaitForPlaylists():
+		playlists = &p
 		if playlists == nil {
 			return
 		}
@@ -151,10 +151,10 @@ func (gui *Gui) playNext() error {
 }
 
 func (gui *Gui) playNextFromPlaylist() {
-	playlist := playlists[state.currentPlaylist]
+	playlist := playlists.Get(state.currentPlaylist)
 	if state.isAllRandomMode() {
-		state.currentPlaylist, state.currentIndexTrack = getRandomNextPlaylistAndTrack()
-		playlist = playlists[state.currentPlaylist]
+		state.currentPlaylist, state.currentIndexTrack = playlists.GetRandomNextPlaylistAndTrack()
+		playlist = playlists.Get(state.currentPlaylist)
 	} else if state.isRandomMode() {
 		state.currentIndexTrack = playlist.GetRandomNextTrack()
 	} else {
@@ -175,28 +175,12 @@ func (gui *Gui) play(track *sconsify.Track) {
 	gui.events.Play(gui.currentTrack)
 }
 
-func getRandomNextPlaylistAndTrack() (string, int) {
-	index := rand.Intn(len(playlists))
-	count := 0
-	var playlist *sconsify.Playlist
-	var newPlaylistName string
-	for key, value := range playlists {
-		if index == count {
-			newPlaylistName = key
-			playlist = value
-			break
-		}
-		count++
-	}
-	return newPlaylistName, playlist.GetRandomNextTrack()
-}
-
 func getCurrentSelectedTrack() *sconsify.Track {
 	var errPlaylist error
 	state.currentPlaylist, errPlaylist = gui.getSelectedPlaylist()
 	currentTrack, errTrack := gui.getSelectedTrack()
 	if errPlaylist == nil && errTrack == nil && playlists != nil {
-		playlist := playlists[state.currentPlaylist]
+		playlist := playlists.Get(state.currentPlaylist)
 
 		if playlist != nil {
 			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
@@ -307,10 +291,8 @@ func keybindings() error {
 	return nil
 }
 
-func (gui *Gui) newPlaylist(newPlaylist *map[string]*sconsify.Playlist) {
-	for key, value := range *newPlaylist {
-		playlists[key] = value
-	}
+func (gui *Gui) newPlaylist(newPlaylist *sconsify.Playlists) {
+	playlists.Merge(newPlaylist)
 	gui.updatePlaylistsView()
 	gui.updateTracksView()
 	gui.g.Flush()
@@ -322,7 +304,7 @@ func (gui *Gui) updateTracksView() {
 	gui.tracksView.SetOrigin(0, 0)
 	currentPlaylist, err := gui.getSelectedPlaylist()
 	if err == nil && playlists != nil {
-		playlist := playlists[currentPlaylist]
+		playlist := playlists.Get(currentPlaylist)
 
 		if playlist != nil {
 			for i := 0; i < playlist.Tracks(); i++ {
@@ -335,17 +317,10 @@ func (gui *Gui) updateTracksView() {
 
 func (gui *Gui) updatePlaylistsView() {
 	gui.playlistsView.Clear()
-	if playlists != nil {
-		keys := make([]string, len(playlists))
-		i := 0
-		for k, _ := range playlists {
-			keys[i] = k
-			i++
-		}
-		sort.Strings(keys)
-		for _, key := range keys {
-			fmt.Fprintln(gui.playlistsView, key)
-		}
+	keys := playlists.GetNames()
+	sort.Strings(keys)
+	for _, key := range keys {
+		fmt.Fprintln(gui.playlistsView, key)
 	}
 }
 
