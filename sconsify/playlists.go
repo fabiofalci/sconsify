@@ -3,6 +3,7 @@ package sconsify
 import (
 	"errors"
 	"math/rand"
+	"sort"
 	"time"
 )
 
@@ -129,8 +130,12 @@ func (playlists *Playlists) buildAllRandomModeTracks(numberOfTracks int) {
 }
 
 func (playlists *Playlists) buildSequentialModeTracks() {
+	names := playlists.GetNames()
+	sort.Strings(names)
+
 	index := 0
-	for _, playlist := range playlists.playlists {
+	for _, name := range names {
+		playlist := playlists.playlists[name]
 		for i := 0; i < playlist.Tracks(); i++ {
 			playlists.premadeTracks[index] = playlist.Track(i)
 			index++
