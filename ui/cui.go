@@ -98,7 +98,7 @@ func (gui *Gui) updateStatus(message string, temporary bool) {
 			gui.updateStatus(state.currentMessage, false)
 		}()
 	}
-	fmt.Fprintf(gui.statusView, state.getModeAsString()+"%v", message)
+	fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v", message)
 
 	// otherwise the update will appear only in the next keyboard move
 	gui.g.Flush()
@@ -144,25 +144,14 @@ func (gui *Gui) getSelected(v *gocui.View) (string, error) {
 func (gui *Gui) playNext() error {
 	if !queue.isEmpty() {
 		gui.playNextFromQueue()
-	} else if state.hasPlaylistSelected() {
+	} else if playlists.HasPlaylistSelected() {
 		gui.playNextFromPlaylist()
 	}
 	return nil
 }
 
 func (gui *Gui) playNextFromPlaylist() {
-	playlist := playlists.Get(state.currentPlaylist)
-	if state.isAllRandomMode() {
-		state.currentPlaylist, state.currentIndexTrack = playlists.GetRandomNextPlaylistAndTrack()
-		playlist = playlists.Get(state.currentPlaylist)
-	} else if state.isRandomMode() {
-		state.currentIndexTrack = playlist.GetRandomNextTrack()
-	} else {
-		state.currentIndexTrack = playlist.GetNextTrack(state.currentIndexTrack)
-	}
-	track := playlist.Track(state.currentIndexTrack)
-
-	gui.play(track)
+	gui.play(playlists.GetNext())
 }
 
 func (gui *Gui) playNextFromQueue() {
@@ -176,17 +165,17 @@ func (gui *Gui) play(track *sconsify.Track) {
 }
 
 func getCurrentSelectedTrack() *sconsify.Track {
-	var errPlaylist error
-	state.currentPlaylist, errPlaylist = gui.getSelectedPlaylist()
+	currentPlaylist, errPlaylist := gui.getSelectedPlaylist()
 	currentTrack, errTrack := gui.getSelectedTrack()
 	if errPlaylist == nil && errTrack == nil {
-		playlist := playlists.Get(state.currentPlaylist)
+		playlist := playlists.Get(currentPlaylist)
 
 		if playlist != nil {
 			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
-			converted, _ := strconv.Atoi(currentTrack)
-			state.currentIndexTrack = converted - 1
-			track := playlist.Track(state.currentIndexTrack)
+			currentIndexTrack, _ := strconv.Atoi(currentTrack)
+			currentIndexTrack = currentIndexTrack - 1
+			track := playlist.Track(currentIndexTrack)
+			playlists.SetCurrents(currentPlaylist, currentIndexTrack)
 			return track
 		}
 	}

@@ -7,14 +7,25 @@ import (
 )
 
 type Playlists struct {
-	playlists map[string]*Playlist
+	playlists         map[string]*Playlist
+	currentIndexTrack int
+	currentPlaylist   string
+	playMode          int
 }
+
+const (
+	NormalMode    = iota
+	RandomMode    = iota
+	AllRandomMode = iota
+)
 
 func InitPlaylists() *Playlists {
 	rand.Seed(time.Now().Unix())
 
-	m := make(map[string]*Playlist)
-	playlists := &Playlists{playlists: m}
+	playlists := &Playlists{
+		playlists: make(map[string]*Playlist),
+		playMode:  NormalMode,
+	}
 	return playlists
 }
 
@@ -102,4 +113,54 @@ func (playlists *Playlists) GetRandomNextPlaylistAndTrack() (string, int) {
 		count++
 	}
 	return newPlaylistName, playlist.GetRandomNextTrack()
+}
+
+func (playlists *Playlists) GetModeAsString() string {
+	if playlists.playMode == RandomMode {
+		return "[Random] "
+	}
+	if playlists.playMode == AllRandomMode {
+		return "[All Random] "
+	}
+	return ""
+}
+
+func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrack int) {
+	playlists.currentPlaylist = currentPlaylist
+	playlists.currentIndexTrack = currentIndexTrack
+}
+
+func (playlists *Playlists) GetNext() *Track {
+	playlist := playlists.Get(playlists.currentPlaylist)
+	if playlists.isAllRandomMode() {
+		playlists.currentPlaylist, playlists.currentIndexTrack = playlists.GetRandomNextPlaylistAndTrack()
+		playlist = playlists.Get(playlists.currentPlaylist)
+	} else if playlists.isRandomMode() {
+		playlists.currentIndexTrack = playlist.GetRandomNextTrack()
+	} else {
+		playlists.currentIndexTrack = playlist.GetNextTrack(playlists.currentIndexTrack)
+	}
+
+	return playlist.Track(playlists.currentIndexTrack)
+}
+
+func (playlists *Playlists) InvertMode(mode int) int {
+	if mode == playlists.playMode {
+		playlists.playMode = NormalMode
+	} else {
+		playlists.playMode = mode
+	}
+	return playlists.playMode
+}
+
+func (playlists *Playlists) HasPlaylistSelected() bool {
+	return playlists.currentPlaylist != ""
+}
+
+func (playlists *Playlists) isAllRandomMode() bool {
+	return playlists.playMode == AllRandomMode
+}
+
+func (playlists *Playlists) isRandomMode() bool {
+	return playlists.playMode == RandomMode
 }

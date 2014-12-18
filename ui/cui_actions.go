@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+
+	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/jroimartin/gocui"
 )
 
@@ -19,13 +21,13 @@ func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 }
 
 func setRandomMode(g *gocui.Gui, v *gocui.View) error {
-	state.invertMode(randomMode)
+	playlists.InvertMode(sconsify.RandomMode)
 	gui.updateStatus(state.currentMessage, false)
 	return nil
 }
 
 func setAllRandomMode(g *gocui.Gui, v *gocui.View) error {
-	state.invertMode(allRandomMode)
+	playlists.InvertMode(sconsify.AllRandomMode)
 	gui.updateStatus(state.currentMessage, false)
 	return nil
 }
