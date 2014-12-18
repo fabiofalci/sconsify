@@ -22,13 +22,13 @@ func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 
 func setRandomMode(g *gocui.Gui, v *gocui.View) error {
 	playlists.InvertMode(sconsify.RandomMode)
-	gui.updateStatus(state.currentMessage, false)
+	gui.updateStatus(gui.currentMessage, false)
 	return nil
 }
 
 func setAllRandomMode(g *gocui.Gui, v *gocui.View) error {
 	playlists.InvertMode(sconsify.AllRandomMode)
-	gui.updateStatus(state.currentMessage, false)
+	gui.updateStatus(gui.currentMessage, false)
 	return nil
 }
 

@@ -16,18 +16,18 @@ import (
 var (
 	gui       *Gui
 	queue     *Queue
-	state     *UiState
 	playlists *sconsify.Playlists
 )
 
 type Gui struct {
-	g             *gocui.Gui
-	playlistsView *gocui.View
-	tracksView    *gocui.View
-	statusView    *gocui.View
-	queueView     *gocui.View
-	events        *events.Events
-	currentTrack  *sconsify.Track
+	g              *gocui.Gui
+	playlistsView  *gocui.View
+	tracksView     *gocui.View
+	statusView     *gocui.View
+	queueView      *gocui.View
+	events         *events.Events
+	currentTrack   *sconsify.Track
+	currentMessage string
 }
 
 func StartConsoleUserInterface(events *events.Events) {
@@ -44,7 +44,6 @@ func StartConsoleUserInterface(events *events.Events) {
 	gui = &Gui{events: events}
 
 	queue = InitQueue()
-	state = InitState()
 
 	go func() {
 		for {
@@ -91,11 +90,11 @@ func (gui *Gui) updateStatus(message string, temporary bool) {
 	gui.statusView.SetOrigin(0, 0)
 
 	if !temporary {
-		state.currentMessage = message
+		gui.currentMessage = message
 	} else {
 		go func() {
 			time.Sleep(4 * time.Second)
-			gui.updateStatus(state.currentMessage, false)
+			gui.updateStatus(gui.currentMessage, false)
 		}()
 	}
 	fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v", message)
