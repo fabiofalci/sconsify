@@ -12,7 +12,6 @@ import (
 
 type NoUi struct {
 	silent *bool
-	tracks []*sconsify.Track
 	events *events.Events
 }
 
@@ -28,19 +27,21 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 
 	noui.listenForTermination()
 
-	if err := noui.setTracks(playlists, random); err != nil {
-		return err
+	if *random {
+		playlists.SetMode(sconsify.AllRandomMode)
+	} else {
+		playlists.SetMode(sconsify.SequentialMode)
 	}
 
 	if !*silent {
-		noui.printPlaylistInfo()
+		noui.printPlaylistInfo(playlists)
 	}
 
-	nextToPlayIndex := 0
-	numberOfTracks := len(noui.tracks)
-
 	for {
-		track := noui.tracks[nextToPlayIndex]
+		track, repeating := playlists.GetNext()
+		if repeating && !*repeatOn {
+			return nil
+		}
 
 		events.Play(track)
 
@@ -63,15 +64,6 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 				return nil
 			}
 		}
-
-		nextToPlayIndex++
-		if nextToPlayIndex >= numberOfTracks {
-			if *repeatOn {
-				nextToPlayIndex = 0
-			} else {
-				return nil
-			}
-		}
 	}
 
 	return nil
@@ -86,8 +78,8 @@ func (noui *NoUi) waitForPlaylists() *sconsify.Playlists {
 	return nil
 }
 
-func (noui *NoUi) printPlaylistInfo() {
-	fmt.Printf("%v track(s)\n", len(noui.tracks))
+func (noui *NoUi) printPlaylistInfo(playlists *sconsify.Playlists) {
+	fmt.Printf("%v track(s)\n", playlists.PremadeTracks())
 }
 
 func (noui *NoUi) listenForTermination() {
@@ -130,14 +122,4 @@ func (noui *NoUi) listenForKeyboardEvents() {
 			noui.shutdownNogui()
 		}
 	}
-}
-
-func (noui *NoUi) setTracks(playlists *sconsify.Playlists, random *bool) error {
-	var err error
-	noui.tracks, err = playlists.GetTracks(random)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

@@ -150,7 +150,8 @@ func (gui *Gui) playNext() error {
 }
 
 func (gui *Gui) playNextFromPlaylist() {
-	gui.play(playlists.GetNext())
+	track, _ := playlists.GetNext()
+	gui.play(track)
 }
 
 func (gui *Gui) playNextFromQueue() {

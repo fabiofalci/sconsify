@@ -11,12 +11,14 @@ type Playlists struct {
 	currentIndexTrack int
 	currentPlaylist   string
 	playMode          int
+	premadeTracks     []*Track
 }
 
 const (
-	NormalMode    = iota
-	RandomMode    = iota
-	AllRandomMode = iota
+	NormalMode     = iota
+	RandomMode     = iota
+	AllRandomMode  = iota
+	SequentialMode = iota
 )
 
 func InitPlaylists() *Playlists {
@@ -65,34 +67,75 @@ func (playlists *Playlists) Tracks() int {
 	return numberOfTracks
 }
 
-func (playlists *Playlists) GetTracks(random *bool) ([]*Track, error) {
-	numberOfTracks := playlists.Tracks()
+func (playlists *Playlists) PremadeTracks() int {
+	return len(playlists.premadeTracks)
+}
+
+func (playlists *Playlists) buildPlaylistForNewMode() error {
+	if playlists.isNormalMode() {
+		playlists.premadeTracks = nil
+		return nil
+	}
+
+	var numberOfTracks int
+	var playlist *Playlist
+	if playlists.isRandomMode() {
+		playlist = playlists.Get(playlists.currentPlaylist)
+		numberOfTracks = playlist.Tracks()
+	} else {
+		// all random and sequential
+		numberOfTracks = playlists.Tracks()
+	}
+
 	if numberOfTracks == 0 {
-		return nil, errors.New("No tracks selected")
+		return errors.New("No tracks selected")
 	}
 
-	tracks := make([]*Track, numberOfTracks)
-
-	var perm []int
-	if *random {
-		perm = getRandomPermutation(numberOfTracks)
+	playlists.premadeTracks = make([]*Track, numberOfTracks)
+	if playlists.isRandomMode() {
+		playlists.buildRandomModeTracks(playlist, numberOfTracks)
+	} else if playlists.isAllRandomMode() {
+		playlists.buildAllRandomModeTracks(numberOfTracks)
+	} else {
+		// sequential
+		playlists.buildSequentialModeTracks()
 	}
+
+	playlists.currentIndexTrack = -1
+
+	return nil
+}
+
+func (playlists *Playlists) buildRandomModeTracks(playlist *Playlist, numberOfTracks int) {
+	perm := getRandomPermutation(numberOfTracks)
+
+	index := 0
+	for i := 0; i < playlist.Tracks(); i++ {
+		playlists.premadeTracks[perm[index]] = playlist.Track(i)
+		index++
+	}
+}
+
+func (playlists *Playlists) buildAllRandomModeTracks(numberOfTracks int) {
+	perm := getRandomPermutation(numberOfTracks)
 
 	index := 0
 	for _, playlist := range playlists.playlists {
 		for i := 0; i < playlist.Tracks(); i++ {
-			track := playlist.Track(i)
-
-			if *random {
-				tracks[perm[index]] = track
-			} else {
-				tracks[index] = track
-			}
+			playlists.premadeTracks[perm[index]] = playlist.Track(i)
 			index++
 		}
 	}
+}
 
-	return tracks, nil
+func (playlists *Playlists) buildSequentialModeTracks() {
+	index := 0
+	for _, playlist := range playlists.playlists {
+		for i := 0; i < playlist.Tracks(); i++ {
+			playlists.premadeTracks[index] = playlist.Track(i)
+			index++
+		}
+	}
 }
 
 func getRandomPermutation(numberOfTracks int) []int {
@@ -130,25 +173,33 @@ func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrac
 	playlists.currentIndexTrack = currentIndexTrack
 }
 
-func (playlists *Playlists) GetNext() *Track {
-	playlist := playlists.Get(playlists.currentPlaylist)
-	if playlists.isAllRandomMode() {
-		playlists.currentPlaylist, playlists.currentIndexTrack = playlists.GetRandomNextPlaylistAndTrack()
-		playlist = playlists.Get(playlists.currentPlaylist)
-	} else if playlists.isRandomMode() {
-		playlists.currentIndexTrack = playlist.GetRandomNextTrack()
-	} else {
-		playlists.currentIndexTrack = playlist.GetNextTrack(playlists.currentIndexTrack)
+func (playlists *Playlists) GetNext() (*Track, bool) {
+	repeating := false
+	if playlists.premadeTracks != nil {
+		playlists.currentIndexTrack++
+		if playlists.currentIndexTrack >= len(playlists.premadeTracks) {
+			playlists.currentIndexTrack = 0
+			repeating = true
+		}
+		return playlists.premadeTracks[playlists.currentIndexTrack], repeating
 	}
 
-	return playlist.Track(playlists.currentIndexTrack)
+	playlist := playlists.Get(playlists.currentPlaylist)
+	playlists.currentIndexTrack = playlist.GetNextTrack(playlists.currentIndexTrack)
+
+	return playlist.Track(playlists.currentIndexTrack), repeating
+}
+
+func (playlists *Playlists) SetMode(mode int) {
+	playlists.playMode = mode
+	playlists.buildPlaylistForNewMode()
 }
 
 func (playlists *Playlists) InvertMode(mode int) int {
 	if mode == playlists.playMode {
-		playlists.playMode = NormalMode
+		playlists.SetMode(NormalMode)
 	} else {
-		playlists.playMode = mode
+		playlists.SetMode(mode)
 	}
 	return playlists.playMode
 }
@@ -163,4 +214,8 @@ func (playlists *Playlists) isAllRandomMode() bool {
 
 func (playlists *Playlists) isRandomMode() bool {
 	return playlists.playMode == RandomMode
+}
+
+func (playlists *Playlists) isNormalMode() bool {
+	return playlists.playMode == NormalMode
 }
