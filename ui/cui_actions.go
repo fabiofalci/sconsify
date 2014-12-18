@@ -44,6 +44,16 @@ func queueCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func removeAllFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
+	queue.RemoveAll()
+	gui.updateQueueView()
+	gui.tracksView.Highlight = true
+	gui.playlistsView.Highlight = false
+	gui.queueView.Highlight = false
+	gui.g.SetCurrentView("main")
+	return nil
+}
+
 func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	index := gui.getQeueuSelectedTrackIndex()
 	if index > -1 {

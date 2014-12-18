@@ -70,6 +70,26 @@ func TestQueueRemove(t *testing.T) {
 	}
 }
 
+func TestQueueRemoveAll(t *testing.T) {
+	queue := InitQueue()
+
+	track0 := &sconsify.Track{}
+	queue.Add(track0)
+
+	track1 := &sconsify.Track{}
+	queue.Add(track1)
+
+	if queue.isEmpty() {
+		t.Error("Queue is not empty")
+	}
+
+	queue.RemoveAll()
+
+	if !queue.isEmpty() {
+		t.Error("Queue is empty")
+	}
+}
+
 func TestQueueEmpty(t *testing.T) {
 	queue := InitQueue()
 	if !queue.isEmpty() {

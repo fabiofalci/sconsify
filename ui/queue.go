@@ -34,6 +34,14 @@ func (queue *Queue) Pop() *sconsify.Track {
 	return track
 }
 
+func (queue *Queue) RemoveAll() {
+	if len(queue.queue) == 0 {
+		return
+	}
+
+	queue.queue = make([]*sconsify.Track, 0, QUEUE_MAX_ELEMENTS)
+}
+
 func (queue *Queue) Remove(index int) *sconsify.Track {
 	if len(queue.queue) == 0 {
 		return nil
