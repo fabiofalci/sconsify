@@ -38,7 +38,7 @@ func nextCommand(g *gocui.Gui, v *gocui.View) error {
 func queueCommand(g *gocui.Gui, v *gocui.View) error {
 	track := getCurrentSelectedTrack()
 	if track != nil {
-		fmt.Fprintf(gui.queueView, "%v - %v", track.Artist(0).Name(), track.Name())
+		fmt.Fprintf(gui.queueView, "%v", track.GetTitle())
 		queue.Add(track)
 	}
 	return nil

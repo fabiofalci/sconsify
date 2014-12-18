@@ -2,18 +2,16 @@ package events
 
 import (
 	"github.com/fabiofalci/sconsify/sconsify"
-
-	sp "github.com/op/go-libspotify/spotify"
 )
 
 type Events struct {
 	playlists         chan map[string]*sconsify.Playlist
-	play              chan *sp.Track
+	play              chan *sconsify.Track
 	nextPlay          chan bool
 	pause             chan bool
-	trackNotAvailable chan *sp.Track
-	trackPlaying      chan *sp.Track
-	trackPaused       chan *sp.Track
+	trackNotAvailable chan *sconsify.Track
+	trackPlaying      chan *sconsify.Track
+	trackPaused       chan *sconsify.Track
 	shutdown          chan bool
 	playTokenLost     chan bool
 	search            chan string
@@ -22,44 +20,44 @@ type Events struct {
 func InitialiseEvents() *Events {
 	return &Events{
 		playlists:         make(chan map[string]*sconsify.Playlist),
-		play:              make(chan *sp.Track),
+		play:              make(chan *sconsify.Track),
 		nextPlay:          make(chan bool),
 		pause:             make(chan bool),
-		trackNotAvailable: make(chan *sp.Track),
-		trackPlaying:      make(chan *sp.Track),
-		trackPaused:       make(chan *sp.Track),
+		trackNotAvailable: make(chan *sconsify.Track),
+		trackPlaying:      make(chan *sconsify.Track),
+		trackPaused:       make(chan *sconsify.Track),
 		playTokenLost:     make(chan bool),
 		search:            make(chan string),
 		shutdown:          make(chan bool)}
 }
 
-func (events *Events) TrackPlaying(track *sp.Track) {
+func (events *Events) TrackPlaying(track *sconsify.Track) {
 	select {
 	case events.trackPlaying <- track:
 	default:
 	}
 }
 
-func (events *Events) WaitForTrackPlaying() <-chan *sp.Track {
+func (events *Events) WaitForTrackPlaying() <-chan *sconsify.Track {
 	return events.trackPlaying
 }
 
-func (events *Events) TrackPaused(track *sp.Track) {
+func (events *Events) TrackPaused(track *sconsify.Track) {
 	select {
 	case events.trackPaused <- track:
 	default:
 	}
 }
 
-func (events *Events) WaitForTrackPaused() <-chan *sp.Track {
+func (events *Events) WaitForTrackPaused() <-chan *sconsify.Track {
 	return events.trackPaused
 }
 
-func (events *Events) TrackNotAvailable(track *sp.Track) {
+func (events *Events) TrackNotAvailable(track *sconsify.Track) {
 	events.trackNotAvailable <- track
 }
 
-func (events *Events) WaitForTrackNotAvailable() <-chan *sp.Track {
+func (events *Events) WaitForTrackNotAvailable() <-chan *sconsify.Track {
 	return events.trackNotAvailable
 }
 
@@ -71,11 +69,11 @@ func (events *Events) WaitForNextPlay() <-chan bool {
 	return events.nextPlay
 }
 
-func (events *Events) Play(track *sp.Track) {
+func (events *Events) Play(track *sconsify.Track) {
 	events.play <- track
 }
 
-func (events *Events) WaitPlay() <-chan *sp.Track {
+func (events *Events) WaitPlay() <-chan *sconsify.Track {
 	return events.play
 }
 

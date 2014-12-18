@@ -12,7 +12,6 @@ import (
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/jroimartin/gocui"
-	sp "github.com/op/go-libspotify/spotify"
 )
 
 var (
@@ -29,7 +28,7 @@ type Gui struct {
 	statusView    *gocui.View
 	queueView     *gocui.View
 	events        *events.Events
-	currentTrack  *sp.Track
+	currentTrack  *sconsify.Track
 }
 
 func StartConsoleUserInterface(events *events.Events) {
@@ -105,16 +104,16 @@ func (gui *Gui) updateStatus(message string, temporary bool) {
 	gui.g.Flush()
 }
 
-func (gui *Gui) trackNotAvailable(track *sp.Track) {
-	gui.updateStatus(formatTrack("Not available", track), true)
+func (gui *Gui) trackNotAvailable(track *sconsify.Track) {
+	gui.updateStatus("Not available: "+track.GetTitle(), true)
 }
 
-func (gui *Gui) trackPlaying(track *sp.Track) {
-	gui.updateStatus(formatTrack("Playing", track), false)
+func (gui *Gui) trackPlaying(track *sconsify.Track) {
+	gui.updateStatus("Playing: "+track.GetFullTitle(), false)
 }
 
-func (gui *Gui) trackPaused(track *sp.Track) {
-	gui.updateStatus(formatTrack("Paused", track), false)
+func (gui *Gui) trackPaused(track *sconsify.Track) {
+	gui.updateStatus("Paused: "+track.GetFullTitle(), false)
 }
 
 func (gui *Gui) getSelectedPlaylist() (string, error) {
@@ -171,7 +170,7 @@ func (gui *Gui) playNextFromQueue() {
 	gui.updateQueueView()
 }
 
-func (gui *Gui) play(track *sp.Track) {
+func (gui *Gui) play(track *sconsify.Track) {
 	gui.currentTrack = track
 	gui.events.Play(gui.currentTrack)
 }
@@ -192,7 +191,7 @@ func getRandomNextPlaylistAndTrack() (string, int) {
 	return newPlaylistName, playlist.GetRandomNextTrack()
 }
 
-func getCurrentSelectedTrack() *sp.Track {
+func getCurrentSelectedTrack() *sconsify.Track {
 	var errPlaylist error
 	state.currentPlaylist, errPlaylist = gui.getSelectedPlaylist()
 	currentTrack, errTrack := gui.getSelectedTrack()
@@ -328,7 +327,7 @@ func (gui *Gui) updateTracksView() {
 		if playlist != nil {
 			for i := 0; i < playlist.Tracks(); i++ {
 				track := playlist.Track(i)
-				fmt.Fprintf(gui.tracksView, "%v. %v - %v", (i + 1), track.Artist(0).Name(), track.Name())
+				fmt.Fprintf(gui.tracksView, "%v. %v", (i + 1), track.GetTitle())
 			}
 		}
 	}
@@ -354,7 +353,7 @@ func (gui *Gui) updateQueueView() {
 	gui.queueView.Clear()
 	if !queue.isEmpty() {
 		for _, track := range queue.Contents() {
-			fmt.Fprintf(gui.queueView, "%v - %v", track.Artist(0).Name(), track.Name())
+			fmt.Fprintf(gui.queueView, "%v", track.GetTitle())
 		}
 	}
 }

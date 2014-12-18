@@ -14,7 +14,7 @@ import (
 )
 
 type Spotify struct {
-	currentTrack   *sp.Track
+	currentTrack   *sconsify.Track
 	paused         bool
 	cacheLocation  string
 	events         *events.Events
@@ -242,9 +242,19 @@ func (spotify *Spotify) isPausedOrPlaying() bool {
 	return spotify.currentTrack != nil
 }
 
-func (spotify *Spotify) play(track *sp.Track) {
+func (spotify *Spotify) play(trackUri *sconsify.Track) {
+	link, err := spotify.session.ParseLink(trackUri.Uri)
+	if err != nil {
+		return
+	}
+
+	track, err := link.Track()
+	if err != nil {
+		return
+	}
+
 	if !spotify.isTrackAvailable(track) {
-		spotify.events.TrackNotAvailable(track)
+		spotify.events.TrackNotAvailable(trackUri)
 		return
 	}
 	player := spotify.session.Player()
@@ -253,8 +263,8 @@ func (spotify *Spotify) play(track *sp.Track) {
 	}
 	player.Play()
 
-	spotify.events.TrackPlaying(track)
-	spotify.currentTrack = track
+	spotify.events.TrackPlaying(trackUri)
+	spotify.currentTrack = trackUri
 }
 
 func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {

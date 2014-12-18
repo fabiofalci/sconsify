@@ -11,12 +11,11 @@ import (
 
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
-	sp "github.com/op/go-libspotify/spotify"
 )
 
 type NoUi struct {
 	silent *bool
-	tracks []*sp.Track
+	tracks []*sconsify.Track
 	events *events.Events
 }
 
@@ -54,7 +53,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 			case <-events.WaitForTrackNotAvailable():
 				goToNext = true
 			case track := <-events.WaitForTrackPlaying():
-				fmt.Println(formatTrack("Playing", track))
+				fmt.Println("Playing: " + track.GetFullTitle())
 			}
 		}
 
@@ -148,7 +147,7 @@ func (noui *NoUi) setTracks(playlists map[string]*sconsify.Playlist, random *boo
 		return errors.New("No tracks selected")
 	}
 
-	noui.tracks = make([]*sp.Track, numberOfTracks)
+	noui.tracks = make([]*sconsify.Track, numberOfTracks)
 
 	var perm []int
 	if *random {

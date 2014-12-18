@@ -1,20 +1,20 @@
 package ui
 
 import (
-	sp "github.com/op/go-libspotify/spotify"
+	"github.com/fabiofalci/sconsify/sconsify"
 )
 
 type Queue struct {
-	queue []*sp.Track
+	queue []*sconsify.Track
 }
 
 const QUEUE_MAX_ELEMENTS = 100
 
 func InitQueue() *Queue {
-	return &Queue{queue: make([]*sp.Track, 0, QUEUE_MAX_ELEMENTS)}
+	return &Queue{queue: make([]*sconsify.Track, 0, QUEUE_MAX_ELEMENTS)}
 }
 
-func (queue *Queue) Add(track *sp.Track) *sp.Track {
+func (queue *Queue) Add(track *sconsify.Track) *sconsify.Track {
 	n := len(queue.queue)
 	if n+1 > cap(queue.queue) {
 		return nil
@@ -25,7 +25,7 @@ func (queue *Queue) Add(track *sp.Track) *sp.Track {
 	return queue.queue[n]
 }
 
-func (queue *Queue) Pop() *sp.Track {
+func (queue *Queue) Pop() *sconsify.Track {
 	if len(queue.queue) == 0 {
 		return nil
 	}
@@ -34,7 +34,7 @@ func (queue *Queue) Pop() *sp.Track {
 	return track
 }
 
-func (queue *Queue) Remove(index int) *sp.Track {
+func (queue *Queue) Remove(index int) *sconsify.Track {
 	if len(queue.queue) == 0 {
 		return nil
 	}
@@ -43,7 +43,7 @@ func (queue *Queue) Remove(index int) *sp.Track {
 	return track
 }
 
-func (queue *Queue) Contents() []*sp.Track {
+func (queue *Queue) Contents() []*sconsify.Track {
 	return queue.queue
 }
 

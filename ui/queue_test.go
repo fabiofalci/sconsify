@@ -1,14 +1,14 @@
 package ui
 
 import (
-	sp "github.com/op/go-libspotify/spotify"
+	"github.com/fabiofalci/sconsify/sconsify"
 	"testing"
 )
 
 func TestQueueAddPopEmptyAndContents(t *testing.T) {
 	queue := InitQueue()
 
-	track0 := &sp.Track{}
+	track0 := &sconsify.Track{}
 	queue.Add(track0)
 
 	trackPop0 := queue.Pop()
@@ -16,7 +16,7 @@ func TestQueueAddPopEmptyAndContents(t *testing.T) {
 		t.Error("Queue is not returning right element")
 	}
 
-	track1 := &sp.Track{}
+	track1 := &sconsify.Track{}
 
 	queue.Add(track0)
 	queue.Add(track1)
@@ -49,13 +49,13 @@ func TestQueueAddPopEmptyAndContents(t *testing.T) {
 func TestQueueRemove(t *testing.T) {
 	queue := InitQueue()
 
-	track0 := &sp.Track{}
+	track0 := &sconsify.Track{}
 	queue.Add(track0)
 
-	track1 := &sp.Track{}
+	track1 := &sconsify.Track{}
 	queue.Add(track1)
 
-	track2 := &sp.Track{}
+	track2 := &sconsify.Track{}
 	queue.Add(track2)
 
 	trackRemoved := queue.Remove(1)
@@ -86,14 +86,14 @@ func TestQueueAddToLimit(t *testing.T) {
 	queue := InitQueue()
 
 	for i := 0; i < QUEUE_MAX_ELEMENTS; i++ {
-		track := &sp.Track{}
+		track := &sconsify.Track{}
 		trackAdded := queue.Add(track)
 		if track != trackAdded {
 			t.Error("Queue add should return the very same element")
 		}
 	}
 
-	track := &sp.Track{}
+	track := &sconsify.Track{}
 	trackAdded := queue.Add(track)
 	if trackAdded != nil {
 		t.Error("Queue reached its limit, it should not add anymore")
