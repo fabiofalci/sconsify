@@ -2,6 +2,7 @@ package sconsify
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"sort"
 )
@@ -39,12 +40,14 @@ func (playlists *Playlists) Playlists() int {
 
 func (playlists *Playlists) AddPlaylist(name string, playlist *Playlist) {
 	playlists.playlists[name] = playlist
+	playlists.buildPlaylistForNewMode()
 }
 
 func (playlists *Playlists) Merge(newPlaylist *Playlists) {
 	for key, value := range newPlaylist.playlists {
 		playlists.playlists[key] = value
 	}
+	playlists.buildPlaylistForNewMode()
 }
 
 func (playlists *Playlists) GetNames() []string {
@@ -79,7 +82,9 @@ func (playlists *Playlists) buildPlaylistForNewMode() error {
 	var playlist *Playlist
 	if playlists.isRandomMode() {
 		playlist = playlists.Get(playlists.currentPlaylist)
-		numberOfTracks = playlist.Tracks()
+		if playlist != nil {
+			numberOfTracks = playlist.Tracks()
+		}
 	} else {
 		// all random and sequential
 		numberOfTracks = playlists.Tracks()
@@ -154,9 +159,15 @@ func (playlists *Playlists) GetModeAsString() string {
 	return ""
 }
 
-func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrack int) {
-	playlists.currentPlaylist = currentPlaylist
-	playlists.currentIndexTrack = currentIndexTrack
+func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrack int) error {
+	if playlist, ok := playlists.playlists[currentPlaylist]; ok {
+		if playlist.Tracks() > currentIndexTrack {
+			playlists.currentPlaylist = currentPlaylist
+			playlists.currentIndexTrack = currentIndexTrack
+			return nil
+		}
+	}
+	return errors.New(fmt.Sprintf("Invalid index [%v] track or current playlist [%v]", currentIndexTrack, currentPlaylist))
 }
 
 func (playlists *Playlists) GetNext() (*Track, bool) {
@@ -171,9 +182,12 @@ func (playlists *Playlists) GetNext() (*Track, bool) {
 	}
 
 	playlist := playlists.Get(playlists.currentPlaylist)
-	playlists.currentIndexTrack = playlist.GetNextTrack(playlists.currentIndexTrack)
+	if playlist != nil {
+		playlists.currentIndexTrack = playlist.GetNextTrack(playlists.currentIndexTrack)
+		return playlist.Track(playlists.currentIndexTrack), repeating
+	}
 
-	return playlist.Track(playlists.currentIndexTrack), repeating
+	return nil, false
 }
 
 func (playlists *Playlists) SetMode(mode int) {
