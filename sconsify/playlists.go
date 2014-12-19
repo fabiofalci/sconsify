@@ -144,22 +144,6 @@ func getRandomPermutation(numberOfTracks int) []int {
 	return rand.Perm(numberOfTracks)
 }
 
-func (playlists *Playlists) GetRandomNextPlaylistAndTrack() (string, int) {
-	index := rand.Intn(playlists.Playlists())
-	count := 0
-	var playlist *Playlist
-	var newPlaylistName string
-	for key, value := range playlists.playlists {
-		if index == count {
-			newPlaylistName = key
-			playlist = value
-			break
-		}
-		count++
-	}
-	return newPlaylistName, playlist.GetRandomNextTrack()
-}
-
 func (playlists *Playlists) GetModeAsString() string {
 	if playlists.playMode == RandomMode {
 		return "[Random] "
