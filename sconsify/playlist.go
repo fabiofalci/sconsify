@@ -1,8 +1,6 @@
 package sconsify
 
 import (
-	"math/rand"
-
 	sp "github.com/op/go-libspotify/spotify"
 )
 
@@ -25,10 +23,6 @@ func InitPlaylist(tracks []*sp.Track) *Playlist {
 		}
 	}
 	return playlist
-}
-
-func (playlist *Playlist) GetRandomNextTrack() int {
-	return rand.Intn(len(playlist.tracks))
 }
 
 func (playlist *Playlist) GetNextTrack(currentIndexTrack int) int {

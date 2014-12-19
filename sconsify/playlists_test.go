@@ -285,12 +285,3 @@ func TestStateInvertMode(t *testing.T) {
 		t.Errorf("Mode was inverted to random but is returning %v", mode)
 	}
 }
-
-func createDummyPlaylist() *Playlist {
-	tracks := make([]*Track, 4)
-	tracks[0] = &Track{Uri: "0"}
-	tracks[1] = &Track{Uri: "1"}
-	tracks[2] = &Track{Uri: "2"}
-	tracks[3] = &Track{Uri: "3"}
-	return &Playlist{tracks: tracks}
-}
