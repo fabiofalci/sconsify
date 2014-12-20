@@ -39,7 +39,11 @@ func main() {
 	if *providedUi {
 		ui.StartConsoleUserInterface(events)
 	} else {
-		err := ui.StartNoUserInterface(events, providedNoUiSilent, providedNoUiRepeatOn, providedNoUiRandom)
+		var output ui.Printer
+		if *providedNoUiSilent {
+			output = new(ui.SilentPrinter)
+		}
+		err := ui.StartNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiRandom)
 		if err != nil {
 			fmt.Println(err)
 		}

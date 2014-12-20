@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,16 +12,26 @@ import (
 )
 
 type NoUi struct {
-	silent *bool
 	events *events.Events
+	output Printer
 }
 
-func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, random *bool) error {
-	noui := &NoUi{silent: silent, events: events}
+type Printer interface {
+	Print(message string)
+}
+
+type SilentPrinter struct{}
+type StandardOutputPrinter struct{}
+
+func StartNoUserInterface(events *events.Events, output Printer, repeatOn *bool, random *bool) error {
+	if output == nil {
+		output = new(StandardOutputPrinter)
+	}
+	noui := &NoUi{events: events, output: output}
 
 	playlists := noui.waitForPlaylists()
-	if playlists == nil {
-		return nil
+	if playlists == nil || playlists.Tracks() == 0 {
+		return errors.New("No track selected")
 	}
 
 	go noui.listenForKeyboardEvents()
@@ -33,9 +44,7 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 		playlists.SetMode(sconsify.SequentialMode)
 	}
 
-	if !*silent {
-		noui.printPlaylistInfo(playlists)
-	}
+	noui.output.Print(fmt.Sprintf("%v track(s)\n", playlists.PremadeTracks()))
 
 	for {
 		track, repeating := playlists.GetNext()
@@ -46,21 +55,21 @@ func StartNoUserInterface(events *events.Events, silent *bool, repeatOn *bool, r
 		events.Play(track)
 
 		goToNext := false
-		if !*silent {
-			select {
-			case <-events.WaitForTrackNotAvailable():
-				goToNext = true
-			case track := <-events.WaitForTrackPlaying():
-				fmt.Println("Playing: " + track.GetFullTitle())
-			}
+		select {
+		case <-events.WaitForTrackNotAvailable():
+			goToNext = true
+		case track := <-events.WaitForTrackPlaying():
+			noui.output.Print(fmt.Sprintf("Playing: %v\n", track.GetFullTitle()))
+		case <-events.WaitForPlayTokenLost():
+			noui.output.Print("Play token lost\n")
+			return nil
 		}
 
 		if !goToNext {
 			select {
-			case <-events.WaitForTrackNotAvailable():
 			case <-events.WaitForNextPlay():
 			case <-events.WaitForPlayTokenLost():
-				fmt.Printf("Play token lost\n")
+				noui.output.Print("Play token lost\n")
 				return nil
 			}
 		}
@@ -76,10 +85,6 @@ func (noui *NoUi) waitForPlaylists() *sconsify.Playlists {
 	case <-noui.events.WaitForShutdown():
 	}
 	return nil
-}
-
-func (noui *NoUi) printPlaylistInfo(playlists *sconsify.Playlists) {
-	fmt.Printf("%v track(s)\n", playlists.PremadeTracks())
 }
 
 func (noui *NoUi) listenForTermination() {
@@ -122,4 +127,11 @@ func (noui *NoUi) listenForKeyboardEvents() {
 			noui.shutdownNogui()
 		}
 	}
+}
+
+func (p *SilentPrinter) Print(message string) {
+}
+
+func (p *StandardOutputPrinter) Print(message string) {
+	fmt.Print(message)
 }
