@@ -5,7 +5,7 @@ import (
 )
 
 func TestPlaylistTracks(t *testing.T) {
-	playlist := CreateDummyPlaylist()
+	playlist := createDummyPlaylist()
 
 	if count := playlist.Tracks(); count != 4 {
 		t.Errorf("Number of tracks should be 4")
@@ -13,7 +13,7 @@ func TestPlaylistTracks(t *testing.T) {
 }
 
 func TestPlaylistGetNextTrack(t *testing.T) {
-	playlist := CreateDummyPlaylist()
+	playlist := createDummyPlaylist()
 
 	if nextIndex := playlist.GetNextTrack(0); nextIndex != 1 {
 		t.Errorf("Next track should be track 1")
@@ -30,7 +30,7 @@ func TestPlaylistGetNextTrack(t *testing.T) {
 }
 
 func TestPlaylistTrack(t *testing.T) {
-	playlist := CreateDummyPlaylist()
+	playlist := createDummyPlaylist()
 
 	if track := playlist.Track(0); track.Uri != "0" {
 		t.Errorf("Should be track 0")
@@ -44,4 +44,13 @@ func TestPlaylistTrack(t *testing.T) {
 	if track := playlist.Track(3); track.Uri != "3" {
 		t.Errorf("Should be track 3")
 	}
+}
+
+func createDummyPlaylist() *Playlist {
+	tracks := make([]*Track, 4)
+	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
+	tracks[1] = InitTrack("1", "artist1", "name1", "duration1")
+	tracks[2] = InitTrack("2", "artist2", "name2", "duration2")
+	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
+	return &Playlist{tracks: tracks}
 }

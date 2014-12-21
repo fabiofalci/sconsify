@@ -44,7 +44,7 @@ func TestNoUiSequentialAndRepeating(t *testing.T) {
 	}()
 
 	playlists := sconsify.InitPlaylists()
-	playlists.AddPlaylist("name", sconsify.CreateDummyPlaylist())
+	playlists.AddPlaylist("name", createDummyPlaylist())
 	events.NewPlaylist(playlists)
 
 	message := <-output.message
@@ -55,31 +55,40 @@ func TestNoUiSequentialAndRepeating(t *testing.T) {
 	events.TrackPlaying(<-events.WaitPlay())
 	message = <-output.message
 	if message != "Playing: artist0 - name0 [duration0]" {
-		t.Errorf("Not showing right track, instead [%v]", message)
+		t.Errorf("Should be showing track0 instead is showing [%v]", message)
 	}
 
 	events.NextPlay()
 	events.TrackPlaying(<-events.WaitPlay())
 	message = <-output.message
 	if message != "Playing: artist1 - name1 [duration1]" {
-		t.Errorf("Not showing right track, instead [%v]", message)
+		t.Errorf("Should be showing track1 instead is showing [%v]", message)
 	}
 
 	events.NextPlay()
 	events.TrackPlaying(<-events.WaitPlay())
 	message = <-output.message
 	if message != "Playing: artist2 - name2 [duration2]" {
-		t.Errorf("Not showing right track, instead [%v]", message)
+		t.Errorf("Should be showing track2 instead is showing [%v]", message)
 	}
 
 	events.NextPlay()
 	events.TrackPlaying(<-events.WaitPlay())
 	message = <-output.message
 	if message != "Playing: artist3 - name3 [duration3]" {
-		t.Errorf("Not showing right track, instead [%v]", message)
+		t.Errorf("Should be showing track3 instead is showing [%v]", message)
 	}
 
 	events.NextPlay()
 
 	<-finished
+}
+
+func createDummyPlaylist() *sconsify.Playlist {
+	tracks := make([]*sconsify.Track, 4)
+	tracks[0] = sconsify.InitTrack("0", "artist0", "name0", "duration0")
+	tracks[1] = sconsify.InitTrack("1", "artist1", "name1", "duration1")
+	tracks[2] = sconsify.InitTrack("2", "artist2", "name2", "duration2")
+	tracks[3] = sconsify.InitTrack("3", "artist3", "name3", "duration3")
+	return sconsify.InitPlaylist(tracks)
 }
