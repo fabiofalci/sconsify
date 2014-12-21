@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -32,6 +33,29 @@ func TestNoUiEmptyPlaylists(t *testing.T) {
 }
 
 func TestNoUiSequentialAndRepeating(t *testing.T) {
+	repeatOn := true
+	random := false
+	events := events.InitialiseEvents()
+	output := &TestPrinter{message: make(chan string)}
+
+	finished := make(chan bool)
+	go func() {
+		err := StartNoUserInterface(events, output, &repeatOn, &random)
+		finished <- err == nil
+	}()
+
+	sendNewPlaylist(events)
+
+	assertPrintFourTracks(t, events, output)
+
+	assertFirstTrack(t, events, output)
+	assertNextThreeTracks(t, events, output)
+	assertRepeatingAllFourTracks(t, events, output)
+
+	assertShutdown(t, events, finished)
+}
+
+func TestNoUiSequentialAndNotRepeating(t *testing.T) {
 	repeatOn := false
 	random := false
 	events := events.InitialiseEvents()
@@ -43,45 +67,70 @@ func TestNoUiSequentialAndRepeating(t *testing.T) {
 		finished <- true
 	}()
 
+	sendNewPlaylist(events)
+
+	assertPrintFourTracks(t, events, output)
+
+	assertFirstTrack(t, events, output)
+	assertNextThreeTracks(t, events, output)
+	assertNoNextTrack(events, finished)
+}
+
+func sendNewPlaylist(events *events.Events) {
 	playlists := sconsify.InitPlaylists()
 	playlists.AddPlaylist("name", createDummyPlaylist())
 	events.NewPlaylist(playlists)
+}
 
+func assertShutdown(t *testing.T, events *events.Events, finished chan bool) {
+	go ShutdownNogui()
+
+	<-events.WaitForShutdown()
+	events.Shutdown()
+
+	if !<-finished {
+		t.Errorf("Not properly finished")
+	}
+}
+
+func assertPrintFourTracks(t *testing.T, events *events.Events, output *TestPrinter) {
 	message := <-output.message
 	if message != "4 track(s)" {
 		t.Errorf("Should be playing 4 tracks")
 	}
+}
 
+func assertNoNextTrack(events *events.Events, finished chan bool) {
+	events.NextPlay()
+	<-finished
+}
+
+func assertFirstTrack(t *testing.T, events *events.Events, output *TestPrinter) {
 	events.TrackPlaying(<-events.WaitPlay())
-	message = <-output.message
+	message := <-output.message
 	if message != "Playing: artist0 - name0 [duration0]" {
 		t.Errorf("Should be showing track0 instead is showing [%v]", message)
 	}
+}
 
-	events.NextPlay()
-	events.TrackPlaying(<-events.WaitPlay())
-	message = <-output.message
-	if message != "Playing: artist1 - name1 [duration1]" {
-		t.Errorf("Should be showing track1 instead is showing [%v]", message)
+func assertNextThreeTracks(t *testing.T, events *events.Events, output *TestPrinter) {
+	playNext(t, events, output, []string{"1", "2", "3"})
+}
+
+func assertRepeatingAllFourTracks(t *testing.T, events *events.Events, output *TestPrinter) {
+	playNext(t, events, output, []string{"0", "1", "2", "3"})
+}
+
+func playNext(t *testing.T, events *events.Events, output *TestPrinter, tracks []string) {
+	for _, track := range tracks {
+		events.NextPlay()
+		events.TrackPlaying(<-events.WaitPlay())
+		message := <-output.message
+		expectedMessage := fmt.Sprintf("Playing: artist%v - name%v [duration%v]", track, track, track)
+		if message != expectedMessage {
+			t.Errorf("Should be showing track%v instead is showing [%v]", track, message)
+		}
 	}
-
-	events.NextPlay()
-	events.TrackPlaying(<-events.WaitPlay())
-	message = <-output.message
-	if message != "Playing: artist2 - name2 [duration2]" {
-		t.Errorf("Should be showing track2 instead is showing [%v]", message)
-	}
-
-	events.NextPlay()
-	events.TrackPlaying(<-events.WaitPlay())
-	message = <-output.message
-	if message != "Playing: artist3 - name3 [duration3]" {
-		t.Errorf("Should be showing track3 instead is showing [%v]", message)
-	}
-
-	events.NextPlay()
-
-	<-finished
 }
 
 func createDummyPlaylist() *sconsify.Playlist {

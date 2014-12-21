@@ -12,8 +12,9 @@ import (
 )
 
 type NoUi struct {
-	events *events.Events
-	output Printer
+	events           *events.Events
+	output           Printer
+	internalShutdown chan bool
 }
 
 type Printer interface {
@@ -23,11 +24,17 @@ type Printer interface {
 type SilentPrinter struct{}
 type StandardOutputPrinter struct{}
 
+var noui *NoUi
+
 func StartNoUserInterface(events *events.Events, output Printer, repeatOn *bool, random *bool) error {
 	if output == nil {
 		output = new(StandardOutputPrinter)
 	}
-	noui := &NoUi{events: events, output: output}
+	noui = &NoUi{
+		events:           events,
+		output:           output,
+		internalShutdown: make(chan bool),
+	}
 
 	playlists := noui.waitForPlaylists()
 	if playlists == nil || playlists.Tracks() == 0 {
@@ -46,10 +53,12 @@ func StartNoUserInterface(events *events.Events, output Printer, repeatOn *bool,
 
 	noui.output.Print(fmt.Sprintf("%v track(s)\n", playlists.PremadeTracks()))
 
-	for {
+	running := true
+	for running {
 		track, repeating := playlists.GetNext()
 		if repeating && !*repeatOn {
-			return nil
+			running = false
+			break
 		}
 
 		events.Play(track)
@@ -62,15 +71,18 @@ func StartNoUserInterface(events *events.Events, output Printer, repeatOn *bool,
 			noui.output.Print(fmt.Sprintf("Playing: %v\n", track.GetFullTitle()))
 		case <-events.WaitForPlayTokenLost():
 			noui.output.Print("Play token lost\n")
-			return nil
+			running = false
+			break
 		}
 
 		if !goToNext {
 			select {
+			case <-noui.internalShutdown:
+				running = false
 			case <-events.WaitForNextPlay():
 			case <-events.WaitForPlayTokenLost():
 				noui.output.Print("Play token lost\n")
-				return nil
+				running = false
 			}
 		}
 	}
@@ -100,7 +112,11 @@ func (noui *NoUi) listenForTermination() {
 func (noui *NoUi) shutdownNogui() {
 	noui.events.Shutdown()
 	<-noui.events.WaitForShutdown()
-	os.Exit(0)
+	noui.internalShutdown <- true
+}
+
+func ShutdownNogui() {
+	noui.shutdownNogui()
 }
 
 func (noui *NoUi) listenForKeyboardEvents() {
