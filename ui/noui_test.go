@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 	"testing"
 
@@ -76,6 +77,54 @@ func TestNoUiSequentialAndNotRepeating(t *testing.T) {
 	assertNoNextTrack(events, finished)
 }
 
+func TestNoUiRandomAndRepeating(t *testing.T) {
+	rand.Seed(123456789) // repeatable
+
+	repeatOn := true
+	random := true
+	events := events.InitialiseEvents()
+	output := &TestPrinter{message: make(chan string)}
+
+	finished := make(chan bool)
+	go func() {
+		err := StartNoUserInterface(events, output, &repeatOn, &random)
+		finished <- err == nil
+	}()
+
+	sendNewPlaylist(events)
+
+	assertPrintFourTracks(t, events, output)
+
+	assertRandomFirstTrack(t, events, output)
+	assertRandomNextThreeTracks(t, events, output)
+	assertRandomRepeatingAllFourTracks(t, events, output)
+
+	assertShutdown(t, events, finished)
+}
+
+func TestNoUiRandomAndNotRepeating(t *testing.T) {
+	rand.Seed(123456789) // repeatable
+
+	repeatOn := false
+	random := true
+	events := events.InitialiseEvents()
+	output := &TestPrinter{message: make(chan string)}
+
+	finished := make(chan bool)
+	go func() {
+		StartNoUserInterface(events, output, &repeatOn, &random)
+		finished <- true
+	}()
+
+	sendNewPlaylist(events)
+
+	assertPrintFourTracks(t, events, output)
+
+	assertRandomFirstTrack(t, events, output)
+	assertRandomNextThreeTracks(t, events, output)
+	assertNoNextTrack(events, finished)
+}
+
 func sendNewPlaylist(events *events.Events) {
 	playlists := sconsify.InitPlaylists()
 	playlists.AddPlaylist("name", createDummyPlaylist())
@@ -113,12 +162,28 @@ func assertFirstTrack(t *testing.T, events *events.Events, output *TestPrinter) 
 	}
 }
 
+func assertRandomFirstTrack(t *testing.T, events *events.Events, output *TestPrinter) {
+	events.TrackPlaying(<-events.WaitPlay())
+	message := <-output.message
+	if message != "Playing: artist3 - name3 [duration3]" {
+		t.Errorf("Should be showing track3 instead is showing [%v]", message)
+	}
+}
+
 func assertNextThreeTracks(t *testing.T, events *events.Events, output *TestPrinter) {
 	playNext(t, events, output, []string{"1", "2", "3"})
 }
 
+func assertRandomNextThreeTracks(t *testing.T, events *events.Events, output *TestPrinter) {
+	playNext(t, events, output, []string{"0", "2", "1"})
+}
+
 func assertRepeatingAllFourTracks(t *testing.T, events *events.Events, output *TestPrinter) {
 	playNext(t, events, output, []string{"0", "1", "2", "3"})
+}
+
+func assertRandomRepeatingAllFourTracks(t *testing.T, events *events.Events, output *TestPrinter) {
+	playNext(t, events, output, []string{"3", "0", "2", "1"})
 }
 
 func playNext(t *testing.T, events *events.Events, output *TestPrinter, tracks []string) {
