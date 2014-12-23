@@ -214,6 +214,9 @@ func keybindings() error {
 	if err := gui.g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
 		return err
 	}
+	if err := gui.g.SetKeybinding("main", gocui.KeyEnter, 0, playCurrentSelectedTrack); err != nil {
+		return err
+	}
 
 	if err := gui.g.SetKeybinding("main", 'u', 0, queueCommand); err != nil {
 		return err
