@@ -7,12 +7,11 @@ import (
 	"os/exec"
 	"os/signal"
 
-	"github.com/fabiofalci/sconsify/events"
+	e "github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 )
 
 type NoUi struct {
-	events           *events.Events
 	output           Printer
 	internalShutdown chan bool
 }
@@ -26,12 +25,12 @@ type StandardOutputPrinter struct{}
 
 var noui *NoUi
 
-func StartNoUserInterface(events *events.Events, output Printer, repeatOn *bool, random *bool) error {
+func StartNoUserInterface(ev *e.Events, output Printer, repeatOn *bool, random *bool) error {
+	events = ev
 	if output == nil {
 		output = new(StandardOutputPrinter)
 	}
 	noui = &NoUi{
-		events:           events,
 		output:           output,
 		internalShutdown: make(chan bool),
 	}
@@ -92,9 +91,9 @@ func StartNoUserInterface(events *events.Events, output Printer, repeatOn *bool,
 
 func (noui *NoUi) waitForPlaylists() *sconsify.Playlists {
 	select {
-	case playlists := <-noui.events.WaitForPlaylists():
+	case playlists := <-events.WaitForPlaylists():
 		return &playlists
-	case <-noui.events.WaitForShutdown():
+	case <-events.WaitForShutdown():
 	}
 	return nil
 }
@@ -110,8 +109,8 @@ func (noui *NoUi) listenForTermination() {
 }
 
 func (noui *NoUi) shutdownNogui() {
-	noui.events.Shutdown()
-	<-noui.events.WaitForShutdown()
+	events.Shutdown()
+	<-events.WaitForShutdown()
 	noui.internalShutdown <- true
 }
 
@@ -135,10 +134,10 @@ func (noui *NoUi) listenForKeyboardEvents() {
 		key := string(b)
 		if key == ">" {
 			fmt.Println("")
-			noui.events.NextPlay()
+			events.NextPlay()
 		} else if key == "p" {
 			fmt.Println("")
-			noui.events.Pause()
+			events.Pause()
 		} else if key == "q" {
 			noui.shutdownNogui()
 		}

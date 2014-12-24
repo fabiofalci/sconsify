@@ -114,13 +114,13 @@ func keybindings() error {
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	track := getCurrentSelectedTrack()
 	if track != nil {
-		gui.events.Play(track)
+		events.Play(track)
 	}
 	return nil
 }
 
 func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	gui.events.Pause()
+	events.Pause()
 	return nil
 }
 
@@ -188,7 +188,7 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.playlistsView.Highlight = true
 	gui.queueView.Highlight = false
 	gui.g.SetCurrentView("side")
-	gui.events.Search(line)
+	events.Search(line)
 
 	gui.statusView.Clear()
 	gui.statusView.SetCursor(0, 0)
@@ -199,7 +199,7 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
-	gui.events.Shutdown()
-	<-gui.events.WaitForShutdown()
+	events.Shutdown()
+	<-events.WaitForShutdown()
 	return gocui.ErrorQuit
 }

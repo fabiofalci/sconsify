@@ -8,13 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fabiofalci/sconsify/events"
+	e "github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/jroimartin/gocui"
 )
 
 var (
 	gui       *Gui
+	events    *e.Events
 	queue     *Queue
 	playlists *sconsify.Playlists
 )
@@ -25,12 +26,12 @@ type Gui struct {
 	tracksView     *gocui.View
 	statusView     *gocui.View
 	queueView      *gocui.View
-	events         *events.Events
 	currentTrack   *sconsify.Track
 	currentMessage string
 }
 
-func StartConsoleUserInterface(events *events.Events) {
+func StartConsoleUserInterface(ev *e.Events) {
+	events = ev
 	select {
 	case p := <-events.WaitForPlaylists():
 		playlists = &p
@@ -41,22 +42,21 @@ func StartConsoleUserInterface(events *events.Events) {
 		return
 	}
 
-	gui = &Gui{events: events}
-
+	gui = &Gui{}
 	queue = InitQueue()
 
 	go func() {
 		for {
 			select {
-			case track := <-gui.events.WaitForTrackPaused():
+			case track := <-events.WaitForTrackPaused():
 				gui.trackPaused(track)
-			case track := <-gui.events.WaitForTrackPlaying():
+			case track := <-events.WaitForTrackPlaying():
 				gui.trackPlaying(track)
-			case track := <-gui.events.WaitForTrackNotAvailable():
+			case track := <-events.WaitForTrackNotAvailable():
 				gui.trackNotAvailable(track)
-			case <-gui.events.WaitForPlayTokenLost():
+			case <-events.WaitForPlayTokenLost():
 				gui.updateStatus("Play token lost", false)
-			case <-gui.events.WaitForNextPlay():
+			case <-events.WaitForNextPlay():
 				gui.playNext()
 			case newPlaylist := <-events.WaitForPlaylists():
 				gui.newPlaylist(&newPlaylist)
@@ -161,7 +161,7 @@ func (gui *Gui) playNextFromQueue() {
 
 func (gui *Gui) play(track *sconsify.Track) {
 	gui.currentTrack = track
-	gui.events.Play(gui.currentTrack)
+	events.Play(gui.currentTrack)
 }
 
 func getCurrentSelectedTrack() *sconsify.Track {
