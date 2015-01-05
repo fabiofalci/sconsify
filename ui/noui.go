@@ -64,11 +64,11 @@ func StartNoUserInterface(ev *e.Events, output Printer, repeatOn *bool, random *
 
 		goToNext := false
 		select {
-		case <-events.WaitForTrackNotAvailable():
+		case <-events.TrackNotAvailableUpdates():
 			goToNext = true
-		case track := <-events.WaitForTrackPlaying():
+		case track := <-events.TrackPlayingUpdates():
 			noui.output.Print(fmt.Sprintf("Playing: %v\n", track.GetFullTitle()))
-		case <-events.WaitForPlayTokenLost():
+		case <-events.PlayTokenLostUpdates():
 			noui.output.Print("Play token lost\n")
 			running = false
 			break
@@ -78,8 +78,8 @@ func StartNoUserInterface(ev *e.Events, output Printer, repeatOn *bool, random *
 			select {
 			case <-noui.internalShutdown:
 				running = false
-			case <-events.WaitForNextPlay():
-			case <-events.WaitForPlayTokenLost():
+			case <-events.NextPlayUpdates():
+			case <-events.PlayTokenLostUpdates():
 				noui.output.Print("Play token lost\n")
 				running = false
 			}
@@ -91,9 +91,9 @@ func StartNoUserInterface(ev *e.Events, output Printer, repeatOn *bool, random *
 
 func (noui *NoUi) waitForPlaylists() *sconsify.Playlists {
 	select {
-	case playlists := <-events.WaitForPlaylists():
+	case playlists := <-events.PlaylistsUpdates():
 		return &playlists
-	case <-events.WaitForShutdown():
+	case <-events.ShutdownUpdates():
 	}
 	return nil
 }
@@ -110,7 +110,7 @@ func (noui *NoUi) listenForTermination() {
 
 func (noui *NoUi) shutdownNogui() {
 	events.Shutdown()
-	<-events.WaitForShutdown()
+	<-events.ShutdownUpdates()
 	noui.internalShutdown <- true
 }
 

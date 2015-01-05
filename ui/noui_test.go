@@ -134,7 +134,7 @@ func sendNewPlaylist(events *e.Events) {
 func assertShutdown(t *testing.T, events *e.Events, finished chan bool) {
 	go ShutdownNogui()
 
-	<-events.WaitForShutdown()
+	<-events.ShutdownUpdates()
 	events.Shutdown()
 
 	if !<-finished {
@@ -155,7 +155,7 @@ func assertNoNextTrack(events *e.Events, finished chan bool) {
 }
 
 func assertFirstTrack(t *testing.T, events *e.Events, output *TestPrinter) {
-	events.TrackPlaying(<-events.WaitPlay())
+	events.TrackPlaying(<-events.PlayUpdates())
 	message := <-output.message
 	if message != "Playing: artist0 - name0 [duration0]" {
 		t.Errorf("Should be showing track0 instead is showing [%v]", message)
@@ -163,7 +163,7 @@ func assertFirstTrack(t *testing.T, events *e.Events, output *TestPrinter) {
 }
 
 func assertRandomFirstTrack(t *testing.T, events *e.Events, output *TestPrinter) {
-	events.TrackPlaying(<-events.WaitPlay())
+	events.TrackPlaying(<-events.PlayUpdates())
 	message := <-output.message
 	if message != "Playing: artist3 - name3 [duration3]" {
 		t.Errorf("Should be showing track3 instead is showing [%v]", message)
@@ -189,7 +189,7 @@ func assertRandomRepeatingAllFourTracks(t *testing.T, events *e.Events, output *
 func playNext(t *testing.T, events *e.Events, output *TestPrinter, tracks []string) {
 	for _, track := range tracks {
 		events.NextPlay()
-		events.TrackPlaying(<-events.WaitPlay())
+		events.TrackPlaying(<-events.PlayUpdates())
 		message := <-output.message
 		expectedMessage := fmt.Sprintf("Playing: artist%v - name%v [duration%v]", track, track, track)
 		if message != expectedMessage {

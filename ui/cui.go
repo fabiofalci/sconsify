@@ -33,12 +33,12 @@ type Gui struct {
 func StartConsoleUserInterface(ev *e.Events) {
 	events = ev
 	select {
-	case p := <-events.WaitForPlaylists():
+	case p := <-events.PlaylistsUpdates():
 		playlists = &p
 		if playlists == nil {
 			return
 		}
-	case <-events.WaitForShutdown():
+	case <-events.ShutdownUpdates():
 		return
 	}
 
@@ -48,17 +48,17 @@ func StartConsoleUserInterface(ev *e.Events) {
 	go func() {
 		for {
 			select {
-			case track := <-events.WaitForTrackPaused():
+			case track := <-events.TrackPausedUpdates():
 				gui.trackPaused(track)
-			case track := <-events.WaitForTrackPlaying():
+			case track := <-events.TrackPlayingUpdates():
 				gui.trackPlaying(track)
-			case track := <-events.WaitForTrackNotAvailable():
+			case track := <-events.TrackNotAvailableUpdates():
 				gui.trackNotAvailable(track)
-			case <-events.WaitForPlayTokenLost():
+			case <-events.PlayTokenLostUpdates():
 				gui.updateStatus("Play token lost", false)
-			case <-events.WaitForNextPlay():
+			case <-events.NextPlayUpdates():
 				gui.playNext()
-			case newPlaylist := <-events.WaitForPlaylists():
+			case newPlaylist := <-events.PlaylistsUpdates():
 				gui.newPlaylist(&newPlaylist)
 			}
 		}

@@ -152,13 +152,13 @@ func (spotify *Spotify) waitForEvents() {
 			spotify.events.NextPlay()
 		case <-spotify.session.PlayTokenLostUpdates():
 			spotify.events.PlayTokenLost()
-		case track := <-spotify.events.WaitPlay():
+		case track := <-spotify.events.PlayUpdates():
 			spotify.play(track)
-		case <-spotify.events.WaitForPause():
+		case <-spotify.events.PauseUpdates():
 			spotify.pause()
-		case <-spotify.events.WaitForShutdown():
+		case <-spotify.events.ShutdownUpdates():
 			spotify.shutdownSpotify()
-		case query := <-spotify.events.WaitForSearch():
+		case query := <-spotify.events.SearchUpdates():
 			spotify.search(query)
 		}
 	}
