@@ -123,7 +123,7 @@ func (gui *Gui) getSelectedTrack() (string, error) {
 	return gui.getSelected(gui.tracksView)
 }
 
-func (gui *Gui) getQeueuSelectedTrackIndex() int {
+func (gui *Gui) getQueueSelectedTrackIndex() int {
 	_, cy := gui.queueView.Cursor()
 	return cy
 }

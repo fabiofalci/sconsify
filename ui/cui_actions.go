@@ -161,7 +161,7 @@ func removeAllFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
-	index := gui.getQeueuSelectedTrackIndex()
+	index := gui.getQueueSelectedTrackIndex()
 	if index > -1 {
 		queue.Remove(index)
 		gui.updateQueueView()
