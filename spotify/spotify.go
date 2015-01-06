@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"code.google.com/p/portaudio-go/portaudio"
-	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
 )
@@ -17,21 +16,21 @@ type Spotify struct {
 	currentTrack   *sconsify.Track
 	paused         bool
 	cacheLocation  string
-	events         *events.Events
+	events         *sconsify.Events
 	pa             *portAudio
 	session        *sp.Session
 	appKey         *[]byte
 	playlistFilter []string
 }
 
-func Initialise(username *string, pass *[]byte, events *events.Events, playlistFilter *string) {
+func Initialise(username *string, pass *[]byte, events *sconsify.Events, playlistFilter *string) {
 	if err := initialiseSpotify(username, pass, events, playlistFilter); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		events.ShutdownEngine()
 	}
 }
 
-func initialiseSpotify(username *string, pass *[]byte, events *events.Events, playlistFilter *string) error {
+func initialiseSpotify(username *string, pass *[]byte, events *sconsify.Events, playlistFilter *string) error {
 	spotify := &Spotify{events: events}
 	spotify.setPlaylistFilter(*playlistFilter)
 	err := spotify.initKey()

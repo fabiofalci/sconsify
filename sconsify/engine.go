@@ -1,11 +1,6 @@
-package engine
+package sconsify
 
-import (
-	e "github.com/fabiofalci/sconsify/events"
-	"github.com/fabiofalci/sconsify/sconsify"
-)
-
-func InitialiseEngine(events *e.Events, ui sconsify.UserInterface, askForFirstTrack bool) error {
+func InitialiseEngine(events *Events, ui UserInterface, askForFirstTrack bool) error {
 	select {
 	case playlists := <-events.PlaylistsUpdates():
 		err := ui.NewPlaylists(playlists)

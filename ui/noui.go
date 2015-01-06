@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"os/signal"
 
-	e "github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 )
 
@@ -16,7 +15,7 @@ type NoUi struct {
 	random    bool
 	repeatOn  bool
 	playlists *sconsify.Playlists
-	events    *e.Events
+	events    *sconsify.Events
 }
 
 type Printer interface {
@@ -26,7 +25,7 @@ type Printer interface {
 type SilentPrinter struct{}
 type StandardOutputPrinter struct{}
 
-func InitialiseNoUserInterface(events *e.Events, output Printer, repeatOn *bool, random *bool) sconsify.UserInterface {
+func InitialiseNoUserInterface(events *sconsify.Events, output Printer, repeatOn *bool, random *bool) sconsify.UserInterface {
 	if output == nil {
 		output = new(StandardOutputPrinter)
 	}

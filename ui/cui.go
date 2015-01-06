@@ -8,14 +8,13 @@ import (
 	"strings"
 	"time"
 
-	e "github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/jroimartin/gocui"
 )
 
 var (
 	gui       *Gui
-	events    *e.Events
+	events    *sconsify.Events
 	queue     *Queue
 	playlists *sconsify.Playlists
 )
@@ -30,7 +29,7 @@ type Gui struct {
 	currentMessage string
 }
 
-func InitialiseConsoleUserInterface(ev *e.Events) sconsify.UserInterface {
+func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface {
 	events = ev
 	gui = &Gui{}
 	queue = InitQueue()

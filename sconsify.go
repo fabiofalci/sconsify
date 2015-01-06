@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fabiofalci/sconsify/engine"
-	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/fabiofalci/sconsify/ui"
@@ -33,20 +31,20 @@ func main() {
 	flag.Parse()
 
 	username, pass := credentials(providedUsername)
-	events := events.InitialiseEvents()
+	events := sconsify.InitialiseEvents()
 
 	go spotify.Initialise(username, pass, events, providedPlaylists)
 
 	if *providedUi {
 		ui := ui.InitialiseConsoleUserInterface(events)
-		engine.InitialiseEngine(events, ui, false)
+		sconsify.InitialiseEngine(events, ui, false)
 	} else {
 		var output ui.Printer
 		if *providedNoUiSilent {
 			output = new(ui.SilentPrinter)
 		}
 		ui := ui.InitialiseNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiRandom)
-		engine.InitialiseEngine(events, ui, true)
+		sconsify.InitialiseEngine(events, ui, true)
 	}
 }
 

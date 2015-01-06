@@ -1,23 +1,19 @@
-package events
-
-import (
-	"github.com/fabiofalci/sconsify/sconsify"
-)
+package sconsify
 
 type Events struct {
 	shutdownEngine  chan bool
 	shutdownSpotify chan bool
 
-	play   chan *sconsify.Track
+	play   chan *Track
 	pause  chan bool
 	search chan string
 
 	nextPlay          chan bool
 	playTokenLost     chan bool
-	playlists         chan sconsify.Playlists
-	trackNotAvailable chan *sconsify.Track
-	trackPlaying      chan *sconsify.Track
-	trackPaused       chan *sconsify.Track
+	playlists         chan Playlists
+	trackNotAvailable chan *Track
+	trackPlaying      chan *Track
+	trackPaused       chan *Track
 }
 
 func InitialiseEvents() *Events {
@@ -25,16 +21,16 @@ func InitialiseEvents() *Events {
 		shutdownEngine:  make(chan bool),
 		shutdownSpotify: make(chan bool),
 
-		play:   make(chan *sconsify.Track),
+		play:   make(chan *Track),
 		pause:  make(chan bool),
 		search: make(chan string),
 
 		nextPlay:          make(chan bool),
 		playTokenLost:     make(chan bool),
-		playlists:         make(chan sconsify.Playlists),
-		trackNotAvailable: make(chan *sconsify.Track),
-		trackPlaying:      make(chan *sconsify.Track),
-		trackPaused:       make(chan *sconsify.Track)}
+		playlists:         make(chan Playlists),
+		trackNotAvailable: make(chan *Track),
+		trackPlaying:      make(chan *Track),
+		trackPaused:       make(chan *Track)}
 }
 
 func (events *Events) ShutdownEngine() {
@@ -53,25 +49,25 @@ func (events *Events) ShutdownSpotifyUpdates() <-chan bool {
 	return events.shutdownSpotify
 }
 
-func (events *Events) TrackPlaying(track *sconsify.Track) {
+func (events *Events) TrackPlaying(track *Track) {
 	select {
 	case events.trackPlaying <- track:
 	default:
 	}
 }
 
-func (events *Events) TrackPlayingUpdates() <-chan *sconsify.Track {
+func (events *Events) TrackPlayingUpdates() <-chan *Track {
 	return events.trackPlaying
 }
 
-func (events *Events) TrackPaused(track *sconsify.Track) {
+func (events *Events) TrackPaused(track *Track) {
 	select {
 	case events.trackPaused <- track:
 	default:
 	}
 }
 
-func (events *Events) TrackPausedUpdates() <-chan *sconsify.Track {
+func (events *Events) TrackPausedUpdates() <-chan *Track {
 	return events.trackPaused
 }
 
@@ -83,11 +79,11 @@ func (events *Events) SearchUpdates() <-chan string {
 	return events.search
 }
 
-func (events *Events) TrackNotAvailable(track *sconsify.Track) {
+func (events *Events) TrackNotAvailable(track *Track) {
 	events.trackNotAvailable <- track
 }
 
-func (events *Events) TrackNotAvailableUpdates() <-chan *sconsify.Track {
+func (events *Events) TrackNotAvailableUpdates() <-chan *Track {
 	return events.trackNotAvailable
 }
 
@@ -99,11 +95,11 @@ func (events *Events) NextPlayUpdates() <-chan bool {
 	return events.nextPlay
 }
 
-func (events *Events) Play(track *sconsify.Track) {
+func (events *Events) Play(track *Track) {
 	events.play <- track
 }
 
-func (events *Events) PlayUpdates() <-chan *sconsify.Track {
+func (events *Events) PlayUpdates() <-chan *Track {
 	return events.play
 }
 
@@ -115,11 +111,11 @@ func (events *Events) PauseUpdates() <-chan bool {
 	return events.pause
 }
 
-func (events *Events) NewPlaylist(playlists *sconsify.Playlists) {
+func (events *Events) NewPlaylist(playlists *Playlists) {
 	events.playlists <- *playlists
 }
 
-func (events *Events) PlaylistsUpdates() <-chan sconsify.Playlists {
+func (events *Events) PlaylistsUpdates() <-chan Playlists {
 	return events.playlists
 }
 
