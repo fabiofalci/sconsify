@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fabiofalci/sconsify/engine"
 	"github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
@@ -37,16 +38,14 @@ func main() {
 	go spotify.Initialise(username, pass, events, providedPlaylists)
 
 	if *providedUi {
-		ui.StartConsoleUserInterface(events)
+		// ui.StartConsoleUserInterface(events)
 	} else {
 		var output ui.Printer
 		if *providedNoUiSilent {
 			output = new(ui.SilentPrinter)
 		}
-		err := ui.StartNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiRandom)
-		if err != nil {
-			fmt.Println(err)
-		}
+		ui := ui.InitialiseNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiRandom)
+		engine.InitialiseEngine(events, ui, true)
 	}
 }
 

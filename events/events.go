@@ -5,7 +5,8 @@ import (
 )
 
 type Events struct {
-	shutdown chan bool
+	shutdownEngine  chan bool
+	shutdownSpotify chan bool
 
 	play   chan *sconsify.Track
 	pause  chan bool
@@ -21,7 +22,8 @@ type Events struct {
 
 func InitialiseEvents() *Events {
 	return &Events{
-		shutdown: make(chan bool),
+		shutdownEngine:  make(chan bool),
+		shutdownSpotify: make(chan bool),
 
 		play:   make(chan *sconsify.Track),
 		pause:  make(chan bool),
@@ -35,12 +37,20 @@ func InitialiseEvents() *Events {
 		trackPaused:       make(chan *sconsify.Track)}
 }
 
-func (events *Events) Shutdown() {
-	events.shutdown <- true
+func (events *Events) ShutdownEngine() {
+	events.shutdownEngine <- true
 }
 
-func (events *Events) ShutdownUpdates() <-chan bool {
-	return events.shutdown
+func (events *Events) ShutdownEngineUpdates() <-chan bool {
+	return events.shutdownEngine
+}
+
+func (events *Events) ShutdownSpotify() {
+	events.shutdownSpotify <- true
+}
+
+func (events *Events) ShutdownSpotifyUpdates() <-chan bool {
+	return events.shutdownSpotify
 }
 
 func (events *Events) TrackPlaying(track *sconsify.Track) {

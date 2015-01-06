@@ -38,7 +38,7 @@ func StartConsoleUserInterface(ev *e.Events) {
 		if playlists == nil {
 			return
 		}
-	case <-events.ShutdownUpdates():
+	case <-events.ShutdownEngineUpdates():
 		return
 	}
 

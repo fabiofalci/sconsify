@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/fabiofalci/sconsify/engine"
 	e "github.com/fabiofalci/sconsify/events"
 	"github.com/fabiofalci/sconsify/sconsify"
 )
@@ -22,12 +23,14 @@ func TestNoUiEmptyPlaylists(t *testing.T) {
 	repeatOn := true
 	random := true
 	events := e.InitialiseEvents()
+
 	go func() {
 		playlists := sconsify.InitPlaylists()
 		events.NewPlaylist(playlists)
 	}()
 
-	err := StartNoUserInterface(events, nil, &repeatOn, &random)
+	ui := InitialiseNoUserInterface(events, nil, &repeatOn, &random)
+	err := engine.InitialiseEngine(events, ui, true)
 	if err == nil {
 		t.Errorf("No track selected should return an error")
 	}
@@ -38,10 +41,11 @@ func TestNoUiSequentialAndRepeating(t *testing.T) {
 	random := false
 	events := e.InitialiseEvents()
 	output := &TestPrinter{message: make(chan string)}
+	ui := InitialiseNoUserInterface(events, output, &repeatOn, &random)
 
 	finished := make(chan bool)
 	go func() {
-		err := StartNoUserInterface(events, output, &repeatOn, &random)
+		err := engine.InitialiseEngine(events, ui, true)
 		finished <- err == nil
 	}()
 
@@ -53,7 +57,7 @@ func TestNoUiSequentialAndRepeating(t *testing.T) {
 	assertNextThreeTracks(t, events, output)
 	assertRepeatingAllFourTracks(t, events, output)
 
-	assertShutdown(t, events, finished)
+	assertShutdown(t, ui, events, finished)
 }
 
 func TestNoUiSequentialAndNotRepeating(t *testing.T) {
@@ -61,10 +65,11 @@ func TestNoUiSequentialAndNotRepeating(t *testing.T) {
 	random := false
 	events := e.InitialiseEvents()
 	output := &TestPrinter{message: make(chan string)}
+	ui := InitialiseNoUserInterface(events, output, &repeatOn, &random)
 
 	finished := make(chan bool)
 	go func() {
-		StartNoUserInterface(events, output, &repeatOn, &random)
+		engine.InitialiseEngine(events, ui, true)
 		finished <- true
 	}()
 
@@ -84,10 +89,11 @@ func TestNoUiRandomAndRepeating(t *testing.T) {
 	random := true
 	events := e.InitialiseEvents()
 	output := &TestPrinter{message: make(chan string)}
+	ui := InitialiseNoUserInterface(events, output, &repeatOn, &random)
 
 	finished := make(chan bool)
 	go func() {
-		err := StartNoUserInterface(events, output, &repeatOn, &random)
+		err := engine.InitialiseEngine(events, ui, true)
 		finished <- err == nil
 	}()
 
@@ -99,7 +105,7 @@ func TestNoUiRandomAndRepeating(t *testing.T) {
 	assertRandomNextThreeTracks(t, events, output)
 	assertRandomRepeatingAllFourTracks(t, events, output)
 
-	assertShutdown(t, events, finished)
+	assertShutdown(t, ui, events, finished)
 }
 
 func TestNoUiRandomAndNotRepeating(t *testing.T) {
@@ -109,10 +115,11 @@ func TestNoUiRandomAndNotRepeating(t *testing.T) {
 	random := true
 	events := e.InitialiseEvents()
 	output := &TestPrinter{message: make(chan string)}
+	ui := InitialiseNoUserInterface(events, output, &repeatOn, &random)
 
 	finished := make(chan bool)
 	go func() {
-		StartNoUserInterface(events, output, &repeatOn, &random)
+		engine.InitialiseEngine(events, ui, true)
 		finished <- true
 	}()
 
@@ -131,11 +138,12 @@ func sendNewPlaylist(events *e.Events) {
 	events.NewPlaylist(playlists)
 }
 
-func assertShutdown(t *testing.T, events *e.Events, finished chan bool) {
-	go ShutdownNogui()
+func assertShutdown(t *testing.T, ui sconsify.UserInterface, events *e.Events, finished chan bool) {
+	go ui.Shutdown()
 
-	<-events.ShutdownUpdates()
-	events.Shutdown()
+	// playing spotify shutdown here
+	<-events.ShutdownSpotifyUpdates()
+	events.ShutdownEngine()
 
 	if !<-finished {
 		t.Errorf("Not properly finished")
@@ -151,6 +159,11 @@ func assertPrintFourTracks(t *testing.T, events *e.Events, output *TestPrinter) 
 
 func assertNoNextTrack(events *e.Events, finished chan bool) {
 	events.NextPlay()
+
+	// playing spotify shutdown here
+	<-events.ShutdownSpotifyUpdates()
+	events.ShutdownEngine()
+
 	<-finished
 }
 
