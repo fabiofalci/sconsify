@@ -38,7 +38,8 @@ func main() {
 	go spotify.Initialise(username, pass, events, providedPlaylists)
 
 	if *providedUi {
-		// ui.StartConsoleUserInterface(events)
+		ui := ui.InitialiseConsoleUserInterface(events)
+		engine.InitialiseEngine(events, ui, false)
 	} else {
 		var output ui.Printer
 		if *providedNoUiSilent {

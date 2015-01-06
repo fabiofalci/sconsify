@@ -30,40 +30,57 @@ type Gui struct {
 	currentMessage string
 }
 
-func StartConsoleUserInterface(ev *e.Events) {
+func InitialiseConsoleUserInterface(ev *e.Events) sconsify.UserInterface {
 	events = ev
-	select {
-	case p := <-events.PlaylistsUpdates():
-		playlists = &p
-		if playlists == nil {
-			return
-		}
-	case <-events.ShutdownEngineUpdates():
-		return
-	}
-
 	gui = &Gui{}
 	queue = InitQueue()
+	return gui
+}
 
-	go func() {
-		for {
-			select {
-			case track := <-events.TrackPausedUpdates():
-				gui.trackPaused(track)
-			case track := <-events.TrackPlayingUpdates():
-				gui.trackPlaying(track)
-			case track := <-events.TrackNotAvailableUpdates():
-				gui.trackNotAvailable(track)
-			case <-events.PlayTokenLostUpdates():
-				gui.updateStatus("Play token lost", false)
-			case <-events.NextPlayUpdates():
-				gui.playNext()
-			case newPlaylist := <-events.PlaylistsUpdates():
-				gui.newPlaylist(&newPlaylist)
-			}
-		}
-	}()
+func (gui *Gui) TrackPaused(track *sconsify.Track) {
+	gui.updateStatus("Paused: "+track.GetFullTitle(), false)
+}
 
+func (gui *Gui) TrackPlaying(track *sconsify.Track) {
+	gui.updateStatus("Playing: "+track.GetFullTitle(), false)
+}
+
+func (gui *Gui) TrackNotAvailable(track *sconsify.Track) {
+	gui.updateStatus("Not available: "+track.GetTitle(), true)
+}
+
+func (gui *Gui) Shutdown() {}
+
+func (gui *Gui) PlayTokenLost() error {
+	gui.updateStatus("Play token lost", false)
+	return nil
+}
+
+func (gui *Gui) GetNextToPlay() *sconsify.Track {
+	if !queue.isEmpty() {
+		return gui.getNextFromQueue()
+	} else if playlists.HasPlaylistSelected() {
+		return gui.getNextFromPlaylist()
+	}
+	return nil
+}
+
+func (gui *Gui) NewPlaylists(newPlaylist sconsify.Playlists) error {
+	if playlists == nil {
+		playlists = &newPlaylist
+		go gui.initGui()
+	} else {
+		playlists.Merge(&newPlaylist)
+		go func() {
+			gui.updatePlaylistsView()
+			gui.updateTracksView()
+			gui.g.Flush()
+		}()
+	}
+	return nil
+}
+
+func (gui *Gui) initGui() {
 	gui.g = gocui.NewGui()
 	if err := gui.g.Init(); err != nil {
 		log.Panicln(err)
@@ -103,18 +120,6 @@ func (gui *Gui) updateStatus(message string, temporary bool) {
 	gui.g.Flush()
 }
 
-func (gui *Gui) trackNotAvailable(track *sconsify.Track) {
-	gui.updateStatus("Not available: "+track.GetTitle(), true)
-}
-
-func (gui *Gui) trackPlaying(track *sconsify.Track) {
-	gui.updateStatus("Playing: "+track.GetFullTitle(), false)
-}
-
-func (gui *Gui) trackPaused(track *sconsify.Track) {
-	gui.updateStatus("Paused: "+track.GetFullTitle(), false)
-}
-
 func (gui *Gui) getSelectedPlaylist() (string, error) {
 	return gui.getSelected(gui.playlistsView)
 }
@@ -140,18 +145,14 @@ func (gui *Gui) getSelected(v *gocui.View) (string, error) {
 	return l, nil
 }
 
-func (gui *Gui) playNext() error {
-	if !queue.isEmpty() {
-		gui.playNextFromQueue()
-	} else if playlists.HasPlaylistSelected() {
-		gui.playNextFromPlaylist()
-	}
-	return nil
-}
-
 func (gui *Gui) playNextFromPlaylist() {
 	track, _ := playlists.GetNext()
 	gui.play(track)
+}
+
+func (gui *Gui) getNextFromPlaylist() *sconsify.Track {
+	gui.currentTrack, _ = playlists.GetNext()
+	return gui.currentTrack
 }
 
 func (gui *Gui) playNextFromQueue() {
@@ -159,9 +160,23 @@ func (gui *Gui) playNextFromQueue() {
 	gui.updateQueueView()
 }
 
+func (gui *Gui) getNextFromQueue() *sconsify.Track {
+	gui.currentTrack = queue.Pop()
+	go gui.updateQueueView()
+	return gui.currentTrack
+}
+
 func (gui *Gui) play(track *sconsify.Track) {
 	gui.currentTrack = track
 	events.Play(gui.currentTrack)
+}
+
+func (gui *Gui) playNext() {
+	if !queue.isEmpty() {
+		gui.playNextFromQueue()
+	} else if playlists.HasPlaylistSelected() {
+		gui.playNextFromPlaylist()
+	}
 }
 
 func getCurrentSelectedTrack() *sconsify.Track {
@@ -180,13 +195,6 @@ func getCurrentSelectedTrack() *sconsify.Track {
 		}
 	}
 	return nil
-}
-
-func (gui *Gui) newPlaylist(newPlaylist *sconsify.Playlists) {
-	playlists.Merge(newPlaylist)
-	gui.updatePlaylistsView()
-	gui.updateTracksView()
-	gui.g.Flush()
 }
 
 func (gui *Gui) updateTracksView() {
