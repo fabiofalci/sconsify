@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fabiofalci/sconsify/engine"
 	"github.com/fabiofalci/sconsify/sconsify"
 )
 
@@ -29,7 +28,7 @@ func TestNoUiEmptyPlaylists(t *testing.T) {
 	}()
 
 	ui := InitialiseNoUserInterface(events, nil, &repeatOn, &random)
-	err := engine.InitialiseEngine(events, ui, true)
+	err := sconsify.InitialiseEngine(events, ui, true)
 	if err == nil {
 		t.Errorf("No track selected should return an error")
 	}
@@ -44,7 +43,7 @@ func TestNoUiSequentialAndRepeating(t *testing.T) {
 
 	finished := make(chan bool)
 	go func() {
-		err := engine.InitialiseEngine(events, ui, true)
+		err := sconsify.InitialiseEngine(events, ui, true)
 		finished <- err == nil
 	}()
 
@@ -68,7 +67,7 @@ func TestNoUiSequentialAndNotRepeating(t *testing.T) {
 
 	finished := make(chan bool)
 	go func() {
-		engine.InitialiseEngine(events, ui, true)
+		sconsify.InitialiseEngine(events, ui, true)
 		finished <- true
 	}()
 
@@ -92,7 +91,7 @@ func TestNoUiRandomAndRepeating(t *testing.T) {
 
 	finished := make(chan bool)
 	go func() {
-		err := engine.InitialiseEngine(events, ui, true)
+		err := sconsify.InitialiseEngine(events, ui, true)
 		finished <- err == nil
 	}()
 
@@ -118,7 +117,7 @@ func TestNoUiRandomAndNotRepeating(t *testing.T) {
 
 	finished := make(chan bool)
 	go func() {
-		engine.InitialiseEngine(events, ui, true)
+		sconsify.InitialiseEngine(events, ui, true)
 		finished <- true
 	}()
 
