@@ -25,7 +25,6 @@ type Gui struct {
 	tracksView     *gocui.View
 	statusView     *gocui.View
 	queueView      *gocui.View
-	currentTrack   *sconsify.Track
 	currentMessage string
 }
 
@@ -148,14 +147,14 @@ func (gui *Gui) getSelected(v *gocui.View) (string, error) {
 }
 
 func (gui *Gui) getNextFromPlaylist() *sconsify.Track {
-	gui.currentTrack, _ = playlists.GetNext()
-	return gui.currentTrack
+	track, _ := playlists.GetNext()
+	return track
 }
 
 func (gui *Gui) getNextFromQueue() *sconsify.Track {
-	gui.currentTrack = queue.Pop()
+	track := queue.Pop()
 	go gui.updateQueueView()
-	return gui.currentTrack
+	return track
 }
 
 func (gui *Gui) playNext() {
