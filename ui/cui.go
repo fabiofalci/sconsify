@@ -103,9 +103,7 @@ func (gui *Gui) initGui() {
 }
 
 func (gui *Gui) updateStatus(message string, temporary bool) {
-	gui.statusView.Clear()
-	gui.statusView.SetCursor(0, 0)
-	gui.statusView.SetOrigin(0, 0)
+	gui.clearStatusView()
 
 	if !temporary {
 		gui.currentMessage = message
@@ -290,4 +288,10 @@ func (gui *Gui) enableQueueView() error {
 	gui.playlistsView.Highlight = false
 	gui.queueView.Highlight = true
 	return gui.g.SetCurrentView("queue")
+}
+
+func (gui *Gui) clearStatusView() {
+	gui.statusView.Clear()
+	gui.statusView.SetCursor(0, 0)
+	gui.statusView.SetOrigin(0, 0)
 }

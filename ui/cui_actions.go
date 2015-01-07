@@ -166,13 +166,9 @@ func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
-	gui.statusView.Clear()
-	gui.statusView.SetCursor(0, 0)
-	gui.statusView.SetOrigin(0, 0)
-
+	gui.clearStatusView()
 	gui.statusView.Editable = true
 	gui.g.SetCurrentView("status")
-
 	return nil
 }
 
@@ -182,11 +178,7 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 
 	gui.enableSideView()
 	events.Search(line)
-
-	gui.statusView.Clear()
-	gui.statusView.SetCursor(0, 0)
-	gui.statusView.SetOrigin(0, 0)
-
+	gui.clearStatusView()
 	gui.statusView.Editable = false
 	return nil
 }
