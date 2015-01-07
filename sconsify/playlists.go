@@ -16,10 +16,10 @@ type Playlists struct {
 }
 
 const (
-	NormalMode     = iota
-	RandomMode     = iota
-	AllRandomMode  = iota
-	SequentialMode = iota
+	NormalMode = iota
+	RandomMode
+	AllRandomMode
+	SequentialMode
 )
 
 func InitPlaylists() *Playlists {
