@@ -112,7 +112,7 @@ func keybindings() error {
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	track := getCurrentSelectedTrack()
+	track := gui.getCurrentSelectedTrack()
 	if track != nil {
 		events.Play(track)
 	}
@@ -142,7 +142,7 @@ func nextCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func queueCommand(g *gocui.Gui, v *gocui.View) error {
-	track := getCurrentSelectedTrack()
+	track := gui.getCurrentSelectedTrack()
 	if track != nil {
 		fmt.Fprintf(gui.queueView, "%v", track.GetTitle())
 		queue.Add(track)

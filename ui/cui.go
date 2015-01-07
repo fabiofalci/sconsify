@@ -161,7 +161,7 @@ func (gui *Gui) playNext() {
 	events.NextPlay()
 }
 
-func getCurrentSelectedTrack() *sconsify.Track {
+func (gui *Gui) getCurrentSelectedTrack() *sconsify.Track {
 	currentPlaylist, errPlaylist := gui.getSelectedPlaylist()
 	currentTrack, errTrack := gui.getSelectedTrack()
 	if errPlaylist == nil && errTrack == nil {
