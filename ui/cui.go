@@ -270,3 +270,24 @@ func layout(g *gocui.Gui) error {
 	}
 	return nil
 }
+
+func (gui *Gui) enableMainView() error {
+	gui.tracksView.Highlight = true
+	gui.playlistsView.Highlight = false
+	gui.queueView.Highlight = false
+	return gui.g.SetCurrentView("main")
+}
+
+func (gui *Gui) enableSideView() error {
+	gui.tracksView.Highlight = false
+	gui.playlistsView.Highlight = true
+	gui.queueView.Highlight = false
+	return gui.g.SetCurrentView("side")
+}
+
+func (gui *Gui) enableQueueView() error {
+	gui.tracksView.Highlight = false
+	gui.playlistsView.Highlight = false
+	gui.queueView.Highlight = true
+	return gui.g.SetCurrentView("queue")
+}

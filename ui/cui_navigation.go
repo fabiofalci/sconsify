@@ -6,24 +6,15 @@ import (
 
 // nextView is shared between Side and Queue and they all go to main
 func nextView(g *gocui.Gui, v *gocui.View) error {
-	gui.tracksView.Highlight = true
-	gui.playlistsView.Highlight = false
-	gui.queueView.Highlight = false
-	return gui.g.SetCurrentView("main")
+	return gui.enableMainView()
 }
 
 func mainNextViewLeft(g *gocui.Gui, v *gocui.View) error {
-	gui.tracksView.Highlight = false
-	gui.playlistsView.Highlight = true
-	gui.queueView.Highlight = false
-	return gui.g.SetCurrentView("side")
+	return gui.enableSideView()
 }
 
 func mainNextViewRight(g *gocui.Gui, v *gocui.View) error {
-	gui.tracksView.Highlight = false
-	gui.playlistsView.Highlight = false
-	gui.queueView.Highlight = true
-	return gui.g.SetCurrentView("queue")
+	return gui.enableQueueView()
 }
 
 func cursorEnd(g *gocui.Gui, v *gocui.View) error {

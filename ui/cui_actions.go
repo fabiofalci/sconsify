@@ -153,11 +153,7 @@ func queueCommand(g *gocui.Gui, v *gocui.View) error {
 func removeAllFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	queue.RemoveAll()
 	gui.updateQueueView()
-	gui.tracksView.Highlight = true
-	gui.playlistsView.Highlight = false
-	gui.queueView.Highlight = false
-	gui.g.SetCurrentView("main")
-	return nil
+	return gui.enableMainView()
 }
 
 func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
@@ -184,10 +180,7 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	// after the enter the command is at -1
 	line, _ := gui.statusView.Line(-1)
 
-	gui.tracksView.Highlight = false
-	gui.playlistsView.Highlight = true
-	gui.queueView.Highlight = false
-	gui.g.SetCurrentView("side")
+	gui.enableSideView()
 	events.Search(line)
 
 	gui.statusView.Clear()
