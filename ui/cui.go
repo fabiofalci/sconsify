@@ -48,7 +48,9 @@ func (gui *Gui) TrackNotAvailable(track *sconsify.Track) {
 	gui.updateStatus("Not available: "+track.GetTitle(), true)
 }
 
-func (gui *Gui) Shutdown() {}
+func (gui *Gui) Shutdown() {
+	events.ShutdownEngine()
+}
 
 func (gui *Gui) PlayTokenLost() error {
 	gui.updateStatus("Play token lost", false)
