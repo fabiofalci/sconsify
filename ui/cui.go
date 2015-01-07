@@ -147,19 +147,9 @@ func (gui *Gui) getSelected(v *gocui.View) (string, error) {
 	return l, nil
 }
 
-func (gui *Gui) playNextFromPlaylist() {
-	track, _ := playlists.GetNext()
-	gui.play(track)
-}
-
 func (gui *Gui) getNextFromPlaylist() *sconsify.Track {
 	gui.currentTrack, _ = playlists.GetNext()
 	return gui.currentTrack
-}
-
-func (gui *Gui) playNextFromQueue() {
-	gui.play(queue.Pop())
-	gui.updateQueueView()
 }
 
 func (gui *Gui) getNextFromQueue() *sconsify.Track {
@@ -168,17 +158,8 @@ func (gui *Gui) getNextFromQueue() *sconsify.Track {
 	return gui.currentTrack
 }
 
-func (gui *Gui) play(track *sconsify.Track) {
-	gui.currentTrack = track
-	events.Play(gui.currentTrack)
-}
-
 func (gui *Gui) playNext() {
-	if !queue.isEmpty() {
-		gui.playNextFromQueue()
-	} else if playlists.HasPlaylistSelected() {
-		gui.playNextFromPlaylist()
-	}
+	events.NextPlay()
 }
 
 func getCurrentSelectedTrack() *sconsify.Track {
