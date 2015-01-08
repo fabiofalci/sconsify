@@ -259,7 +259,7 @@ func layout(g *gocui.Gui) error {
 	return nil
 }
 
-func (gui *Gui) enableMainView() error {
+func (gui *Gui) enableTracksView() error {
 	gui.tracksView.Highlight = true
 	gui.playlistsView.Highlight = false
 	gui.queueView.Highlight = false

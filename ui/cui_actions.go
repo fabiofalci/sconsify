@@ -154,7 +154,7 @@ func queueCommand(g *gocui.Gui, v *gocui.View) error {
 func removeAllFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	queue.RemoveAll()
 	gui.updateQueueView()
-	return gui.enableMainView()
+	return gui.enableTracksView()
 }
 
 func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {

@@ -4,9 +4,9 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-// nextView is shared between Side and Queue and they all go to main
+// nextView is shared between Playlists and Queue and they all go to Tracks
 func nextView(g *gocui.Gui, v *gocui.View) error {
-	return gui.enableMainView()
+	return gui.enableTracksView()
 }
 
 func mainNextViewLeft(g *gocui.Gui, v *gocui.View) error {
