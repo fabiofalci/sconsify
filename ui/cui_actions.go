@@ -8,7 +8,8 @@ import (
 )
 
 func keybindings() error {
-	views := []string{"main", "side", "queue"}
+	views := []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE}
+	allViews := ""
 	for _, view := range views {
 		if err := gui.g.SetKeybinding(view, 'p', 0, pauseCurrentSelectedTrack); err != nil {
 			return err
@@ -36,75 +37,75 @@ func keybindings() error {
 		}
 	}
 
-	if err := gui.g.SetKeybinding("main", gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
+	if err := gui.g.SetKeybinding(VIEW_TRACKS, gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("main", gocui.KeyEnter, 0, playCurrentSelectedTrack); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding("main", 'u', 0, queueCommand); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("queue", 'd', 0, removeFromQueueCommand); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("queue", 'D', 0, removeAllFromQueueCommand); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("status", gocui.KeyEnter, 0, searchCommand); err != nil {
+	if err := gui.g.SetKeybinding(VIEW_TRACKS, gocui.KeyEnter, 0, playCurrentSelectedTrack); err != nil {
 		return err
 	}
 
-	if err := gui.g.SetKeybinding("", gocui.KeyHome, 0, cursorHome); err != nil {
+	if err := gui.g.SetKeybinding(VIEW_TRACKS, 'u', 0, queueCommand); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("", gocui.KeyEnd, 0, cursorEnd); err != nil {
+	if err := gui.g.SetKeybinding(VIEW_QUEUE, 'd', 0, removeFromQueueCommand); err != nil {
 		return err
 	}
-
-	if err := gui.g.SetKeybinding("", gocui.KeyPgup, 0, cursorPgup); err != nil {
+	if err := gui.g.SetKeybinding(VIEW_QUEUE, 'D', 0, removeAllFromQueueCommand); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("", gocui.KeyPgdn, 0, cursorPgdn); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding("", gocui.KeyArrowDown, 0, cursorDown); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("", gocui.KeyArrowUp, 0, cursorUp); err != nil {
+	if err := gui.g.SetKeybinding(VIEW_STATUS, gocui.KeyEnter, 0, searchCommand); err != nil {
 		return err
 	}
 
-	if err := gui.g.SetKeybinding("main", gocui.KeyArrowLeft, 0, mainNextViewLeft); err != nil {
+	if err := gui.g.SetKeybinding(allViews, gocui.KeyHome, 0, cursorHome); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("queue", gocui.KeyArrowLeft, 0, nextView); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding("side", gocui.KeyArrowRight, 0, nextView); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("main", gocui.KeyArrowRight, 0, mainNextViewRight); err != nil {
+	if err := gui.g.SetKeybinding(allViews, gocui.KeyEnd, 0, cursorEnd); err != nil {
 		return err
 	}
 
-	if err := gui.g.SetKeybinding("main", 'h', 0, mainNextViewLeft); err != nil {
+	if err := gui.g.SetKeybinding(allViews, gocui.KeyPgup, 0, cursorPgup); err != nil {
 		return err
 	}
-	if err := gui.g.SetKeybinding("queue", 'h', 0, nextView); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("side", 'l', 0, nextView); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding("main", 'l', 0, mainNextViewRight); err != nil {
+	if err := gui.g.SetKeybinding(allViews, gocui.KeyPgdn, 0, cursorPgdn); err != nil {
 		return err
 	}
 
-	if err := gui.g.SetKeybinding("", gocui.KeyCtrlC, 0, quit); err != nil {
+	if err := gui.g.SetKeybinding(allViews, gocui.KeyArrowDown, 0, cursorDown); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding(allViews, gocui.KeyArrowUp, 0, cursorUp); err != nil {
+		return err
+	}
+
+	if err := gui.g.SetKeybinding(VIEW_TRACKS, gocui.KeyArrowLeft, 0, mainNextViewLeft); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding(VIEW_QUEUE, gocui.KeyArrowLeft, 0, nextView); err != nil {
+		return err
+	}
+
+	if err := gui.g.SetKeybinding(VIEW_PLAYLISTS, gocui.KeyArrowRight, 0, nextView); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding(VIEW_TRACKS, gocui.KeyArrowRight, 0, mainNextViewRight); err != nil {
+		return err
+	}
+
+	if err := gui.g.SetKeybinding(VIEW_TRACKS, 'h', 0, mainNextViewLeft); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding(VIEW_QUEUE, 'h', 0, nextView); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding(VIEW_PLAYLISTS, 'l', 0, nextView); err != nil {
+		return err
+	}
+	if err := gui.g.SetKeybinding(VIEW_TRACKS, 'l', 0, mainNextViewRight); err != nil {
+		return err
+	}
+
+	if err := gui.g.SetKeybinding(allViews, gocui.KeyCtrlC, 0, quit); err != nil {
 		return err
 	}
 
@@ -168,7 +169,7 @@ func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.clearStatusView()
 	gui.statusView.Editable = true
-	gui.g.SetCurrentView("status")
+	gui.g.SetCurrentView(VIEW_STATUS)
 	return nil
 }
 

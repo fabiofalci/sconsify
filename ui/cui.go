@@ -19,6 +19,13 @@ var (
 	playlists *sconsify.Playlists
 )
 
+const (
+	VIEW_PLAYLISTS = "playlists"
+	VIEW_TRACKS    = "tracks"
+	VIEW_QUEUE     = "queue"
+	VIEW_STATUS    = "status"
+)
+
 type Gui struct {
 	g              *gocui.Gui
 	playlistsView  *gocui.View
@@ -216,7 +223,7 @@ func (gui *Gui) updateQueueView() {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("side", -1, -1, 25, maxY-2); err != nil {
+	if v, err := g.SetView(VIEW_PLAYLISTS, -1, -1, 25, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -225,11 +232,11 @@ func layout(g *gocui.Gui) error {
 
 		gui.updatePlaylistsView()
 
-		if err := g.SetCurrentView("side"); err != nil {
+		if err := g.SetCurrentView(VIEW_PLAYLISTS); err != nil {
 			return err
 		}
 	}
-	if v, err := g.SetView("main", 25, -1, maxX-50, maxY-2); err != nil {
+	if v, err := g.SetView(VIEW_TRACKS, 25, -1, maxX-50, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -237,13 +244,13 @@ func layout(g *gocui.Gui) error {
 
 		gui.updateTracksView()
 	}
-	if v, err := g.SetView("queue", maxX-50, -1, maxX, maxY-2); err != nil {
+	if v, err := g.SetView(VIEW_QUEUE, maxX-50, -1, maxX, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
 		gui.queueView = v
 	}
-	if v, err := g.SetView("status", -1, maxY-2, maxX, maxY); err != nil {
+	if v, err := g.SetView(VIEW_STATUS, -1, maxY-2, maxX, maxY); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -256,21 +263,21 @@ func (gui *Gui) enableMainView() error {
 	gui.tracksView.Highlight = true
 	gui.playlistsView.Highlight = false
 	gui.queueView.Highlight = false
-	return gui.g.SetCurrentView("main")
+	return gui.g.SetCurrentView(VIEW_TRACKS)
 }
 
 func (gui *Gui) enableSideView() error {
 	gui.tracksView.Highlight = false
 	gui.playlistsView.Highlight = true
 	gui.queueView.Highlight = false
-	return gui.g.SetCurrentView("side")
+	return gui.g.SetCurrentView(VIEW_PLAYLISTS)
 }
 
 func (gui *Gui) enableQueueView() error {
 	gui.tracksView.Highlight = false
 	gui.playlistsView.Highlight = false
 	gui.queueView.Highlight = true
-	return gui.g.SetCurrentView("queue")
+	return gui.g.SetCurrentView(VIEW_QUEUE)
 }
 
 func (gui *Gui) clearStatusView() {
