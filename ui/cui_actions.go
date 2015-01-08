@@ -181,6 +181,7 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	events.Search(line)
 	gui.clearStatusView()
 	gui.statusView.Editable = false
+	gui.setStatus(gui.currentMessage)
 	return nil
 }
 
