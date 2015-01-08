@@ -103,12 +103,9 @@ func updateTracksView(g *gocui.Gui, v *gocui.View) {
 
 func getCurrentViewSize(v *gocui.View) int {
 	if v == gui.tracksView {
-		selectedPlaylist, err := gui.getSelectedPlaylist()
-		if err == nil {
-			playlist := playlists.Get(selectedPlaylist)
-			if playlist != nil {
-				return playlist.Tracks() - 1
-			}
+		selectedPlaylist := gui.getSelectedPlaylist()
+		if selectedPlaylist != nil {
+			return selectedPlaylist.Tracks() - 1
 		}
 	} else if v == gui.playlistsView {
 		return playlists.Playlists() - 1

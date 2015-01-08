@@ -128,8 +128,12 @@ func (gui *Gui) setStatus(message string) {
 	gui.g.Flush()
 }
 
-func (gui *Gui) getSelectedPlaylist() (string, error) {
-	return gui.getSelected(gui.playlistsView)
+func (gui *Gui) getSelectedPlaylist() *sconsify.Playlist {
+	playlistName, _ := gui.getSelected(gui.playlistsView)
+	if playlistName != "" {
+		return playlists.Get(playlistName)
+	}
+	return nil
 }
 
 func (gui *Gui) getSelectedTrack() (string, error) {
@@ -150,7 +154,7 @@ func (gui *Gui) getSelected(v *gocui.View) (string, error) {
 		l = ""
 	}
 
-	return l, nil
+	return l, err
 }
 
 func (gui *Gui) getNextFromPlaylist() *sconsify.Track {
@@ -169,17 +173,15 @@ func (gui *Gui) playNext() {
 }
 
 func (gui *Gui) getCurrentSelectedTrack() *sconsify.Track {
-	currentPlaylist, errPlaylist := gui.getSelectedPlaylist()
+	currentPlaylist := gui.getSelectedPlaylist()
 	currentTrack, errTrack := gui.getSelectedTrack()
-	if errPlaylist == nil && errTrack == nil {
-		playlist := playlists.Get(currentPlaylist)
-
-		if playlist != nil {
+	if currentPlaylist != nil && errTrack == nil {
+		if currentPlaylist != nil {
 			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
 			currentIndexTrack, _ := strconv.Atoi(currentTrack)
 			currentIndexTrack = currentIndexTrack - 1
-			track := playlist.Track(currentIndexTrack)
-			playlists.SetCurrents(currentPlaylist, currentIndexTrack)
+			track := currentPlaylist.Track(currentIndexTrack)
+			playlists.SetCurrents(currentPlaylist.Name(), currentIndexTrack)
 			return track
 		}
 	}
@@ -190,15 +192,11 @@ func (gui *Gui) updateTracksView() {
 	gui.tracksView.Clear()
 	gui.tracksView.SetCursor(0, 0)
 	gui.tracksView.SetOrigin(0, 0)
-	currentPlaylist, err := gui.getSelectedPlaylist()
-	if err == nil {
-		playlist := playlists.Get(currentPlaylist)
-
-		if playlist != nil {
-			for i := 0; i < playlist.Tracks(); i++ {
-				track := playlist.Track(i)
-				fmt.Fprintf(gui.tracksView, "%v. %v", (i + 1), track.GetTitle())
-			}
+	currentPlaylist := gui.getSelectedPlaylist()
+	if currentPlaylist != nil {
+		for i := 0; i < currentPlaylist.Tracks(); i++ {
+			track := currentPlaylist.Track(i)
+			fmt.Fprintf(gui.tracksView, "%v. %v", (i + 1), track.GetTitle())
 		}
 	}
 }

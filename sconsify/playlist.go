@@ -2,10 +2,11 @@ package sconsify
 
 type Playlist struct {
 	tracks []*Track
+	name   string
 }
 
-func InitPlaylist(tracks []*Track) *Playlist {
-	return &Playlist{tracks: tracks}
+func InitPlaylist(name string, tracks []*Track) *Playlist {
+	return &Playlist{name: name, tracks: tracks}
 }
 
 func (playlist *Playlist) GetNextTrack(currentIndexTrack int) int {
@@ -21,4 +22,8 @@ func (playlist *Playlist) Track(index int) *Track {
 
 func (playlist *Playlist) Tracks() int {
 	return len(playlist.tracks)
+}
+
+func (playlist *Playlist) Name() string {
+	return playlist.name
 }

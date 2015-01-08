@@ -179,7 +179,7 @@ func (spotify *Spotify) initPlaylist() {
 				tracks[i] = playlistTrack.Track()
 				tracks[i].Wait()
 			}
-			playlists.AddPlaylist(playlist.Name(), sconsify.InitPlaylist(sconsify.ToSconsifyTrack(tracks)))
+			playlists.AddPlaylist(playlist.Name(), sconsify.InitPlaylist(playlist.Name(), sconsify.ToSconsifyTrack(tracks)))
 		}
 	}
 
@@ -293,7 +293,8 @@ func (spotify *Spotify) search(query string) {
 	}
 
 	playlists := sconsify.InitPlaylists()
-	playlists.AddPlaylist("*"+query, sconsify.InitPlaylist(sconsify.ToSconsifyTrack(tracks)))
+	name := "*" + query
+	playlists.AddPlaylist(name, sconsify.InitPlaylist(name, sconsify.ToSconsifyTrack(tracks)))
 
 	spotify.events.NewPlaylist(playlists)
 }
