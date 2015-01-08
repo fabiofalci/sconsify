@@ -174,11 +174,12 @@ func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func searchCommand(g *gocui.Gui, v *gocui.View) error {
-	// after the enter the command is at -1
-	line, _ := gui.statusView.Line(-1)
-
+	// after user hit Enter, the typed command is at position -1
+	query, _ := gui.statusView.Line(-1)
+	if query != "" {
+		events.Search(query)
+	}
 	gui.enableSideView()
-	events.Search(line)
 	gui.clearStatusView()
 	gui.statusView.Editable = false
 	gui.setStatus(gui.currentMessage)
