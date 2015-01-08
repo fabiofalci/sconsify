@@ -50,6 +50,11 @@ func (playlists *Playlists) Merge(newPlaylist *Playlists) {
 	playlists.buildPlaylistForNewMode()
 }
 
+func (playlists *Playlists) Remove(playlistName string) {
+	delete(playlists.playlists, playlistName)
+	playlists.buildPlaylistForNewMode()
+}
+
 func (playlists *Playlists) GetNames() []string {
 	names := make([]string, playlists.Playlists())
 	i := 0

@@ -3,10 +3,15 @@ package sconsify
 type Playlist struct {
 	tracks []*Track
 	name   string
+	search bool
 }
 
 func InitPlaylist(name string, tracks []*Track) *Playlist {
 	return &Playlist{name: name, tracks: tracks}
+}
+
+func InitSearchPlaylist(name string, tracks []*Track) *Playlist {
+	return &Playlist{name: name, tracks: tracks, search: true}
 }
 
 func (playlist *Playlist) GetNextTrack(currentIndexTrack int) int {
@@ -26,4 +31,8 @@ func (playlist *Playlist) Tracks() int {
 
 func (playlist *Playlist) Name() string {
 	return playlist.name
+}
+
+func (playlist *Playlist) IsSearch() bool {
+	return playlist.search
 }

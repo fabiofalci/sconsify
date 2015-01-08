@@ -47,6 +47,9 @@ func keybindings() error {
 	if err := gui.g.SetKeybinding(VIEW_TRACKS, 'u', 0, queueCommand); err != nil {
 		return err
 	}
+	if err := gui.g.SetKeybinding(VIEW_PLAYLISTS, 'd', 0, removeFromPlaylistsCommand); err != nil {
+		return err
+	}
 	if err := gui.g.SetKeybinding(VIEW_QUEUE, 'd', 0, removeFromQueueCommand); err != nil {
 		return err
 	}
@@ -162,6 +165,16 @@ func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	if index > -1 {
 		queue.Remove(index)
 		gui.updateQueueView()
+	}
+	return nil
+}
+
+func removeFromPlaylistsCommand(g *gocui.Gui, v *gocui.View) error {
+	playlist := gui.getSelectedPlaylist()
+	if playlist != nil && playlist.IsSearch() {
+		playlists.Remove(playlist.Name())
+		gui.updatePlaylistsView()
+		gui.updateTracksView()
 	}
 	return nil
 }

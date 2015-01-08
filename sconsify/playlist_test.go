@@ -46,11 +46,27 @@ func TestPlaylistTrack(t *testing.T) {
 	}
 }
 
+func TestSearchPlaylist(t *testing.T) {
+	tracks := make([]*Track, 1)
+	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
+	playlist := InitSearchPlaylist("testing", tracks)
+
+	if !playlist.IsSearch() {
+		t.Errorf("Should be a search playlists")
+	}
+
+	playlist = InitPlaylist("testing", tracks)
+
+	if playlist.IsSearch() {
+		t.Errorf("Should not be a search playlists")
+	}
+}
+
 func createDummyPlaylist() *Playlist {
 	tracks := make([]*Track, 4)
 	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
 	tracks[1] = InitTrack("1", "artist1", "name1", "duration1")
 	tracks[2] = InitTrack("2", "artist2", "name2", "duration2")
 	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
-	return &Playlist{tracks: tracks}
+	return InitPlaylist("testing", tracks)
 }

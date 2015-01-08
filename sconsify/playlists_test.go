@@ -285,3 +285,25 @@ func TestStateInvertMode(t *testing.T) {
 		t.Errorf("Mode was inverted to random but is returning %v", mode)
 	}
 }
+
+func TestRemove(t *testing.T) {
+	playlists := InitPlaylists()
+	playlists.AddPlaylist("name0", createDummyPlaylist())
+	playlists.AddPlaylist("name1", createDummyPlaylist())
+	playlists.AddPlaylist("name2", createDummyPlaylist())
+
+	if playlists.Playlists() != 3 {
+		t.Error("Number of playlists should be 3")
+	}
+
+	playlists.Remove("name1")
+
+	if playlists.Playlists() != 2 {
+		t.Error("Number of playlists should be 2")
+	}
+
+	names := playlists.GetNames()
+	if names[0] != "name0" || names[1] != "name2" {
+		t.Error("Playlist names look wrong after removing name1 playlist")
+	}
+}
