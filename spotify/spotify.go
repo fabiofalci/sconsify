@@ -33,14 +33,13 @@ func Initialise(username *string, pass *[]byte, events *sconsify.Events, playlis
 func initialiseSpotify(username *string, pass *[]byte, events *sconsify.Events, playlistFilter *string) error {
 	spotify := &Spotify{events: events}
 	spotify.setPlaylistFilter(*playlistFilter)
-	err := spotify.initKey()
-	if err != nil {
+	if err := spotify.initKey(); err != nil {
 		return err
 	}
 	spotify.initAudio()
 	defer portaudio.Terminate()
 
-	err = spotify.initCache()
+	err := spotify.initCache()
 	if err == nil {
 		err = spotify.initSession()
 		if err == nil {
