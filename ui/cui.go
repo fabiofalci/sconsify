@@ -203,7 +203,7 @@ func (gui *Gui) updateTracksView() {
 
 func (gui *Gui) updatePlaylistsView() {
 	gui.playlistsView.Clear()
-	keys := playlists.GetNames()
+	keys := playlists.Names()
 	sort.Strings(keys)
 	for _, key := range keys {
 		fmt.Fprintln(gui.playlistsView, key)

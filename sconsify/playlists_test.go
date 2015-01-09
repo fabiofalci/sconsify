@@ -178,21 +178,21 @@ func TestTracks(t *testing.T) {
 	}
 }
 
-func TestGetNames(t *testing.T) {
+func TestNames(t *testing.T) {
 	playlists := InitPlaylists()
 
-	if len(playlists.GetNames()) != 0 {
+	if len(playlists.Names()) != 0 {
 		t.Errorf("Playlists should be empty")
 	}
 
 	playlists.AddPlaylist("name", createDummyPlaylist())
-	names := playlists.GetNames()
+	names := playlists.Names()
 	if len(names) != 1 {
 		t.Errorf("Should have only one name")
 	}
 
 	playlists.AddPlaylist("name1", createDummyPlaylist())
-	names = playlists.GetNames()
+	names = playlists.Names()
 	if len(names) != 2 {
 		t.Errorf("Should have 2 names")
 	}
@@ -302,7 +302,7 @@ func TestRemove(t *testing.T) {
 		t.Error("Number of playlists should be 2")
 	}
 
-	names := playlists.GetNames()
+	names := playlists.Names()
 	if names[0] != "name0" || names[1] != "name2" {
 		t.Error("Playlist names look wrong after removing name1 playlist")
 	}

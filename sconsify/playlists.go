@@ -55,7 +55,7 @@ func (playlists *Playlists) Remove(playlistName string) {
 	playlists.buildPlaylistForNewMode()
 }
 
-func (playlists *Playlists) GetNames() []string {
+func (playlists *Playlists) Names() []string {
 	names := make([]string, playlists.Playlists())
 	i := 0
 	for name, _ := range playlists.playlists {
@@ -137,7 +137,7 @@ func (playlists *Playlists) buildAllRandomModeTracks(numberOfTracks int) {
 }
 
 func (playlists *Playlists) buildSequentialModeTracks() {
-	names := playlists.GetNames()
+	names := playlists.Names()
 	sort.Strings(names)
 
 	index := 0
