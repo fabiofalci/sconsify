@@ -272,20 +272,16 @@ func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {
 
 func (spotify *Spotify) search(query string) {
 	searchOptions := &sp.SearchOptions{
-		Tracks:    sp.SearchSpec{Offset: 0, Count: 50},
-		Albums:    sp.SearchSpec{Offset: 0, Count: 50},
-		Artists:   sp.SearchSpec{Offset: 0, Count: 50},
-		Playlists: sp.SearchSpec{Offset: 0, Count: 50},
+		Tracks:    sp.SearchSpec{Offset: 0, Count: 100},
+		Albums:    sp.SearchSpec{Offset: 0, Count: 100},
+		Artists:   sp.SearchSpec{Offset: 0, Count: 100},
+		Playlists: sp.SearchSpec{Offset: 0, Count: 100},
 		Type:      sp.SearchStandard,
 	}
 	search, _ := spotify.session.Search(query, searchOptions)
 	search.Wait()
 
 	numberOfTracks := search.Tracks()
-	if numberOfTracks > 100 {
-		numberOfTracks = 100
-	}
-
 	tracks := make([]*sp.Track, numberOfTracks)
 	for i := 0; i < numberOfTracks; i++ {
 		tracks[i] = search.Track(i)
