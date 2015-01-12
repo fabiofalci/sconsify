@@ -102,8 +102,7 @@ func (gui *Gui) initGui() {
 	gui.g.SelFgColor = gocui.ColorBlack
 	gui.g.ShowCursor = true
 
-	err := gui.g.MainLoop()
-	if err != nil && err != gocui.ErrorQuit {
+	if err := gui.g.MainLoop(); err != nil && err != gocui.ErrorQuit {
 		log.Panicln(err)
 	}
 }
@@ -129,8 +128,7 @@ func (gui *Gui) setStatus(message string) {
 }
 
 func (gui *Gui) getSelectedPlaylist() *sconsify.Playlist {
-	playlistName, _ := gui.getSelected(gui.playlistsView)
-	if playlistName != "" {
+	if playlistName, _ := gui.getSelected(gui.playlistsView); playlistName != "" {
 		return playlists.Get(playlistName)
 	}
 	return nil
@@ -192,8 +190,8 @@ func (gui *Gui) updateTracksView() {
 	gui.tracksView.Clear()
 	gui.tracksView.SetCursor(0, 0)
 	gui.tracksView.SetOrigin(0, 0)
-	currentPlaylist := gui.getSelectedPlaylist()
-	if currentPlaylist != nil {
+
+	if currentPlaylist := gui.getSelectedPlaylist(); currentPlaylist != nil {
 		for i := 0; i < currentPlaylist.Tracks(); i++ {
 			track := currentPlaylist.Track(i)
 			fmt.Fprintf(gui.tracksView, "%v. %v", (i + 1), track.GetTitle())

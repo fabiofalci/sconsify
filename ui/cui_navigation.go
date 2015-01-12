@@ -19,8 +19,7 @@ func mainNextViewRight(g *gocui.Gui, v *gocui.View) error {
 
 func cursorEnd(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
-		newIndex := getCurrentViewSize(v)
-		if newIndex > -1 {
+		if newIndex := getCurrentViewSize(v); newIndex > -1 {
 			ox, _ := v.Origin()
 			cx, _ := v.Cursor()
 			_, sizeY := v.Size()
@@ -58,8 +57,7 @@ func cursorPgup(g *gocui.Gui, v *gocui.View) error {
 		_, pageSizeY := v.Size()
 		pageSizeY--
 
-		newOriginY := oy - pageSizeY
-		if newOriginY > 0 {
+		if newOriginY := oy - pageSizeY; newOriginY > 0 {
 			v.SetOrigin(ox, newOriginY)
 			v.SetCursor(cx, cy)
 		} else {
@@ -73,8 +71,7 @@ func cursorPgup(g *gocui.Gui, v *gocui.View) error {
 
 func cursorPgdn(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
-		maxSize := getCurrentViewSize(v)
-		if maxSize > -1 {
+		if maxSize := getCurrentViewSize(v); maxSize > -1 {
 			ox, oy := v.Origin()
 			cx, cy := v.Cursor()
 			_, pageSizeY := v.Size()
@@ -103,8 +100,7 @@ func updateTracksView(g *gocui.Gui, v *gocui.View) {
 
 func getCurrentViewSize(v *gocui.View) int {
 	if v == gui.tracksView {
-		selectedPlaylist := gui.getSelectedPlaylist()
-		if selectedPlaylist != nil {
+		if selectedPlaylist := gui.getSelectedPlaylist(); selectedPlaylist != nil {
 			return selectedPlaylist.Tracks() - 1
 		}
 	} else if v == gui.playlistsView {
@@ -123,8 +119,7 @@ func isNotInLastPage(originY int, pageSizeY int, maxSize int) bool {
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
-		cx, cy := v.Cursor()
-		if canGoToNewPosition(cy + 1) {
+		if cx, cy := v.Cursor(); canGoToNewPosition(cy + 1) {
 			if err := v.SetCursor(cx, cy+1); err != nil {
 				ox, oy := v.Origin()
 				if err := v.SetOrigin(ox, oy+1); err != nil {

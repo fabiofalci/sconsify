@@ -116,8 +116,7 @@ func keybindings() error {
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	track := gui.getCurrentSelectedTrack()
-	if track != nil {
+	if track := gui.getCurrentSelectedTrack(); track != nil {
 		events.Play(track)
 	}
 	return nil
@@ -146,8 +145,7 @@ func nextCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func queueCommand(g *gocui.Gui, v *gocui.View) error {
-	track := gui.getCurrentSelectedTrack()
-	if track != nil {
+	if track := gui.getCurrentSelectedTrack(); track != nil {
 		fmt.Fprintf(gui.queueView, "%v", track.GetTitle())
 		queue.Add(track)
 	}
@@ -161,8 +159,7 @@ func removeAllFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
-	index := gui.getQueueSelectedTrackIndex()
-	if index > -1 {
+	if index := gui.getQueueSelectedTrackIndex(); index > -1 {
 		queue.Remove(index)
 		gui.updateQueueView()
 	}
@@ -170,8 +167,7 @@ func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func removeFromPlaylistsCommand(g *gocui.Gui, v *gocui.View) error {
-	playlist := gui.getSelectedPlaylist()
-	if playlist != nil && playlist.IsSearch() {
+	if playlist := gui.getSelectedPlaylist(); playlist != nil && playlist.IsSearch() {
 		playlists.Remove(playlist.Name())
 		gui.updatePlaylistsView()
 		gui.updateTracksView()
@@ -188,8 +184,7 @@ func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 
 func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	// after user hit Enter, the typed command is at position -1
-	query, _ := gui.statusView.Line(-1)
-	if query != "" {
+	if query, _ := gui.statusView.Line(-1); query != "" {
 		events.Search(query)
 	}
 	gui.enableSideView()
