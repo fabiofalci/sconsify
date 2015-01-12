@@ -75,7 +75,7 @@ func (gui *Gui) GetNextToPlay() *sconsify.Track {
 func (gui *Gui) NewPlaylists(newPlaylist sconsify.Playlists) error {
 	if playlists == nil {
 		playlists = &newPlaylist
-		go gui.initGui()
+		go gui.startGui()
 	} else {
 		playlists.Merge(&newPlaylist)
 		go func() {
@@ -87,7 +87,7 @@ func (gui *Gui) NewPlaylists(newPlaylist sconsify.Playlists) error {
 	return nil
 }
 
-func (gui *Gui) initGui() {
+func (gui *Gui) startGui() {
 	gui.g = gocui.NewGui()
 	if err := gui.g.Init(); err != nil {
 		log.Panicln(err)
