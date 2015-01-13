@@ -47,15 +47,15 @@ func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface 
 }
 
 func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
-	gui.updateStatus("Paused: " + track.GetFullTitle())
+	gui.setStatus("Paused: " + track.GetFullTitle())
 }
 
 func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
-	gui.updateStatus("Playing: " + track.GetFullTitle())
+	gui.setStatus("Playing: " + track.GetFullTitle())
 }
 
 func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
-	gui.updateTemporaryStatus("Not available: " + track.GetTitle())
+	gui.flash("Not available: " + track.GetTitle())
 }
 
 func (cui *ConsoleUserInterface) Shutdown() {
@@ -63,7 +63,7 @@ func (cui *ConsoleUserInterface) Shutdown() {
 }
 
 func (cui *ConsoleUserInterface) PlayTokenLost() error {
-	gui.updateStatus("Play token lost")
+	gui.setStatus("Play token lost")
 	return nil
 }
 
@@ -111,20 +111,24 @@ func (gui *Gui) startGui() {
 	}
 }
 
-func (gui *Gui) updateTemporaryStatus(message string) {
+func (gui *Gui) flash(message string) {
 	go func() {
 		time.Sleep(4 * time.Second)
-		gui.updateStatus(gui.currentMessage)
+		gui.setStatus(gui.currentMessage)
 	}()
-	gui.setStatus(message)
-}
-
-func (gui *Gui) updateStatus(message string) {
-	gui.currentMessage = message
-	gui.setStatus(message)
+	gui.updateStatus(message)
 }
 
 func (gui *Gui) setStatus(message string) {
+	gui.currentMessage = message
+	gui.updateCurrentStatus()
+}
+
+func (gui *Gui) updateCurrentStatus() {
+	gui.updateStatus(gui.currentMessage)
+}
+
+func (gui *Gui) updateStatus(message string) {
 	gui.clearStatusView()
 	fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v", message)
 	// otherwise the update will appear only in the next keyboard move

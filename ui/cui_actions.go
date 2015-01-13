@@ -129,13 +129,13 @@ func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 
 func setRandomMode(g *gocui.Gui, v *gocui.View) error {
 	playlists.InvertMode(sconsify.RandomMode)
-	gui.updateStatus(gui.currentMessage)
+	gui.updateCurrentStatus()
 	return nil
 }
 
 func setAllRandomMode(g *gocui.Gui, v *gocui.View) error {
 	playlists.InvertMode(sconsify.AllRandomMode)
-	gui.updateStatus(gui.currentMessage)
+	gui.updateCurrentStatus()
 	return nil
 }
 
@@ -190,7 +190,7 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.enableSideView()
 	gui.clearStatusView()
 	gui.statusView.Editable = false
-	gui.setStatus(gui.currentMessage)
+	gui.updateCurrentStatus()
 	return nil
 }
 
