@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	gui       *Gui
-	events    *sconsify.Events
-	queue     *Queue
-	playlists *sconsify.Playlists
+	gui                  *Gui
+	events               *sconsify.Events
+	queue                *Queue
+	playlists            *sconsify.Playlists
+	consoleUserInterface sconsify.UserInterface
 )
 
 const (
@@ -25,6 +26,8 @@ const (
 	VIEW_QUEUE     = "queue"
 	VIEW_STATUS    = "status"
 )
+
+type ConsoleUserInterface struct{}
 
 type Gui struct {
 	g              *gocui.Gui
@@ -38,32 +41,33 @@ type Gui struct {
 func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface {
 	events = ev
 	gui = &Gui{}
+	consoleUserInterface = &ConsoleUserInterface{}
 	queue = InitQueue()
-	return gui
+	return consoleUserInterface
 }
 
-func (gui *Gui) TrackPaused(track *sconsify.Track) {
+func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 	gui.updateStatus("Paused: " + track.GetFullTitle())
 }
 
-func (gui *Gui) TrackPlaying(track *sconsify.Track) {
+func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 	gui.updateStatus("Playing: " + track.GetFullTitle())
 }
 
-func (gui *Gui) TrackNotAvailable(track *sconsify.Track) {
+func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
 	gui.updateTemporaryStatus("Not available: " + track.GetTitle())
 }
 
-func (gui *Gui) Shutdown() {
+func (cui *ConsoleUserInterface) Shutdown() {
 	events.ShutdownEngine()
 }
 
-func (gui *Gui) PlayTokenLost() error {
+func (cui *ConsoleUserInterface) PlayTokenLost() error {
 	gui.updateStatus("Play token lost")
 	return nil
 }
 
-func (gui *Gui) GetNextToPlay() *sconsify.Track {
+func (cui *ConsoleUserInterface) GetNextToPlay() *sconsify.Track {
 	if !queue.isEmpty() {
 		return gui.getNextFromQueue()
 	} else if playlists.HasPlaylistSelected() {
@@ -72,7 +76,7 @@ func (gui *Gui) GetNextToPlay() *sconsify.Track {
 	return nil
 }
 
-func (gui *Gui) NewPlaylists(newPlaylist sconsify.Playlists) error {
+func (cui *ConsoleUserInterface) NewPlaylists(newPlaylist sconsify.Playlists) error {
 	if playlists == nil {
 		playlists = &newPlaylist
 		go gui.startGui()

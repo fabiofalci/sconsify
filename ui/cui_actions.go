@@ -195,7 +195,7 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
-	gui.Shutdown()
+	consoleUserInterface.Shutdown()
 	// TODO wait for shutdown
 	// <-events.ShutdownUpdates()
 	return gocui.ErrorQuit
