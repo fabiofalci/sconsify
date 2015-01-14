@@ -303,7 +303,8 @@ func TestRemove(t *testing.T) {
 	}
 
 	names := playlists.Names()
-	if names[0] != "name0" || names[1] != "name2" {
+	isCorrectNames := (names[0] == "name0" && names[1] == "name2") || (names[0] == "name2" && names[1] == "name0")
+	if !isCorrectNames {
 		t.Error("Playlist names look wrong after removing name1 playlist")
 	}
 }
