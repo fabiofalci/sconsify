@@ -82,11 +82,9 @@ func (cui *ConsoleUserInterface) NewPlaylists(newPlaylist sconsify.Playlists) er
 		go gui.startGui()
 	} else {
 		playlists.Merge(&newPlaylist)
-		go func() {
-			gui.updatePlaylistsView()
-			gui.updateTracksView()
-			gui.g.Flush()
-		}()
+		gui.updatePlaylistsView()
+		gui.updateTracksView()
+		gui.g.Flush()
 	}
 	return nil
 }
