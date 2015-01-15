@@ -37,14 +37,14 @@ func main() {
 
 	if *providedUi {
 		ui := ui.InitialiseConsoleUserInterface(events)
-		sconsify.InitialiseEngine(events, ui, false)
+		sconsify.StartMainLoop(events, ui, false)
 	} else {
 		var output ui.Printer
 		if *providedNoUiSilent {
 			output = new(ui.SilentPrinter)
 		}
 		ui := ui.InitialiseNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiRandom)
-		sconsify.InitialiseEngine(events, ui, true)
+		sconsify.StartMainLoop(events, ui, true)
 	}
 }
 

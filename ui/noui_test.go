@@ -28,7 +28,7 @@ func TestNoUiEmptyPlaylists(t *testing.T) {
 	}()
 
 	ui := InitialiseNoUserInterface(events, nil, &repeatOn, &random)
-	err := sconsify.InitialiseEngine(events, ui, true)
+	err := sconsify.StartMainLoop(events, ui, true)
 	if err == nil {
 		t.Errorf("No track selected should return an error")
 	}
@@ -43,7 +43,7 @@ func TestNoUiSequentialAndRepeating(t *testing.T) {
 
 	finished := make(chan bool)
 	go func() {
-		err := sconsify.InitialiseEngine(events, ui, true)
+		err := sconsify.StartMainLoop(events, ui, true)
 		finished <- err == nil
 	}()
 
@@ -67,7 +67,7 @@ func TestNoUiSequentialAndNotRepeating(t *testing.T) {
 
 	finished := make(chan bool)
 	go func() {
-		sconsify.InitialiseEngine(events, ui, true)
+		sconsify.StartMainLoop(events, ui, true)
 		finished <- true
 	}()
 
@@ -91,7 +91,7 @@ func TestNoUiRandomAndRepeating(t *testing.T) {
 
 	finished := make(chan bool)
 	go func() {
-		err := sconsify.InitialiseEngine(events, ui, true)
+		err := sconsify.StartMainLoop(events, ui, true)
 		finished <- err == nil
 	}()
 
@@ -117,7 +117,7 @@ func TestNoUiRandomAndNotRepeating(t *testing.T) {
 
 	finished := make(chan bool)
 	go func() {
-		sconsify.InitialiseEngine(events, ui, true)
+		sconsify.StartMainLoop(events, ui, true)
 		finished <- true
 	}()
 

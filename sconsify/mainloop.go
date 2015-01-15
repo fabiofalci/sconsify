@@ -1,6 +1,6 @@
 package sconsify
 
-func InitialiseEngine(events *Events, ui UserInterface, askForFirstTrack bool) error {
+func StartMainLoop(events *Events, ui UserInterface, askForFirstTrack bool) error {
 	select {
 	case playlists := <-events.PlaylistsUpdates():
 		err := ui.NewPlaylists(playlists)
