@@ -12,11 +12,14 @@ func InitialiseEngine(events *Events, ui UserInterface, askForFirstTrack bool) e
 		return nil
 	}
 
-	if askForFirstTrack {
-		track := ui.GetNextToPlay()
-		if track != nil {
+	getNextToPlay := func() {
+		if track := ui.GetNextToPlay(); track != nil {
 			events.Play(track)
 		}
+	}
+
+	if askForFirstTrack {
+		getNextToPlay()
 	}
 
 	running := true
@@ -33,10 +36,7 @@ func InitialiseEngine(events *Events, ui UserInterface, askForFirstTrack bool) e
 				running = false
 			}
 		case <-events.NextPlayUpdates():
-			track := ui.GetNextToPlay()
-			if track != nil {
-				events.Play(track)
-			}
+			getNextToPlay()
 		case newPlaylist := <-events.PlaylistsUpdates():
 			ui.NewPlaylists(newPlaylist)
 		case <-events.ShutdownEngineUpdates():
