@@ -19,18 +19,18 @@ type Spotify struct {
 	events         *sconsify.Events
 	pa             *portAudio
 	session        *sp.Session
-	appKey         *[]byte
+	appKey         []byte
 	playlistFilter []string
 }
 
-func Initialise(username *string, pass *[]byte, events *sconsify.Events, playlistFilter *string) {
+func Initialise(username string, pass []byte, events *sconsify.Events, playlistFilter *string) {
 	if err := initialiseSpotify(username, pass, events, playlistFilter); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		events.ShutdownEngine()
 	}
 }
 
-func initialiseSpotify(username *string, pass *[]byte, events *sconsify.Events, playlistFilter *string) error {
+func initialiseSpotify(username string, pass []byte, events *sconsify.Events, playlistFilter *string) error {
 	spotify := &Spotify{events: events}
 	spotify.setPlaylistFilter(*playlistFilter)
 	if err := spotify.initKey(); err != nil {
@@ -58,8 +58,8 @@ func (spotify *Spotify) initAudio() {
 	spotify.pa = newPortAudio()
 }
 
-func (spotify *Spotify) login(username *string, pass *[]byte) error {
-	credentials := sp.Credentials{Username: *username, Password: string(*pass)}
+func (spotify *Spotify) login(username string, pass []byte) error {
+	credentials := sp.Credentials{Username: username, Password: string(pass)}
 	if err := spotify.session.Login(credentials, false); err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func (spotify *Spotify) login(username *string, pass *[]byte) error {
 func (spotify *Spotify) initSession() error {
 	var err error
 	spotify.session, err = sp.NewSession(&sp.Config{
-		ApplicationKey:   *spotify.appKey,
+		ApplicationKey:   spotify.appKey,
 		ApplicationName:  "sconsify",
 		CacheLocation:    spotify.cacheLocation,
 		SettingsLocation: spotify.cacheLocation,
