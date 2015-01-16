@@ -11,8 +11,7 @@ import (
 const SCONSIFY_CONF_LOCATION = "/.sconsify"
 
 func GetCacheLocation() string {
-	basePath := getConfLocation()
-	if basePath != "" {
+	if basePath := getConfLocation(); basePath != "" {
 		return basePath + "/cache"
 	}
 	return ""
@@ -25,10 +24,8 @@ func DeleteCache(cacheLocation string) {
 }
 
 func getConfLocation() string {
-	dir, err := homedir.Dir()
-	if err == nil {
-		dir, err = homedir.Expand(dir)
-		if err == nil && dir != "" {
+	if dir, err := homedir.Dir(); err == nil {
+		if dir, err = homedir.Expand(dir); err == nil && dir != "" {
 			return dir + SCONSIFY_CONF_LOCATION
 		}
 	}
@@ -36,9 +33,7 @@ func getConfLocation() string {
 }
 
 func ProcessSconsifyrc() {
-	basePath := getConfLocation()
-	if basePath == "" {
-		return
+	if basePath := getConfLocation(); basePath != "" {
+		flagrc.ProcessFlagrc(basePath + "/sconsifyrc")
 	}
-	flagrc.ProcessFlagrc(basePath + "/sconsifyrc")
 }
