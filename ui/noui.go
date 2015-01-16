@@ -36,6 +36,7 @@ func InitialiseNoUserInterface(events *sconsify.Events, output Printer, repeatOn
 		events:   events,
 	}
 
+	go noui.listenForTermination()
 	go noui.listenForKeyboardEvents()
 	return noui
 }
@@ -86,14 +87,11 @@ func (noui *NoUi) NewPlaylists(playlists sconsify.Playlists) error {
 }
 
 func (noui *NoUi) listenForTermination() {
-	// FIXME don't think is working
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	go func() {
-		for _ = range c {
-			noui.Shutdown()
-		}
-	}()
+	for _ = range c {
+		noui.Shutdown()
+	}
 }
 
 func (noui *NoUi) Shutdown() {
