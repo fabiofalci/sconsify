@@ -3,7 +3,6 @@ package spotify
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -252,7 +251,6 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 	}
 	player := spotify.session.Player()
 	if err := player.Load(track); err != nil {
-		log.Fatal(err)
 		return
 	}
 	player.Play()
