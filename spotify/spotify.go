@@ -273,7 +273,10 @@ func (spotify *Spotify) search(query string) {
 		Playlists: sp.SearchSpec{Offset: 0, Count: 100},
 		Type:      sp.SearchStandard,
 	}
-	search, _ := spotify.session.Search(query, searchOptions)
+	search, err := spotify.session.Search(query, searchOptions)
+	if err != nil {
+		return
+	}
 	search.Wait()
 
 	numberOfTracks := search.Tracks()
