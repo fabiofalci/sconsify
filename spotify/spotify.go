@@ -117,20 +117,15 @@ func (spotify *Spotify) waitForSuccessfulConnectionStateUpdates() bool {
 		time.Sleep(9 * time.Second)
 		timeout <- true
 	}()
-	loggedIn := false
-	running := true
-	for running {
+	for {
 		select {
 		case <-spotify.session.ConnectionStateUpdates():
-			if spotify.isLoggedIn() {
-				running = false
-				loggedIn = true
-			}
+			return spotify.isLoggedIn()
 		case <-timeout:
-			running = false
+			return false
 		}
 	}
-	return loggedIn
+	return false
 }
 
 func (spotify *Spotify) isLoggedIn() bool {
