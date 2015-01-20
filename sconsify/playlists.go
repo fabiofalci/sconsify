@@ -31,15 +31,20 @@ func InitPlaylists() *Playlists {
 }
 
 func (playlists *Playlists) Get(name string) *Playlist {
-	return playlists.playlists[name]
+	for _, playlist := range playlists.playlists {
+		if playlist.Name() == name {
+			return playlist
+		}
+	}
+	return nil
 }
 
 func (playlists *Playlists) Playlists() int {
 	return len(playlists.playlists)
 }
 
-func (playlists *Playlists) AddPlaylist(name string, playlist *Playlist) {
-	playlists.playlists[name] = playlist
+func (playlists *Playlists) AddPlaylist(id string, playlist *Playlist) {
+	playlists.playlists[id] = playlist
 	playlists.buildPlaylistForNewMode()
 }
 
@@ -51,15 +56,20 @@ func (playlists *Playlists) Merge(newPlaylist *Playlists) {
 }
 
 func (playlists *Playlists) Remove(playlistName string) {
-	delete(playlists.playlists, playlistName)
-	playlists.buildPlaylistForNewMode()
+	for key, playlist := range playlists.playlists {
+		if playlist.Name() == playlistName {
+			delete(playlists.playlists, key)
+			playlists.buildPlaylistForNewMode()
+			return
+		}
+	}
 }
 
 func (playlists *Playlists) Names() []string {
 	names := make([]string, playlists.Playlists())
 	i := 0
-	for name, _ := range playlists.playlists {
-		names[i] = name
+	for _, playlist := range playlists.playlists {
+		names[i] = playlist.Name()
 		i++
 	}
 	return names
@@ -142,7 +152,7 @@ func (playlists *Playlists) buildSequentialModeTracks() {
 
 	index := 0
 	for _, name := range names {
-		playlist := playlists.playlists[name]
+		playlist := playlists.Get(name)
 		for i := 0; i < playlist.Tracks(); i++ {
 			playlists.premadeTracks[index] = playlist.Track(i)
 			index++
@@ -165,7 +175,7 @@ func (playlists *Playlists) GetModeAsString() string {
 }
 
 func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrack int) error {
-	if playlist, ok := playlists.playlists[currentPlaylist]; ok {
+	if playlist := playlists.Get(currentPlaylist); playlist != nil {
 		if playlist.Tracks() > currentIndexTrack {
 			playlists.currentPlaylist = currentPlaylist
 			playlists.currentIndexTrack = currentIndexTrack
