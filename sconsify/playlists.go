@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"strconv"
 )
 
 type Playlists struct {
@@ -44,8 +45,20 @@ func (playlists *Playlists) Playlists() int {
 }
 
 func (playlists *Playlists) AddPlaylist(id string, playlist *Playlist) {
+	playlists.checkDuplicatedNames(playlist, playlist.Name(), 1)
 	playlists.playlists[id] = playlist
 	playlists.buildPlaylistForNewMode()
+}
+
+func (playlists *Playlists) checkDuplicatedNames(newPlaylist *Playlist, originalName string, diff int) {
+	for _, playlist := range playlists.playlists {
+		if newPlaylist.Name() == playlist.Name() {
+			newPlaylist.name = originalName + " (" + strconv.Itoa(diff) + ")"
+			diff = diff + 1
+			playlists.checkDuplicatedNames(newPlaylist, originalName, diff)
+			return
+		}
+	}
 }
 
 func (playlists *Playlists) Merge(newPlaylist *Playlists) {

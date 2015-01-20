@@ -308,3 +308,71 @@ func TestRemove(t *testing.T) {
 		t.Error("Playlist names look wrong after removing name1 playlist")
 	}
 }
+
+func TestDuplicatedNames(t *testing.T) {
+	playlists := InitPlaylists()
+
+	playlist := createDummyPlaylistWithId("0", "name")
+	playlists.AddPlaylist("0", playlist)
+
+	if playlist.Name() != "name" {
+		t.Error("Playlist Name should be 'name': ", playlist.Name())
+	}
+
+	playlist = createDummyPlaylistWithId("1", "name")
+	playlists.AddPlaylist("1", playlist)
+
+	if playlist.Name() != "name (1)" {
+		t.Error("Playlist Name should be 'name (1)': ", playlist.Name())
+	}
+
+	playlist = createDummyPlaylistWithId("2", "name")
+	playlists.AddPlaylist("2", playlist)
+
+	if playlist.Name() != "name (2)" {
+		t.Error("Playlist Name should be 'name (2)': ", playlist.Name())
+	}
+
+	playlist = createDummyPlaylistWithId("3", "name (1)")
+	playlists.AddPlaylist("3", playlist)
+
+	if playlist.Name() != "name (1) (1)" {
+		t.Error("Playlist Name should be 'name (1) (1)': ", playlist.Name())
+	}
+
+	playlist = createDummyPlaylistWithId("4", "name (1)")
+	playlists.AddPlaylist("4", playlist)
+
+	if playlist.Name() != "name (1) (2)" {
+		t.Error("Playlist Name should be 'name (1) (2)': ", playlist.Name())
+	}
+
+	playlist = createDummyPlaylistWithId("5", "testing")
+	playlists.AddPlaylist("5", playlist)
+
+	if playlist.Name() != "testing" {
+		t.Error("Playlist Name should be 'testing': ", playlist.Name())
+	}
+
+	playlist = createDummyPlaylistWithId("6", "testing (1)")
+	playlists.AddPlaylist("6", playlist)
+
+	if playlist.Name() != "testing (1)" {
+		t.Error("Playlist Name should be 'testing (1)': ", playlist.Name())
+	}
+
+	playlist = createDummyPlaylistWithId("7", "testing")
+	playlists.AddPlaylist("7", playlist)
+
+	if playlist.Name() != "testing (2)" {
+		t.Error("Playlist Name should be 'testing (2)': ", playlist.Name())
+	}
+
+	playlist = createDummyPlaylistWithId("8", "testing")
+	playlists.AddPlaylist("8", playlist)
+
+	if playlist.Name() != "testing (3)" {
+		t.Error("Playlist Name should be 'testing (3)': ", playlist.Name())
+	}
+
+}

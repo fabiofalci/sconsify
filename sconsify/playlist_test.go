@@ -70,3 +70,12 @@ func createDummyPlaylist(name string) *Playlist {
 	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
 	return InitPlaylist(name, name, tracks)
 }
+
+func createDummyPlaylistWithId(id string, name string) *Playlist {
+	tracks := make([]*Track, 4)
+	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
+	tracks[1] = InitTrack("1", "artist1", "name1", "duration1")
+	tracks[2] = InitTrack("2", "artist2", "name2", "duration2")
+	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
+	return InitPlaylist(id, name, tracks)
+}
