@@ -215,5 +215,5 @@ func createDummyPlaylist() *sconsify.Playlist {
 	tracks[1] = sconsify.InitTrack("1", "artist1", "name1", "duration1")
 	tracks[2] = sconsify.InitTrack("2", "artist2", "name2", "duration2")
 	tracks[3] = sconsify.InitTrack("3", "artist3", "name3", "duration3")
-	return sconsify.InitPlaylist("test", tracks)
+	return sconsify.InitPlaylist("0", "test", tracks)
 }
