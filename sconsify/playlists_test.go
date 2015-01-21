@@ -11,7 +11,7 @@ func TestNormalMode(t *testing.T) {
 		t.Errorf("Playlists initial state should be Normal")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
 	playlists.SetCurrents("name", 0)
 
 	if track, repeating := playlists.GetNext(); track.Uri != "1" || repeating {
@@ -41,7 +41,7 @@ func TestRandomMode(t *testing.T) {
 		t.Errorf("Playlists initial state should be Normal")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
 	playlists.SetCurrents("name", 0)
 	playlists.SetMode(RandomMode)
 
@@ -66,8 +66,8 @@ func TestAllRandomMode(t *testing.T) {
 		t.Errorf("Playlists initial state should be Normal")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
-	playlists.AddPlaylist("name1", createDummyPlaylist("name1"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name1"))
 	playlists.SetCurrents("name", 0)
 	playlists.SetMode(AllRandomMode)
 
@@ -93,8 +93,8 @@ func TestSequentialRandomMode(t *testing.T) {
 		t.Errorf("Playlists initial state should be Normal")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
-	playlists.AddPlaylist("name1", createDummyPlaylist("name1"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name1"))
 	playlists.SetCurrents("name", 0)
 	playlists.SetMode(SequentialMode)
 
@@ -124,14 +124,14 @@ func TestPremadeTracks(t *testing.T) {
 	}
 
 	playlists = InitPlaylists()
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
 	playlists.SetMode(SequentialMode)
 
 	if playlists.PremadeTracks() != 4 {
 		t.Errorf("PremadeTracks should be 4")
 	}
 
-	playlists.AddPlaylist("name1", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name1"))
 	if playlists.PremadeTracks() != 8 {
 		t.Errorf("PremadeTracks should be 8")
 	}
@@ -147,7 +147,7 @@ func TestSetCurrents(t *testing.T) {
 		t.Errorf("No playlist should be selected")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
 
 	if err := playlists.SetCurrents("name", 0); err != nil {
 		t.Errorf("Playlist and track should be found")
@@ -167,12 +167,12 @@ func TestTracks(t *testing.T) {
 		t.Errorf("Tracks should be empty")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
 	if playlists.Tracks() != 4 {
 		t.Errorf("Tracks should be 4")
 	}
 
-	playlists.AddPlaylist("name1", createDummyPlaylist("name1"))
+	playlists.AddPlaylist(createDummyPlaylist("name1"))
 	if playlists.Tracks() != 8 {
 		t.Errorf("Tracks should be 8")
 	}
@@ -185,13 +185,13 @@ func TestNames(t *testing.T) {
 		t.Errorf("Playlists should be empty")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
 	names := playlists.Names()
 	if len(names) != 1 {
 		t.Errorf("Should have only one name")
 	}
 
-	playlists.AddPlaylist("name1", createDummyPlaylist("name1"))
+	playlists.AddPlaylist(createDummyPlaylist("name1"))
 	names = playlists.Names()
 	if len(names) != 2 {
 		t.Errorf("Should have 2 names")
@@ -205,7 +205,7 @@ func TestGetNext(t *testing.T) {
 		t.Errorf("Track should not be found")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
 
 	playlists.SetCurrents("name", 0)
 
@@ -227,13 +227,13 @@ func TestPlaylists(t *testing.T) {
 		t.Errorf("Playlist count should be empty")
 	}
 
-	playlists.AddPlaylist("name", createDummyPlaylist("name"))
+	playlists.AddPlaylist(createDummyPlaylist("name"))
 
 	if count := playlists.Playlists(); count != 1 {
 		t.Errorf("Playlist count should be 1 but it is %v", count)
 	}
 
-	playlists.AddPlaylist("name1", createDummyPlaylist("name1"))
+	playlists.AddPlaylist(createDummyPlaylist("name1"))
 	if count := playlists.Playlists(); count != 2 {
 		t.Errorf("Playlist count should be 2 but it is %v", count)
 	}
@@ -288,9 +288,9 @@ func TestStateInvertMode(t *testing.T) {
 
 func TestRemove(t *testing.T) {
 	playlists := InitPlaylists()
-	playlists.AddPlaylist("name0", createDummyPlaylist("name0"))
-	playlists.AddPlaylist("name1", createDummyPlaylist("name1"))
-	playlists.AddPlaylist("name2", createDummyPlaylist("name2"))
+	playlists.AddPlaylist(createDummyPlaylist("name0"))
+	playlists.AddPlaylist(createDummyPlaylist("name1"))
+	playlists.AddPlaylist(createDummyPlaylist("name2"))
 
 	if playlists.Playlists() != 3 {
 		t.Error("Number of playlists should be 3")
@@ -313,63 +313,63 @@ func TestDuplicatedNames(t *testing.T) {
 	playlists := InitPlaylists()
 
 	playlist := createDummyPlaylistWithId("0", "name")
-	playlists.AddPlaylist("0", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "name" {
 		t.Error("Playlist Name should be 'name': ", playlist.Name())
 	}
 
 	playlist = createDummyPlaylistWithId("1", "name")
-	playlists.AddPlaylist("1", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "name (1)" {
 		t.Error("Playlist Name should be 'name (1)': ", playlist.Name())
 	}
 
 	playlist = createDummyPlaylistWithId("2", "name")
-	playlists.AddPlaylist("2", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "name (2)" {
 		t.Error("Playlist Name should be 'name (2)': ", playlist.Name())
 	}
 
 	playlist = createDummyPlaylistWithId("3", "name (1)")
-	playlists.AddPlaylist("3", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "name (1) (1)" {
 		t.Error("Playlist Name should be 'name (1) (1)': ", playlist.Name())
 	}
 
 	playlist = createDummyPlaylistWithId("4", "name (1)")
-	playlists.AddPlaylist("4", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "name (1) (2)" {
 		t.Error("Playlist Name should be 'name (1) (2)': ", playlist.Name())
 	}
 
 	playlist = createDummyPlaylistWithId("5", "testing")
-	playlists.AddPlaylist("5", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "testing" {
 		t.Error("Playlist Name should be 'testing': ", playlist.Name())
 	}
 
 	playlist = createDummyPlaylistWithId("6", "testing (1)")
-	playlists.AddPlaylist("6", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "testing (1)" {
 		t.Error("Playlist Name should be 'testing (1)': ", playlist.Name())
 	}
 
 	playlist = createDummyPlaylistWithId("7", "testing")
-	playlists.AddPlaylist("7", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "testing (2)" {
 		t.Error("Playlist Name should be 'testing (2)': ", playlist.Name())
 	}
 
 	playlist = createDummyPlaylistWithId("8", "testing")
-	playlists.AddPlaylist("8", playlist)
+	playlists.AddPlaylist(playlist)
 
 	if playlist.Name() != "testing (3)" {
 		t.Error("Playlist Name should be 'testing (3)': ", playlist.Name())

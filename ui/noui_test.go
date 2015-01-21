@@ -132,7 +132,7 @@ func TestNoUiRandomAndNotRepeating(t *testing.T) {
 
 func sendNewPlaylist(events *sconsify.Events) {
 	playlists := sconsify.InitPlaylists()
-	playlists.AddPlaylist("name", createDummyPlaylist())
+	playlists.AddPlaylist(createDummyPlaylist())
 	events.NewPlaylist(playlists)
 }
 

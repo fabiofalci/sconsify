@@ -44,9 +44,9 @@ func (playlists *Playlists) Playlists() int {
 	return len(playlists.playlists)
 }
 
-func (playlists *Playlists) AddPlaylist(id string, playlist *Playlist) {
+func (playlists *Playlists) AddPlaylist(playlist *Playlist) {
 	playlists.checkDuplicatedNames(playlist, playlist.Name(), 1)
-	playlists.playlists[id] = playlist
+	playlists.playlists[playlist.Id()] = playlist
 	playlists.buildPlaylistForNewMode()
 }
 
