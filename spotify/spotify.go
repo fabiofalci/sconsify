@@ -106,8 +106,7 @@ func (spotify *Spotify) checkIfLoggedIn() error {
 	if !spotify.waitForSuccessfulConnectionStateUpdates() {
 		return errors.New("Could not login")
 	}
-	spotify.finishInitialisation()
-	return nil
+	return spotify.finishInitialisation()
 }
 
 func (spotify *Spotify) waitForSuccessfulConnectionStateUpdates() bool {
@@ -131,10 +130,13 @@ func (spotify *Spotify) isLoggedIn() bool {
 	return spotify.session.ConnectionState() == sp.ConnectionStateLoggedIn
 }
 
-func (spotify *Spotify) finishInitialisation() {
-	spotify.initPlaylist()
+func (spotify *Spotify) finishInitialisation() error {
+	if err := spotify.initPlaylist(); err != nil {
+		return err
+	}
 	go spotify.runPlayer()
 	spotify.waitForEvents()
+	return nil
 }
 
 func (spotify *Spotify) waitForEvents() {
@@ -156,10 +158,13 @@ func (spotify *Spotify) waitForEvents() {
 	}
 }
 
-func (spotify *Spotify) initPlaylist() {
+func (spotify *Spotify) initPlaylist() error {
 	playlists := sconsify.InitPlaylists()
 
-	allPlaylists, _ := spotify.session.Playlists()
+	allPlaylists, err := spotify.session.Playlists()
+	if err != nil {
+		return err
+	}
 	allPlaylists.Wait()
 	for i := 0; i < allPlaylists.Playlists(); i++ {
 		playlist := allPlaylists.Playlist(i)
@@ -177,6 +182,7 @@ func (spotify *Spotify) initPlaylist() {
 	}
 
 	spotify.events.NewPlaylist(playlists)
+	return nil
 }
 
 func (spotify *Spotify) canAddPlaylist(playlist *sp.Playlist, playlistType sp.PlaylistType) bool {
