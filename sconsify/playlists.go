@@ -209,8 +209,7 @@ func (playlists *Playlists) GetNext() (*Track, bool) {
 		return playlists.premadeTracks[playlists.currentIndexTrack], repeating
 	}
 
-	playlist := playlists.Get(playlists.currentPlaylist)
-	if playlist != nil {
+	if playlist := playlists.Get(playlists.currentPlaylist); playlist != nil {
 		playlists.currentIndexTrack = playlist.GetNextTrack(playlists.currentIndexTrack)
 		return playlist.Track(playlists.currentIndexTrack), repeating
 	}
