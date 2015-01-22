@@ -200,21 +200,32 @@ func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrac
 
 func (playlists *Playlists) GetNext() (*Track, bool) {
 	repeating := false
-	if playlists.premadeTracks != nil {
+	if playlists.hasPremadeTracks() {
 		playlists.currentIndexTrack++
-		if playlists.currentIndexTrack >= len(playlists.premadeTracks) {
+		if playlists.isCurrentTrackOutOfBounds() {
 			playlists.currentIndexTrack = 0
 			repeating = true
 		}
 		return playlists.premadeTracks[playlists.currentIndexTrack], repeating
 	}
 
-	if playlist := playlists.Get(playlists.currentPlaylist); playlist != nil {
+	if playlist := playlists.getCurrentPlaylist(); playlist != nil {
 		playlists.currentIndexTrack = playlist.GetNextTrack(playlists.currentIndexTrack)
 		return playlist.Track(playlists.currentIndexTrack), repeating
 	}
-
 	return nil, false
+}
+
+func (playlists *Playlists) getCurrentPlaylist() *Playlist {
+	return playlists.Get(playlists.currentPlaylist)
+}
+
+func (playlists *Playlists) hasPremadeTracks() bool {
+	return playlists.premadeTracks != nil
+}
+
+func (playlists *Playlists) isCurrentTrackOutOfBounds() bool {
+	return playlists.currentIndexTrack >= len(playlists.premadeTracks)
 }
 
 func (playlists *Playlists) SetMode(mode int) {
