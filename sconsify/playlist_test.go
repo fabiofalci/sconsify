@@ -15,17 +15,17 @@ func TestPlaylistTracks(t *testing.T) {
 func TestPlaylistGetNextTrack(t *testing.T) {
 	playlist := createDummyPlaylist("testing")
 
-	if nextIndex := playlist.GetNextTrack(0); nextIndex != 1 {
-		t.Errorf("Next track should be track 1")
+	if nextIndex, repeating := playlist.GetNextTrack(0); nextIndex != 1 || repeating {
+		t.Error("Next track should be 1 and not repeating: ", nextIndex, repeating)
 	}
-	if nextIndex := playlist.GetNextTrack(1); nextIndex != 2 {
-		t.Errorf("Next track should be track 2")
+	if nextIndex, repeating := playlist.GetNextTrack(1); nextIndex != 2 || repeating {
+		t.Error("Next track should be 2 and not repeating: ", nextIndex, repeating)
 	}
-	if nextIndex := playlist.GetNextTrack(2); nextIndex != 3 {
-		t.Errorf("Next track should be track 3")
+	if nextIndex, repeating := playlist.GetNextTrack(2); nextIndex != 3 || repeating {
+		t.Error("Next track should be 3 and not repeating: ", nextIndex, repeating)
 	}
-	if nextIndex := playlist.GetNextTrack(3); nextIndex != 0 {
-		t.Errorf("Next track should be track 0")
+	if nextIndex, repeating := playlist.GetNextTrack(3); nextIndex != 0 || !repeating {
+		t.Error("Next track should be 0 and repeating: ", nextIndex, repeating)
 	}
 }
 

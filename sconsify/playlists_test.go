@@ -15,21 +15,20 @@ func TestNormalMode(t *testing.T) {
 	playlists.SetCurrents("name", 0)
 
 	if track, repeating := playlists.GetNext(); track.Uri != "1" || repeating {
-		t.Errorf("Random track should be 1")
+		t.Error("Next track should be 1 and not repeating: ", track.Uri, repeating)
 	}
 	if track, repeating := playlists.GetNext(); track.Uri != "2" || repeating {
-		t.Errorf("Random track should be 2")
+		t.Error("Next track should be 2 and not repeating: ", track.Uri, repeating)
 	}
 	if track, repeating := playlists.GetNext(); track.Uri != "3" || repeating {
-		t.Errorf("Random track should be 3")
+		t.Error("Next track should be 3 and not repeating: "+track.Uri, repeating)
 	}
-	if track, repeating := playlists.GetNext(); track.Uri != "0" || repeating {
-		t.Errorf("Random track should be 0")
+	if track, repeating := playlists.GetNext(); track.Uri != "0" || !repeating {
+		t.Error("Next track should be 0 and repeating : ", track.Uri, repeating)
 	}
 
-	// normal mode doesn't support repeating flag
 	if track, repeating := playlists.GetNext(); track.Uri != "1" || repeating {
-		t.Errorf("Random track should be 1")
+		t.Error("Next track should be 1 and not repeating: ", track.Uri, repeating)
 	}
 }
 

@@ -15,11 +15,11 @@ func InitSearchPlaylist(id string, name string, tracks []*Track) *Playlist {
 	return &Playlist{id: id, name: name, tracks: tracks, search: true}
 }
 
-func (playlist *Playlist) GetNextTrack(currentIndexTrack int) int {
+func (playlist *Playlist) GetNextTrack(currentIndexTrack int) (int, bool) {
 	if currentIndexTrack >= len(playlist.tracks)-1 {
-		return 0
+		return 0, true
 	}
-	return currentIndexTrack + 1
+	return currentIndexTrack + 1, false
 }
 
 func (playlist *Playlist) Track(index int) *Track {

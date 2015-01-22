@@ -13,7 +13,9 @@ type Playlists struct {
 	currentIndexTrack int
 	currentPlaylist   string
 	playMode          int
-	premadeTracks     []*Track
+
+	// when random modes or sequential mode we build the tracks here
+	premadeTracks *Playlist
 }
 
 const (
@@ -97,7 +99,10 @@ func (playlists *Playlists) Tracks() int {
 }
 
 func (playlists *Playlists) PremadeTracks() int {
-	return len(playlists.premadeTracks)
+	if playlists.premadeTracks == nil {
+		return 0
+	}
+	return playlists.premadeTracks.Tracks()
 }
 
 func (playlists *Playlists) buildPlaylistForNewMode() error {
@@ -122,55 +127,62 @@ func (playlists *Playlists) buildPlaylistForNewMode() error {
 		return errors.New("No tracks selected")
 	}
 
-	playlists.premadeTracks = make([]*Track, numberOfTracks)
+	var tracks []*Track
 	if playlists.isRandomMode() {
-		playlists.buildRandomModeTracks(playlist, numberOfTracks)
+		tracks = playlists.buildRandomModeTracks(playlist, numberOfTracks)
 	} else if playlists.isAllRandomMode() {
-		playlists.buildAllRandomModeTracks(numberOfTracks)
+		tracks = playlists.buildAllRandomModeTracks(numberOfTracks)
 	} else {
 		// sequential
-		playlists.buildSequentialModeTracks()
+		tracks = playlists.buildSequentialModeTracks()
 	}
 
+	playlists.premadeTracks = InitPlaylist("premade", "premade", tracks)
 	playlists.currentIndexTrack = -1
 
 	return nil
 }
 
-func (playlists *Playlists) buildRandomModeTracks(playlist *Playlist, numberOfTracks int) {
+func (playlists *Playlists) buildRandomModeTracks(playlist *Playlist, numberOfTracks int) []*Track {
+	tracks := make([]*Track, numberOfTracks)
 	perm := getRandomPermutation(numberOfTracks)
 
 	index := 0
 	for i := 0; i < playlist.Tracks(); i++ {
-		playlists.premadeTracks[perm[index]] = playlist.Track(i)
+		tracks[perm[index]] = playlist.Track(i)
 		index++
 	}
+	return tracks
 }
 
-func (playlists *Playlists) buildAllRandomModeTracks(numberOfTracks int) {
+func (playlists *Playlists) buildAllRandomModeTracks(numberOfTracks int) []*Track {
+	tracks := make([]*Track, numberOfTracks)
 	perm := getRandomPermutation(numberOfTracks)
 
 	index := 0
 	for _, playlist := range playlists.playlists {
 		for i := 0; i < playlist.Tracks(); i++ {
-			playlists.premadeTracks[perm[index]] = playlist.Track(i)
+			tracks[perm[index]] = playlist.Track(i)
 			index++
 		}
 	}
+	return tracks
 }
 
-func (playlists *Playlists) buildSequentialModeTracks() {
+func (playlists *Playlists) buildSequentialModeTracks() []*Track {
 	names := playlists.Names()
 	sort.Strings(names)
+	tracks := make([]*Track, playlists.Tracks())
 
 	index := 0
 	for _, name := range names {
 		playlist := playlists.Get(name)
 		for i := 0; i < playlist.Tracks(); i++ {
-			playlists.premadeTracks[index] = playlist.Track(i)
+			tracks[index] = playlist.Track(i)
 			index++
 		}
 	}
+	return tracks
 }
 
 func getRandomPermutation(numberOfTracks int) []int {
@@ -199,19 +211,18 @@ func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrac
 }
 
 func (playlists *Playlists) GetNext() (*Track, bool) {
-	repeating := false
+	var playingPlaylist *Playlist
+
 	if playlists.hasPremadeTracks() {
-		playlists.currentIndexTrack++
-		if playlists.isCurrentTrackOutOfBounds() {
-			playlists.currentIndexTrack = 0
-			repeating = true
-		}
-		return playlists.premadeTracks[playlists.currentIndexTrack], repeating
+		playingPlaylist = playlists.premadeTracks
+	} else if playlist := playlists.getCurrentPlaylist(); playlist != nil {
+		playingPlaylist = playlist
 	}
 
-	if playlist := playlists.getCurrentPlaylist(); playlist != nil {
-		playlists.currentIndexTrack = playlist.GetNextTrack(playlists.currentIndexTrack)
-		return playlist.Track(playlists.currentIndexTrack), repeating
+	if playingPlaylist != nil {
+		var repeating bool
+		playlists.currentIndexTrack, repeating = playingPlaylist.GetNextTrack(playlists.currentIndexTrack)
+		return playingPlaylist.Track(playlists.currentIndexTrack), repeating
 	}
 	return nil, false
 }
@@ -225,7 +236,7 @@ func (playlists *Playlists) hasPremadeTracks() bool {
 }
 
 func (playlists *Playlists) isCurrentTrackOutOfBounds() bool {
-	return playlists.currentIndexTrack >= len(playlists.premadeTracks)
+	return playlists.currentIndexTrack >= playlists.PremadeTracks()
 }
 
 func (playlists *Playlists) SetMode(mode int) {
