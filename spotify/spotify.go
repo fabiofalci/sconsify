@@ -34,26 +34,20 @@ func initialiseSpotify(username string, pass []byte, events *sconsify.Events, pl
 	if err := spotify.initKey(); err != nil {
 		return err
 	}
-	spotify.initAudio()
-	defer portaudio.Terminate()
+	pa := newPortAudio()
 
 	cacheLocation, err := spotify.initCache()
 	if err == nil {
-		err = spotify.initSession(cacheLocation)
+		err = spotify.initSession(pa, cacheLocation)
 		if err == nil {
 			err = spotify.login(username, pass)
 			if err == nil {
-				err = spotify.checkIfLoggedIn()
+				err = spotify.checkIfLoggedIn(pa)
 			}
 		}
 	}
 
 	return err
-}
-
-func (spotify *Spotify) initAudio() {
-	portaudio.Initialize()
-	spotify.pa = newPortAudio()
 }
 
 func (spotify *Spotify) login(username string, pass []byte) error {
@@ -65,14 +59,14 @@ func (spotify *Spotify) login(username string, pass []byte) error {
 	return <-spotify.session.LoggedInUpdates()
 }
 
-func (spotify *Spotify) initSession(cacheLocation string) error {
+func (spotify *Spotify) initSession(pa *portAudio, cacheLocation string) error {
 	var err error
 	spotify.session, err = sp.NewSession(&sp.Config{
 		ApplicationKey:   spotify.appKey,
 		ApplicationName:  "sconsify",
 		CacheLocation:    cacheLocation,
 		SettingsLocation: cacheLocation,
-		AudioConsumer:    spotify.pa,
+		AudioConsumer:    pa,
 	})
 
 	return err
@@ -101,11 +95,11 @@ func (spotify *Spotify) shutdownSpotify() {
 	spotify.events.ShutdownEngine()
 }
 
-func (spotify *Spotify) checkIfLoggedIn() error {
+func (spotify *Spotify) checkIfLoggedIn(pa *portAudio) error {
 	if !spotify.waitForSuccessfulConnectionStateUpdates() {
 		return errors.New("Could not login")
 	}
-	return spotify.finishInitialisation()
+	return spotify.finishInitialisation(pa)
 }
 
 func (spotify *Spotify) waitForSuccessfulConnectionStateUpdates() bool {
@@ -129,11 +123,17 @@ func (spotify *Spotify) isLoggedIn() bool {
 	return spotify.session.ConnectionState() == sp.ConnectionStateLoggedIn
 }
 
-func (spotify *Spotify) finishInitialisation() error {
+func (spotify *Spotify) finishInitialisation(pa *portAudio) error {
+	// init audio could happen after initPlaylist but this logs to output therefore
+	// the screen isn't built properly
+	portaudio.Initialize()
+	go pa.player()
+	defer portaudio.Terminate()
+
 	if err := spotify.initPlaylist(); err != nil {
 		return err
 	}
-	go spotify.runPlayer()
+
 	spotify.waitForEvents()
 	return nil
 }
@@ -208,10 +208,6 @@ func (spotify *Spotify) setPlaylistFilter(playlistFilter string) {
 	for i := range spotify.playlistFilter {
 		spotify.playlistFilter[i] = strings.Trim(spotify.playlistFilter[i], " ")
 	}
-}
-
-func (spotify *Spotify) runPlayer() {
-	spotify.pa.player()
 }
 
 func (spotify *Spotify) pause() {
