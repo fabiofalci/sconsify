@@ -14,7 +14,6 @@ import (
 type Spotify struct {
 	currentTrack   *sconsify.Track
 	paused         bool
-	cacheLocation  string
 	events         *sconsify.Events
 	pa             *portAudio
 	session        *sp.Session
@@ -38,9 +37,9 @@ func initialiseSpotify(username string, pass []byte, events *sconsify.Events, pl
 	spotify.initAudio()
 	defer portaudio.Terminate()
 
-	err := spotify.initCache()
+	cacheLocation, err := spotify.initCache()
 	if err == nil {
-		err = spotify.initSession()
+		err = spotify.initSession(cacheLocation)
 		if err == nil {
 			err = spotify.login(username, pass)
 			if err == nil {
@@ -66,13 +65,13 @@ func (spotify *Spotify) login(username string, pass []byte) error {
 	return <-spotify.session.LoggedInUpdates()
 }
 
-func (spotify *Spotify) initSession() error {
+func (spotify *Spotify) initSession(cacheLocation string) error {
 	var err error
 	spotify.session, err = sp.NewSession(&sp.Config{
 		ApplicationKey:   spotify.appKey,
 		ApplicationName:  "sconsify",
-		CacheLocation:    spotify.cacheLocation,
-		SettingsLocation: spotify.cacheLocation,
+		CacheLocation:    cacheLocation,
+		SettingsLocation: cacheLocation,
 		AudioConsumer:    spotify.pa,
 	})
 
@@ -85,20 +84,20 @@ func (spotify *Spotify) initKey() error {
 	return err
 }
 
-func (spotify *Spotify) initCache() error {
-	location := sconsify.GetCacheLocation()
-	if location == "" {
-		return errors.New("Cannot find cache dir")
+func (spotify *Spotify) initCache() (string, error) {
+	cacheLocation := sconsify.GetCacheLocation()
+	if cacheLocation == "" {
+		return "", errors.New("Cannot find cache dir")
 	}
-
-	spotify.cacheLocation = location
-	sconsify.DeleteCache(spotify.cacheLocation)
-	return nil
+	if err := sconsify.DeleteCache(cacheLocation); err != nil {
+		return "", err
+	}
+	return cacheLocation, nil
 }
 
 func (spotify *Spotify) shutdownSpotify() {
 	spotify.session.Logout()
-	sconsify.DeleteCache(spotify.cacheLocation)
+	spotify.initCache()
 	spotify.events.ShutdownEngine()
 }
 

@@ -1,6 +1,7 @@
 package sconsify
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -17,10 +18,12 @@ func GetCacheLocation() string {
 	return ""
 }
 
-func DeleteCache(cacheLocation string) {
+func DeleteCache(cacheLocation string) error {
 	if strings.HasSuffix(cacheLocation, SCONSIFY_CONF_LOCATION+"/cache") {
 		os.RemoveAll(cacheLocation)
+		return nil
 	}
+	return errors.New("Invalid cache location: " + cacheLocation)
 }
 
 func getConfLocation() string {
