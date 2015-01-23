@@ -20,8 +20,7 @@ func GetCacheLocation() string {
 
 func DeleteCache(cacheLocation string) error {
 	if strings.HasSuffix(cacheLocation, SCONSIFY_CONF_LOCATION+"/cache") {
-		os.RemoveAll(cacheLocation)
-		return nil
+		return os.RemoveAll(cacheLocation)
 	}
 	return errors.New("Invalid cache location: " + cacheLocation)
 }
