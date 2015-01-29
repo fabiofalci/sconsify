@@ -20,40 +20,40 @@ func keybindings() error {
 	keys := make([]*KeyMapping, 0)
 
 	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
-		addKeyBinding(&keys, newKeyMapping('p', pauseCurrentSelectedTrack, view))
-		addKeyBinding(&keys, newKeyMapping('r', setRandomMode, view))
-		addKeyBinding(&keys, newKeyMapping('R', setAllRandomMode, view))
-		addKeyBinding(&keys, newKeyMapping('>', nextCommand, view))
-		addKeyBinding(&keys, newKeyMapping('/', enableSearchInputCommand, view))
-		addKeyBinding(&keys, newKeyMapping('j', cursorDown, view))
-		addKeyBinding(&keys, newKeyMapping('k', cursorUp, view))
-		addKeyBinding(&keys, newKeyMapping('q', quit, view))
+		addKeyBinding(&keys, newKeyMapping('p', view, pauseCurrentSelectedTrack))
+		addKeyBinding(&keys, newKeyMapping('r', view, setRandomMode))
+		addKeyBinding(&keys, newKeyMapping('R', view, setAllRandomMode))
+		addKeyBinding(&keys, newKeyMapping('>', view, nextCommand))
+		addKeyBinding(&keys, newKeyMapping('/', view, enableSearchInputCommand))
+		addKeyBinding(&keys, newKeyMapping('j', view, cursorDown))
+		addKeyBinding(&keys, newKeyMapping('k', view, cursorUp))
+		addKeyBinding(&keys, newKeyMapping('q', view, quit))
 	}
 
 	allViews := ""
-	addKeyBinding(&keys, newKeyMapping(gocui.KeySpace, playCurrentSelectedTrack, VIEW_TRACKS))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, playCurrentSelectedTrack, VIEW_TRACKS))
-	addKeyBinding(&keys, newKeyMapping('u', queueCommand, VIEW_TRACKS))
-	addKeyBinding(&keys, newKeyMapping('d', removeFromPlaylistsCommand, VIEW_PLAYLISTS))
-	addKeyBinding(&keys, newKeyMapping('d', removeFromQueueCommand, VIEW_QUEUE))
-	addKeyBinding(&keys, newKeyMapping('D', removeAllFromQueueCommand, VIEW_QUEUE))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, searchCommand, VIEW_STATUS))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyHome, cursorHome, allViews))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnd, cursorEnd, allViews))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyPgup, cursorPgup, allViews))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyPgdn, cursorPgdn, allViews))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowDown, cursorDown, allViews))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowUp, cursorUp, allViews))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowLeft, mainNextViewLeft, VIEW_TRACKS))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowLeft, nextView, VIEW_QUEUE))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowRight, nextView, VIEW_PLAYLISTS))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowRight, mainNextViewRight, VIEW_TRACKS))
-	addKeyBinding(&keys, newKeyMapping('h', mainNextViewLeft, VIEW_TRACKS))
-	addKeyBinding(&keys, newKeyMapping('h', nextView, VIEW_QUEUE))
-	addKeyBinding(&keys, newKeyMapping('l', nextView, VIEW_PLAYLISTS))
-	addKeyBinding(&keys, newKeyMapping('l', mainNextViewRight, VIEW_TRACKS))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyCtrlC, quit, allViews))
-	addKeyBinding(&keys, newKeyMapping('G', cursorEnd, allViews))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeySpace, VIEW_TRACKS, playCurrentSelectedTrack))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, VIEW_TRACKS, playCurrentSelectedTrack))
+	addKeyBinding(&keys, newKeyMapping('u', VIEW_TRACKS, queueCommand))
+	addKeyBinding(&keys, newKeyMapping('d', VIEW_PLAYLISTS, removeFromPlaylistsCommand))
+	addKeyBinding(&keys, newKeyMapping('d', VIEW_QUEUE, removeFromQueueCommand))
+	addKeyBinding(&keys, newKeyMapping('D', VIEW_QUEUE, removeAllFromQueueCommand))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyHome, allViews, cursorHome))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnd, allViews, cursorEnd))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyPgup, allViews, cursorPgup))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyPgdn, allViews, cursorPgdn))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowDown, allViews, cursorDown))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowUp, allViews, cursorUp))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_TRACKS, mainNextViewLeft))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_QUEUE, nextView))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowRight, VIEW_PLAYLISTS, nextView))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowRight, VIEW_TRACKS, mainNextViewRight))
+	addKeyBinding(&keys, newKeyMapping('h', VIEW_TRACKS, mainNextViewLeft))
+	addKeyBinding(&keys, newKeyMapping('h', VIEW_QUEUE, nextView))
+	addKeyBinding(&keys, newKeyMapping('l', VIEW_PLAYLISTS, nextView))
+	addKeyBinding(&keys, newKeyMapping('l', VIEW_TRACKS, mainNextViewRight))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyCtrlC, allViews, quit))
+	addKeyBinding(&keys, newKeyMapping('G', allViews, cursorEnd))
 
 	for _, key := range keys {
 		// it needs to copy the key because closures copy var references and we don't
@@ -71,10 +71,10 @@ func keybindings() error {
 	// multiple keys
 	keys = make([]*KeyMapping, 0)
 
-	addKeyBinding(&keys, newKeyMapping('g',
+	addKeyBinding(&keys, newKeyMapping('g', allViews,
 		func(g *gocui.Gui, v *gocui.View) error {
 			return multipleKeys(g, v, 'g')
-		}, allViews))
+		}))
 
 	for _, key := range keys {
 		keyCopy := key
@@ -92,7 +92,7 @@ func addKeyBinding(keys *[]*KeyMapping, key *KeyMapping) {
 	*keys = append(*keys, key)
 }
 
-func newKeyMapping(key interface{}, h gocui.KeybindingHandler, view string) *KeyMapping {
+func newKeyMapping(key interface{}, view string, h gocui.KeybindingHandler) *KeyMapping {
 	return &KeyMapping{key: key, h: h, view: view}
 }
 
