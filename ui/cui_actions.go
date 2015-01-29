@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/fabiofalci/sconsify/sconsify"
@@ -12,6 +13,8 @@ type KeyMapping struct {
 	h    gocui.KeybindingHandler
 	view string
 }
+
+var multipleKeysBuffer bytes.Buffer
 
 func keybindings() error {
 	keys := make([]*KeyMapping, 0)
@@ -50,10 +53,30 @@ func keybindings() error {
 	addKeyBinding(&keys, newKeyMapping('l', nextView, VIEW_PLAYLISTS))
 	addKeyBinding(&keys, newKeyMapping('l', mainNextViewRight, VIEW_TRACKS))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyCtrlC, quit, allViews))
+	addKeyBinding(&keys, newKeyMapping('G', cursorEnd, allViews))
 
 	for _, key := range keys {
 		// it needs to copy the key because closures copy var references and we don't
 		// want to execute always the last action
+		keyCopy := key
+		if err := gui.g.SetKeybinding(key.view, key.key, 0,
+			func(g *gocui.Gui, v *gocui.View) error {
+				resetMultipleKeys()
+				return keyCopy.h(g, v)
+			}); err != nil {
+			return err
+		}
+	}
+
+	// multiple keys
+	keys = make([]*KeyMapping, 0)
+
+	addKeyBinding(&keys, newKeyMapping('g',
+		func(g *gocui.Gui, v *gocui.View) error {
+			return multipleKeys(g, v, 'g')
+		}, allViews))
+
+	for _, key := range keys {
 		keyCopy := key
 		if err := gui.g.SetKeybinding(key.view, key.key, 0,
 			func(g *gocui.Gui, v *gocui.View) error {
@@ -62,7 +85,6 @@ func keybindings() error {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -72,6 +94,22 @@ func addKeyBinding(keys *[]*KeyMapping, key *KeyMapping) {
 
 func newKeyMapping(key interface{}, h gocui.KeybindingHandler, view string) *KeyMapping {
 	return &KeyMapping{key: key, h: h, view: view}
+}
+
+func resetMultipleKeys() {
+	multipleKeysBuffer.Reset()
+}
+
+func multipleKeys(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
+	multipleKeysBuffer.WriteRune(pressedKey)
+
+	switch multipleKeysBuffer.String() {
+	case "gg":
+		cursorHome(g, v)
+		resetMultipleKeys()
+	}
+
+	return nil
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
