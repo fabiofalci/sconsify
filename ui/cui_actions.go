@@ -7,112 +7,71 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+type KeyMapping struct {
+	key  interface{}
+	h    gocui.KeybindingHandler
+	view string
+}
+
 func keybindings() error {
-	views := []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE}
+	keys := make([]*KeyMapping, 0)
+
+	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
+		addKeyBinding(&keys, newKeyMapping('p', pauseCurrentSelectedTrack, view))
+		addKeyBinding(&keys, newKeyMapping('r', setRandomMode, view))
+		addKeyBinding(&keys, newKeyMapping('R', setAllRandomMode, view))
+		addKeyBinding(&keys, newKeyMapping('>', nextCommand, view))
+		addKeyBinding(&keys, newKeyMapping('/', enableSearchInputCommand, view))
+		addKeyBinding(&keys, newKeyMapping('j', cursorDown, view))
+		addKeyBinding(&keys, newKeyMapping('k', cursorUp, view))
+		addKeyBinding(&keys, newKeyMapping('q', quit, view))
+	}
+
 	allViews := ""
-	for _, view := range views {
-		if err := gui.g.SetKeybinding(view, 'p', 0, pauseCurrentSelectedTrack); err != nil {
+	addKeyBinding(&keys, newKeyMapping(gocui.KeySpace, playCurrentSelectedTrack, VIEW_TRACKS))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, playCurrentSelectedTrack, VIEW_TRACKS))
+	addKeyBinding(&keys, newKeyMapping('u', queueCommand, VIEW_TRACKS))
+	addKeyBinding(&keys, newKeyMapping('d', removeFromPlaylistsCommand, VIEW_PLAYLISTS))
+	addKeyBinding(&keys, newKeyMapping('d', removeFromQueueCommand, VIEW_QUEUE))
+	addKeyBinding(&keys, newKeyMapping('D', removeAllFromQueueCommand, VIEW_QUEUE))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, searchCommand, VIEW_STATUS))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyHome, cursorHome, allViews))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnd, cursorEnd, allViews))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyPgup, cursorPgup, allViews))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyPgdn, cursorPgdn, allViews))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowDown, cursorDown, allViews))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowUp, cursorUp, allViews))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowLeft, mainNextViewLeft, VIEW_TRACKS))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowLeft, nextView, VIEW_QUEUE))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowRight, nextView, VIEW_PLAYLISTS))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowRight, mainNextViewRight, VIEW_TRACKS))
+	addKeyBinding(&keys, newKeyMapping('h', mainNextViewLeft, VIEW_TRACKS))
+	addKeyBinding(&keys, newKeyMapping('h', nextView, VIEW_QUEUE))
+	addKeyBinding(&keys, newKeyMapping('l', nextView, VIEW_PLAYLISTS))
+	addKeyBinding(&keys, newKeyMapping('l', mainNextViewRight, VIEW_TRACKS))
+	addKeyBinding(&keys, newKeyMapping(gocui.KeyCtrlC, quit, allViews))
+
+	for _, key := range keys {
+		// it needs to copy the key because closures copy var references and we don't
+		// want to execute always the last action
+		keyCopy := key
+		if err := gui.g.SetKeybinding(key.view, key.key, 0,
+			func(g *gocui.Gui, v *gocui.View) error {
+				return keyCopy.h(g, v)
+			}); err != nil {
 			return err
 		}
-		if err := gui.g.SetKeybinding(view, 'r', 0, setRandomMode); err != nil {
-			return err
-		}
-		if err := gui.g.SetKeybinding(view, 'R', 0, setAllRandomMode); err != nil {
-			return err
-		}
-		if err := gui.g.SetKeybinding(view, '>', 0, nextCommand); err != nil {
-			return err
-		}
-		if err := gui.g.SetKeybinding(view, '/', 0, enableSearchInputCommand); err != nil {
-			return err
-		}
-		if err := gui.g.SetKeybinding(view, 'j', 0, cursorDown); err != nil {
-			return err
-		}
-		if err := gui.g.SetKeybinding(view, 'k', 0, cursorUp); err != nil {
-			return err
-		}
-		if err := gui.g.SetKeybinding(view, 'q', 0, quit); err != nil {
-			return err
-		}
-	}
-
-	if err := gui.g.SetKeybinding(VIEW_TRACKS, gocui.KeySpace, 0, playCurrentSelectedTrack); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_TRACKS, gocui.KeyEnter, 0, playCurrentSelectedTrack); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding(VIEW_TRACKS, 'u', 0, queueCommand); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_PLAYLISTS, 'd', 0, removeFromPlaylistsCommand); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_QUEUE, 'd', 0, removeFromQueueCommand); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_QUEUE, 'D', 0, removeAllFromQueueCommand); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_STATUS, gocui.KeyEnter, 0, searchCommand); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding(allViews, gocui.KeyHome, 0, cursorHome); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(allViews, gocui.KeyEnd, 0, cursorEnd); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding(allViews, gocui.KeyPgup, 0, cursorPgup); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(allViews, gocui.KeyPgdn, 0, cursorPgdn); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding(allViews, gocui.KeyArrowDown, 0, cursorDown); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(allViews, gocui.KeyArrowUp, 0, cursorUp); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding(VIEW_TRACKS, gocui.KeyArrowLeft, 0, mainNextViewLeft); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_QUEUE, gocui.KeyArrowLeft, 0, nextView); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding(VIEW_PLAYLISTS, gocui.KeyArrowRight, 0, nextView); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_TRACKS, gocui.KeyArrowRight, 0, mainNextViewRight); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding(VIEW_TRACKS, 'h', 0, mainNextViewLeft); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_QUEUE, 'h', 0, nextView); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_PLAYLISTS, 'l', 0, nextView); err != nil {
-		return err
-	}
-	if err := gui.g.SetKeybinding(VIEW_TRACKS, 'l', 0, mainNextViewRight); err != nil {
-		return err
-	}
-
-	if err := gui.g.SetKeybinding(allViews, gocui.KeyCtrlC, 0, quit); err != nil {
-		return err
 	}
 
 	return nil
+}
+
+func addKeyBinding(keys *[]*KeyMapping, key *KeyMapping) {
+	*keys = append(*keys, key)
+}
+
+func newKeyMapping(key interface{}, h gocui.KeybindingHandler, view string) *KeyMapping {
+	return &KeyMapping{key: key, h: h, view: view}
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
