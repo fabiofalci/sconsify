@@ -119,10 +119,11 @@ func isNotInLastPage(originY int, pageSizeY int, maxSize int) bool {
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
-		if cx, cy := v.Cursor(); canGoToNewPosition(cy + 1) {
-			if err := v.SetCursor(cx, cy+1); err != nil {
+		offset := getOffsetFromTypedNumbers()
+		if cx, cy := v.Cursor(); canGoToNewPosition(cy + offset) {
+			if err := v.SetCursor(cx, cy+offset); err != nil {
 				ox, oy := v.Origin()
-				if err := v.SetOrigin(ox, oy+1); err != nil {
+				if err := v.SetOrigin(ox, oy+offset); err != nil {
 					return err
 				}
 			}
@@ -132,6 +133,30 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 		}
 	}
 	return nil
+}
+
+func cursorUp(g *gocui.Gui, v *gocui.View) error {
+	if v != nil {
+		offset := getOffsetFromTypedNumbers()
+		ox, oy := v.Origin()
+		cx, cy := v.Cursor()
+		if err := v.SetCursor(cx, cy-offset); err != nil && oy > 0 {
+			if err := v.SetOrigin(ox, oy-offset); err != nil {
+				return err
+			}
+		}
+		if v == gui.playlistsView {
+			gui.updateTracksView()
+		}
+	}
+	return nil
+}
+
+func getOffsetFromTypedNumbers() int {
+	if multipleKeysNumber > 1 {
+		return multipleKeysNumber
+	}
+	return 1
 }
 
 func canGoToNewPosition(newPosition int) bool {
@@ -155,22 +180,6 @@ func canGoToAbsolutNewPosition(newPosition int) bool {
 	case gui.queueView:
 	}
 	return true
-}
-
-func cursorUp(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		ox, oy := v.Origin()
-		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy-1); err != nil && oy > 0 {
-			if err := v.SetOrigin(ox, oy-1); err != nil {
-				return err
-			}
-		}
-		if v == gui.playlistsView {
-			gui.updateTracksView()
-		}
-	}
-	return nil
 }
 
 func goTo(g *gocui.Gui, v *gocui.View, position int) error {
