@@ -54,7 +54,7 @@ func keybindings() error {
 	addKeyBinding(&keys, newKeyMapping('l', VIEW_PLAYLISTS, nextView))
 	addKeyBinding(&keys, newKeyMapping('l', VIEW_TRACKS, mainNextViewRight))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyCtrlC, allViews, quit))
-	addKeyBinding(&keys, newKeyMapping('G', allViews, cursorEnd))
+	addKeyBinding(&keys, newKeyMapping('G', allViews, uppergCommand))
 
 	for _, key := range keys {
 		// it needs to copy the key because closures copy var references and we don't
@@ -62,8 +62,9 @@ func keybindings() error {
 		keyCopy := key
 		if err := gui.g.SetKeybinding(key.view, key.key, 0,
 			func(g *gocui.Gui, v *gocui.View) error {
+				err := keyCopy.h(g, v)
 				resetMultipleKeys()
-				return keyCopy.h(g, v)
+				return err
 			}); err != nil {
 			return err
 		}
@@ -135,6 +136,14 @@ func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
 func ggCommand(g *gocui.Gui, v *gocui.View) error {
 	if multipleKeysNumber <= 0 {
 		return cursorHome(g, v)
+	}
+
+	return goTo(g, v, multipleKeysNumber)
+}
+
+func uppergCommand(g *gocui.Gui, v *gocui.View) error {
+	if multipleKeysNumber <= 0 {
+		return cursorEnd(g, v)
 	}
 
 	return goTo(g, v, multipleKeysNumber)
