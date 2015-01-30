@@ -53,9 +53,9 @@ No UI Parameters
 UI mode keyboard 
 ----------------
 
-* &larr; &darr; &uarr; &rarr; or `h` `j` `k` `l` for navigation.
+* &larr; &darr; &uarr; &rarr; for navigation.
 
-* `space`: play selected track.
+* `space` or `enter`: play selected track.
 
 * `>`: play next track.
 
@@ -67,9 +67,25 @@ UI mode keyboard
 
 * `u`: queue selected track to play next.
 
+* `d`: delete selected track from the queue or delete selected search.
+
+* `D`: delete all tracks from the queue if the focus is on the queue.
+
 * `PageUp` `PageDown` `Home` `End`. 
 
 * `Control C` or `q`: exit.
+
+Vi navigation style:
+
+* `h` `j` `k` `l` for navigation.
+
+* `Nj` and `Nk` where N is a number: repeat the command N times.
+
+* `gg`: go to first element. 
+
+* `G`: go to last element.
+
+* `Ngg` and `NG` where N is a number: go to element at position N. 
 
 
 No UI mode keyboard 
