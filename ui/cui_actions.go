@@ -74,7 +74,7 @@ func keybindings() error {
 
 	addKeyBinding(&keys, newKeyMapping('g', allViews,
 		func(g *gocui.Gui, v *gocui.View) error {
-			return multipleKeys(g, v, 'g')
+			return multipleKeysPressed(g, v, 'g')
 		}))
 
 	// numbers
@@ -125,11 +125,19 @@ func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
 
 	switch multipleKeysBuffer.String() {
 	case "gg":
-		cursorHome(g, v)
+		ggCommand(g, v)
 		resetMultipleKeys()
 	}
 
 	return nil
+}
+
+func ggCommand(g *gocui.Gui, v *gocui.View) error {
+	if multipleKeysNumber <= 0 {
+		return cursorHome(g, v)
+	}
+
+	return goTo(g, v, multipleKeysNumber)
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
