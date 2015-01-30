@@ -25,6 +25,20 @@ func DeleteCache(cacheLocation string) error {
 	return errors.New("Invalid cache location: " + cacheLocation)
 }
 
+func GetLogFileLocation() string {
+	if basePath := getConfLocation(); basePath != "" {
+		return basePath + "/sconsify.log"
+	}
+	return ""
+}
+
+func DeleteLogFile(logFileLocation string) error {
+	if strings.HasSuffix(logFileLocation, SCONSIFY_CONF_LOCATION+"/sconsify.log") {
+		return os.Remove(logFileLocation)
+	}
+	return errors.New("Invalid log location: " + logFileLocation)
+}
+
 func getConfLocation() string {
 	if dir, err := homedir.Dir(); err == nil {
 		if dir, err = homedir.Expand(dir); err == nil && dir != "" {

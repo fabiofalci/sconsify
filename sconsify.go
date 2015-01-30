@@ -28,7 +28,13 @@ func main() {
 	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no UI is used.")
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
 	providedNoUiRandom := flag.Bool("noui-random", true, "Random between tracks or follow playlist order.")
+	providedDebug := flag.Bool("debug", false, "Enable debug mode.")
 	flag.Parse()
+
+	if *providedDebug {
+		sconsify.InitialiseLogger()
+		defer sconsify.CloseLogger()
+	}
 
 	username, pass := credentials(providedUsername)
 	events := sconsify.InitialiseEvents()
