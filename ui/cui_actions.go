@@ -15,6 +15,7 @@ type KeyMapping struct {
 }
 
 var multipleKeysBuffer bytes.Buffer
+var multipleKeysNumber int
 
 func keybindings() error {
 	keys := make([]*KeyMapping, 0)
@@ -76,6 +77,15 @@ func keybindings() error {
 			return multipleKeys(g, v, 'g')
 		}))
 
+	// numbers
+	for i := 0; i < 10; i++ {
+		numberCopy := i
+		addKeyBinding(&keys, newKeyMapping(rune(i+48), allViews,
+			func(g *gocui.Gui, v *gocui.View) error {
+				return multipleKeysNumberPressed(numberCopy)
+			}))
+	}
+
 	for _, key := range keys {
 		keyCopy := key
 		if err := gui.g.SetKeybinding(key.view, key.key, 0,
@@ -98,9 +108,19 @@ func newKeyMapping(key interface{}, view string, h gocui.KeybindingHandler) *Key
 
 func resetMultipleKeys() {
 	multipleKeysBuffer.Reset()
+	multipleKeysNumber = 0
 }
 
-func multipleKeys(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
+func multipleKeysNumberPressed(pressedNumber int) error {
+	if multipleKeysNumber == 0 {
+		multipleKeysNumber = pressedNumber
+	} else {
+		multipleKeysNumber = multipleKeysNumber*10 + pressedNumber
+	}
+	return nil
+}
+
+func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
 	multipleKeysBuffer.WriteRune(pressedKey)
 
 	switch multipleKeysBuffer.String() {
