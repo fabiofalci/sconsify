@@ -193,3 +193,19 @@ func goTo(g *gocui.Gui, v *gocui.View, position int) error {
 	}
 	return nil
 }
+
+func ggCommand(g *gocui.Gui, v *gocui.View) error {
+	if multipleKeysNumber <= 0 {
+		return cursorHome(g, v)
+	}
+
+	return goTo(g, v, multipleKeysNumber)
+}
+
+func uppergCommand(g *gocui.Gui, v *gocui.View) error {
+	if multipleKeysNumber <= 0 {
+		return cursorEnd(g, v)
+	}
+
+	return goTo(g, v, multipleKeysNumber)
+}

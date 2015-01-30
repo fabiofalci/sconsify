@@ -133,22 +133,6 @@ func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
 	return nil
 }
 
-func ggCommand(g *gocui.Gui, v *gocui.View) error {
-	if multipleKeysNumber <= 0 {
-		return cursorHome(g, v)
-	}
-
-	return goTo(g, v, multipleKeysNumber)
-}
-
-func uppergCommand(g *gocui.Gui, v *gocui.View) error {
-	if multipleKeysNumber <= 0 {
-		return cursorEnd(g, v)
-	}
-
-	return goTo(g, v, multipleKeysNumber)
-}
-
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	if track := gui.getCurrentSelectedTrack(); track != nil {
 		events.Play(track)
