@@ -39,6 +39,21 @@ func DeleteLogFile(logFileLocation string) error {
 	return errors.New("Invalid log location: " + logFileLocation)
 }
 
+func GetStateFileLocation() string {
+	if basePath := getConfLocation(); basePath != "" {
+		return basePath + "/state.json"
+	}
+	return ""
+}
+
+func SaveFile(fileLocation string, content []byte) {
+	file, err := os.OpenFile(fileLocation, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	if err == nil {
+		defer file.Close()
+		file.Write(content)
+	}
+}
+
 func getConfLocation() string {
 	if dir, err := homedir.Dir(); err == nil {
 		if dir, err = homedir.Expand(dir); err == nil && dir != "" {

@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"strings"
@@ -37,6 +39,11 @@ type Gui struct {
 	currentMessage string
 }
 
+type State struct {
+	SelectedPlaylist string
+	SelectedTrack    string
+}
+
 func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface {
 	events = ev
 	gui = &Gui{}
@@ -58,6 +65,7 @@ func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
 }
 
 func (cui *ConsoleUserInterface) Shutdown() {
+	gui.persistState()
 	events.ShutdownEngine()
 }
 
@@ -105,6 +113,19 @@ func (gui *Gui) startGui() {
 
 	if err := gui.g.MainLoop(); err != nil && err != gocui.ErrorQuit {
 		log.Panicln(err)
+	}
+}
+
+func (gui *Gui) persistState() {
+	selectedPlaylist := gui.getSelectedPlaylist()
+	selectedTrack := gui.getCurrentSelectedTrack()
+	if selectedPlaylist != nil && selectedTrack != nil {
+		state := State{SelectedPlaylist: selectedPlaylist.Name(), SelectedTrack: selectedTrack.Uri}
+		if b, err := json.Marshal(state); err == nil {
+			if fileLocation := sconsify.GetStateFileLocation(); fileLocation != "" {
+				sconsify.SaveFile(fileLocation, b)
+			}
+		}
 	}
 }
 
@@ -191,6 +212,19 @@ func (gui *Gui) getCurrentSelectedTrack() *sconsify.Track {
 	return nil
 }
 
+func (gui *Gui) initTracksView(state *State) bool {
+	gui.updateTracksView()
+	if state.SelectedPlaylist != "" && state.SelectedTrack != "" {
+		playlist := playlists.Get(state.SelectedPlaylist)
+		index := playlist.IndexByUri(state.SelectedTrack)
+		if index != -1 {
+			goTo(gui.g, gui.tracksView, index+1)
+			return true
+		}
+	}
+	return false
+}
+
 func (gui *Gui) updateTracksView() {
 	gui.tracksView.Clear()
 	gui.tracksView.SetCursor(0, 0)
@@ -200,6 +234,18 @@ func (gui *Gui) updateTracksView() {
 		for i := 0; i < currentPlaylist.Tracks(); i++ {
 			track := currentPlaylist.Track(i)
 			fmt.Fprintf(gui.tracksView, "%v. %v", (i + 1), track.GetTitle())
+		}
+	}
+}
+
+func (gui *Gui) initPlaylistsView(state *State) {
+	gui.updatePlaylistsView()
+	if state.SelectedPlaylist != "" {
+		for index, name := range playlists.Names() {
+			if name == state.SelectedPlaylist {
+				goTo(gui.g, gui.playlistsView, index+1)
+				return
+			}
 		}
 	}
 }
@@ -220,8 +266,22 @@ func (gui *Gui) updateQueueView() {
 	}
 }
 
+func loadState() *State {
+	if fileLocation := sconsify.GetStateFileLocation(); fileLocation != "" {
+		if b, err := ioutil.ReadFile(fileLocation); err == nil {
+			var state State
+			if err := json.Unmarshal(b, &state); err == nil {
+				return &state
+			}
+		}
+	}
+	return &State{}
+}
+
 func layout(g *gocui.Gui) error {
+	state := loadState()
 	maxX, maxY := g.Size()
+	var goToTracks bool
 	if v, err := g.SetView(VIEW_PLAYLISTS, -1, -1, 25, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
@@ -229,7 +289,7 @@ func layout(g *gocui.Gui) error {
 		gui.playlistsView = v
 		gui.playlistsView.Highlight = true
 
-		gui.updatePlaylistsView()
+		gui.initPlaylistsView(state)
 
 		if err := g.SetCurrentView(VIEW_PLAYLISTS); err != nil {
 			return err
@@ -241,7 +301,7 @@ func layout(g *gocui.Gui) error {
 		}
 		gui.tracksView = v
 
-		gui.updateTracksView()
+		goToTracks = gui.initTracksView(state)
 	}
 	if v, err := g.SetView(VIEW_QUEUE, maxX-50, -1, maxX, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
@@ -254,6 +314,10 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		gui.statusView = v
+	}
+
+	if goToTracks {
+		gui.enableTracksView()
 	}
 	return nil
 }
