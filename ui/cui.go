@@ -195,11 +195,11 @@ func (gui *Gui) getSelectedTrack() *sconsify.Track {
 func (gui *Gui) initTracksView(state *State) bool {
 	gui.updateTracksView()
 	if state.SelectedPlaylist != "" && state.SelectedTrack != "" {
-		playlist := playlists.Get(state.SelectedPlaylist)
-		index := playlist.IndexByUri(state.SelectedTrack)
-		if index != -1 {
-			goTo(gui.g, gui.tracksView, index+1)
-			return true
+		if playlist := playlists.Get(state.SelectedPlaylist); playlist != nil {
+			if index := playlist.IndexByUri(state.SelectedTrack); index != -1 {
+				goTo(gui.g, gui.tracksView, index+1)
+				return true
+			}
 		}
 	}
 	return false
