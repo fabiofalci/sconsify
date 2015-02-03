@@ -50,24 +50,24 @@ func TestPlaylistTrack(t *testing.T) {
 	}
 }
 
-func TestPlaylistTrackByUri(t *testing.T) {
+func TestPlaylistIndexByUri(t *testing.T) {
 	playlist := createDummyPlaylist("testing")
 
-	if track := playlist.TrackByUri("0"); track.Uri != "0" {
+	if index := playlist.IndexByUri("0"); index != 0 {
 		t.Errorf("Should be track 0")
 	}
-	if track := playlist.TrackByUri("1"); track.Uri != "1" {
+	if index := playlist.IndexByUri("1"); index != 1 {
 		t.Errorf("Should be track 1")
 	}
-	if track := playlist.TrackByUri("2"); track.Uri != "2" {
+	if index := playlist.IndexByUri("2"); index != 2 {
 		t.Errorf("Should be track 2")
 	}
-	if track := playlist.TrackByUri("3"); track.Uri != "3" {
+	if index := playlist.IndexByUri("3"); index != 3 {
 		t.Errorf("Should be track 3")
 	}
 
-	if track := playlist.TrackByUri("not found"); track != nil {
-		t.Errorf("Track should be null")
+	if index := playlist.IndexByUri("not found"); index != -1 {
+		t.Errorf("Track index should be -1")
 	}
 }
 

@@ -29,13 +29,13 @@ func (playlist *Playlist) Track(index int) *Track {
 	return nil
 }
 
-func (playlist *Playlist) TrackByUri(uri string) *Track {
-	for _, track := range playlist.tracks {
+func (playlist *Playlist) IndexByUri(uri string) int {
+	for i, track := range playlist.tracks {
 		if track.Uri == uri {
-			return track
+			return i
 		}
 	}
-	return nil
+	return -1
 }
 
 func (playlist *Playlist) Tracks() int {
