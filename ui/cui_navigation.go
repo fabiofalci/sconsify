@@ -18,76 +18,68 @@ func mainNextViewRight(g *gocui.Gui, v *gocui.View) error {
 }
 
 func cursorEnd(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		if newIndex := getCurrentViewSize(v); newIndex > -1 {
-			ox, _ := v.Origin()
-			cx, _ := v.Cursor()
-			_, sizeY := v.Size()
-			sizeY--
+	if newIndex := getCurrentViewSize(v); newIndex > -1 {
+		ox, _ := v.Origin()
+		cx, _ := v.Cursor()
+		_, sizeY := v.Size()
+		sizeY--
 
-			if newIndex > sizeY {
-				v.SetOrigin(ox, newIndex-sizeY)
-				v.SetCursor(cx, sizeY)
-			} else {
-				v.SetCursor(cx, newIndex)
-			}
-
-			updateTracksView(g, v)
+		if newIndex > sizeY {
+			v.SetOrigin(ox, newIndex-sizeY)
+			v.SetCursor(cx, sizeY)
+		} else {
+			v.SetCursor(cx, newIndex)
 		}
+
+		updateTracksView(g, v)
 	}
 	return nil
 }
 
 func cursorHome(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		ox, _ := v.Origin()
-		cx, _ := v.Cursor()
-		v.SetCursor(cx, 0)
-		v.SetOrigin(ox, 0)
+	ox, _ := v.Origin()
+	cx, _ := v.Cursor()
+	v.SetCursor(cx, 0)
+	v.SetOrigin(ox, 0)
 
-		updateTracksView(g, v)
-	}
+	updateTracksView(g, v)
 	return nil
 }
 
 func cursorPgup(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
+	ox, oy := v.Origin()
+	cx, cy := v.Cursor()
+	_, pageSizeY := v.Size()
+	pageSizeY--
+
+	if newOriginY := oy - pageSizeY; newOriginY > 0 {
+		v.SetOrigin(ox, newOriginY)
+		v.SetCursor(cx, cy)
+	} else {
+		v.SetOrigin(ox, 0)
+		v.SetCursor(cx, cy)
+	}
+	updateTracksView(g, v)
+	return nil
+}
+
+func cursorPgdn(g *gocui.Gui, v *gocui.View) error {
+	if maxSize := getCurrentViewSize(v); maxSize > -1 {
 		ox, oy := v.Origin()
 		cx, cy := v.Cursor()
 		_, pageSizeY := v.Size()
 		pageSizeY--
 
-		if newOriginY := oy - pageSizeY; newOriginY > 0 {
+		newOriginY := oy + pageSizeY
+
+		if hasMorePages(newOriginY, cy, maxSize) {
 			v.SetOrigin(ox, newOriginY)
 			v.SetCursor(cx, cy)
-		} else {
-			v.SetOrigin(ox, 0)
-			v.SetCursor(cx, cy)
+		} else if isNotInLastPage(oy, pageSizeY, maxSize) {
+			v.SetOrigin(ox, maxSize-pageSizeY)
+			v.SetCursor(cx, pageSizeY)
 		}
 		updateTracksView(g, v)
-	}
-	return nil
-}
-
-func cursorPgdn(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		if maxSize := getCurrentViewSize(v); maxSize > -1 {
-			ox, oy := v.Origin()
-			cx, cy := v.Cursor()
-			_, pageSizeY := v.Size()
-			pageSizeY--
-
-			newOriginY := oy + pageSizeY
-
-			if hasMorePages(newOriginY, cy, maxSize) {
-				v.SetOrigin(ox, newOriginY)
-				v.SetCursor(cx, cy)
-			} else if isNotInLastPage(oy, pageSizeY, maxSize) {
-				v.SetOrigin(ox, maxSize-pageSizeY)
-				v.SetCursor(cx, pageSizeY)
-			}
-			updateTracksView(g, v)
-		}
 	}
 	return nil
 }
@@ -118,36 +110,32 @@ func isNotInLastPage(originY int, pageSizeY int, maxSize int) bool {
 }
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		offset := getOffsetFromTypedNumbers()
-		if cx, cy := v.Cursor(); canGoToNewPosition(cy + offset) {
-			if err := v.SetCursor(cx, cy+offset); err != nil {
-				ox, oy := v.Origin()
-				if err := v.SetOrigin(ox, oy+offset); err != nil {
-					return err
-				}
-			}
-			if v == gui.playlistsView {
-				gui.updateTracksView()
-			}
-		}
-	}
-	return nil
-}
-
-func cursorUp(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		offset := getOffsetFromTypedNumbers()
-		ox, oy := v.Origin()
-		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy-offset); err != nil && oy > 0 {
-			if err := v.SetOrigin(ox, oy-offset); err != nil {
+	offset := getOffsetFromTypedNumbers()
+	if cx, cy := v.Cursor(); canGoToNewPosition(cy + offset) {
+		if err := v.SetCursor(cx, cy+offset); err != nil {
+			ox, oy := v.Origin()
+			if err := v.SetOrigin(ox, oy+offset); err != nil {
 				return err
 			}
 		}
 		if v == gui.playlistsView {
 			gui.updateTracksView()
 		}
+	}
+	return nil
+}
+
+func cursorUp(g *gocui.Gui, v *gocui.View) error {
+	offset := getOffsetFromTypedNumbers()
+	ox, oy := v.Origin()
+	cx, cy := v.Cursor()
+	if err := v.SetCursor(cx, cy-offset); err != nil && oy > 0 {
+		if err := v.SetOrigin(ox, oy-offset); err != nil {
+			return err
+		}
+	}
+	if v == gui.playlistsView {
+		gui.updateTracksView()
 	}
 	return nil
 }
@@ -182,21 +170,19 @@ func canGoToAbsolutNewPosition(v *gocui.View, newPosition int) bool {
 }
 
 func goTo(g *gocui.Gui, v *gocui.View, position int) error {
-	if v != nil {
-		if canGoToAbsolutNewPosition(v, position) {
-			position--
-			ox, _ := v.Origin()
-			cx, _ := v.Cursor()
-			v.SetCursor(cx, 0)
-			v.SetOrigin(ox, 0)
-			if err := v.SetCursor(cx, position); err != nil {
-				if err := v.SetOrigin(ox, position); err != nil {
-					return err
-				}
+	if canGoToAbsolutNewPosition(v, position) {
+		position--
+		ox, _ := v.Origin()
+		cx, _ := v.Cursor()
+		v.SetCursor(cx, 0)
+		v.SetOrigin(ox, 0)
+		if err := v.SetCursor(cx, position); err != nil {
+			if err := v.SetOrigin(ox, position); err != nil {
+				return err
 			}
-			if v == gui.playlistsView && gui.tracksView != nil {
-				gui.updateTracksView()
-			}
+		}
+		if v == gui.playlistsView && gui.tracksView != nil {
+			gui.updateTracksView()
 		}
 	}
 	return nil
