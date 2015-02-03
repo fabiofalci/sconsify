@@ -134,7 +134,7 @@ func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	if track := gui.getCurrentSelectedTrack(); track != nil {
+	if track := gui.getSelectedTrack(); track != nil {
 		events.Play(track)
 	}
 	return nil
@@ -163,7 +163,7 @@ func nextCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func queueCommand(g *gocui.Gui, v *gocui.View) error {
-	if track := gui.getCurrentSelectedTrack(); track != nil {
+	if track := gui.getSelectedTrack(); track != nil {
 		fmt.Fprintf(gui.queueView, "%v", track.GetTitle())
 		queue.Add(track)
 	}

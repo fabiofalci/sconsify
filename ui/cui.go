@@ -140,7 +140,7 @@ func (gui *Gui) getSelectedPlaylist() *sconsify.Playlist {
 	return nil
 }
 
-func (gui *Gui) getSelectedTrack() (string, error) {
+func (gui *Gui) getSelectedTrackName() (string, error) {
 	return gui.getSelected(gui.tracksView)
 }
 
@@ -176,9 +176,9 @@ func (gui *Gui) playNext() {
 	events.NextPlay()
 }
 
-func (gui *Gui) getCurrentSelectedTrack() *sconsify.Track {
+func (gui *Gui) getSelectedTrack() *sconsify.Track {
 	currentPlaylist := gui.getSelectedPlaylist()
-	currentTrack, errTrack := gui.getSelectedTrack()
+	currentTrack, errTrack := gui.getSelectedTrackName()
 	if currentPlaylist != nil && errTrack == nil {
 		if currentPlaylist != nil {
 			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]

@@ -26,7 +26,7 @@ func loadState() *State {
 
 func persistState() {
 	selectedPlaylist := gui.getSelectedPlaylist()
-	selectedTrack := gui.getCurrentSelectedTrack()
+	selectedTrack := gui.getSelectedTrack()
 	if selectedPlaylist != nil && selectedTrack != nil {
 		state := State{SelectedPlaylist: selectedPlaylist.Name(), SelectedTrack: selectedTrack.Uri}
 		if b, err := json.Marshal(state); err == nil {
