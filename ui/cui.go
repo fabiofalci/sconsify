@@ -176,7 +176,7 @@ func (gui *Gui) playNext() {
 	events.NextPlay()
 }
 
-func (gui *Gui) getSelectedTrack() *sconsify.Track {
+func (gui *Gui) getSelectedPlaylistAndTrack() (*sconsify.Playlist, int) {
 	currentPlaylist := gui.getSelectedPlaylist()
 	currentTrack, errTrack := gui.getSelectedTrackName()
 	if currentPlaylist != nil && errTrack == nil {
@@ -184,12 +184,10 @@ func (gui *Gui) getSelectedTrack() *sconsify.Track {
 			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
 			currentIndexTrack, _ := strconv.Atoi(currentTrack)
 			currentIndexTrack = currentIndexTrack - 1
-			track := currentPlaylist.Track(currentIndexTrack)
-			playlists.SetCurrents(currentPlaylist.Name(), currentIndexTrack)
-			return track
+			return currentPlaylist, currentIndexTrack
 		}
 	}
-	return nil
+	return nil, -1
 }
 
 func (gui *Gui) initTracksView(state *State) bool {
