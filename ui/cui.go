@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"log"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -207,9 +206,7 @@ func (gui *Gui) updateTracksView() {
 
 func (gui *Gui) updatePlaylistsView() {
 	gui.playlistsView.Clear()
-	keys := playlists.Names()
-	sort.Strings(keys)
-	for _, key := range keys {
+	for _, key := range playlists.Names() {
 		fmt.Fprintln(gui.playlistsView, key)
 	}
 }

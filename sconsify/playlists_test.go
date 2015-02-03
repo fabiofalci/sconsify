@@ -190,10 +190,19 @@ func TestNames(t *testing.T) {
 		t.Errorf("Should have only one name")
 	}
 
-	playlists.AddPlaylist(createDummyPlaylist("name1"))
+	playlists.AddPlaylist(createDummyPlaylist("a list"))
 	names = playlists.Names()
 	if len(names) != 2 {
 		t.Errorf("Should have 2 names")
+	}
+
+	playlists.AddPlaylist(createDummyPlaylist("z list"))
+	names = playlists.Names()
+
+	for i, name := range []string{"a list", "name", "z list"} {
+		if name != names[i] {
+			t.Errorf("Names is not in alphabetical order")
+		}
 	}
 }
 

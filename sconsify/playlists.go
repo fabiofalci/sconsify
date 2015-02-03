@@ -87,6 +87,7 @@ func (playlists *Playlists) Names() []string {
 		names[i] = playlist.Name()
 		i++
 	}
+	sort.Strings(names)
 	return names
 }
 
