@@ -44,6 +44,10 @@ func TestPlaylistTrack(t *testing.T) {
 	if track := playlist.Track(3); track.Uri != "3" {
 		t.Errorf("Should be track 3")
 	}
+
+	if track := playlist.Track(4); track != nil {
+		t.Errorf("Track should be null")
+	}
 }
 
 func TestPlaylistTrackByUri(t *testing.T) {

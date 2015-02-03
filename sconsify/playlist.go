@@ -23,7 +23,10 @@ func (playlist *Playlist) GetNextTrack(currentIndexTrack int) (int, bool) {
 }
 
 func (playlist *Playlist) Track(index int) *Track {
-	return playlist.tracks[index]
+	if index < len(playlist.tracks) {
+		return playlist.tracks[index]
+	}
+	return nil
 }
 
 func (playlist *Playlist) TrackByUri(uri string) *Track {
