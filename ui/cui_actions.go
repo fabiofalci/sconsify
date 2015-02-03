@@ -164,7 +164,7 @@ func nextCommand(g *gocui.Gui, v *gocui.View) error {
 
 func queueCommand(g *gocui.Gui, v *gocui.View) error {
 	if track := gui.getSelectedTrack(); track != nil {
-		fmt.Fprintf(gui.queueView, "%v", track.GetTitle())
+		fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
 		queue.Add(track)
 	}
 	return nil

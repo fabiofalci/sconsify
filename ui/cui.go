@@ -128,7 +128,7 @@ func (gui *Gui) updateCurrentStatus() {
 
 func (gui *Gui) updateStatus(message string) {
 	gui.clearStatusView()
-	fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v", message)
+	fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v\n", message)
 	// otherwise the update will appear only in the next keyboard move
 	gui.g.Flush()
 }
@@ -213,7 +213,7 @@ func (gui *Gui) updateTracksView() {
 	if currentPlaylist := gui.getSelectedPlaylist(); currentPlaylist != nil {
 		for i := 0; i < currentPlaylist.Tracks(); i++ {
 			track := currentPlaylist.Track(i)
-			fmt.Fprintf(gui.tracksView, "%v. %v", (i + 1), track.GetTitle())
+			fmt.Fprintf(gui.tracksView, "%v. %v\n", (i + 1), track.GetTitle())
 		}
 	}
 }
@@ -241,7 +241,7 @@ func (gui *Gui) updateQueueView() {
 	gui.queueView.Clear()
 	if !queue.isEmpty() {
 		for _, track := range queue.Contents() {
-			fmt.Fprintf(gui.queueView, "%v", track.GetTitle())
+			fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
 		}
 	}
 }
