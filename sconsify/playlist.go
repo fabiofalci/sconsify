@@ -26,6 +26,15 @@ func (playlist *Playlist) Track(index int) *Track {
 	return playlist.tracks[index]
 }
 
+func (playlist *Playlist) TrackByUri(uri string) *Track {
+	for _, track := range playlist.tracks {
+		if track.Uri == uri {
+			return track
+		}
+	}
+	return nil
+}
+
 func (playlist *Playlist) Tracks() int {
 	return len(playlist.tracks)
 }
