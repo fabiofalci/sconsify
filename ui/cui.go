@@ -104,7 +104,7 @@ func (gui *Gui) startGui() {
 	gui.g.SelFgColor = gocui.ColorBlack
 	gui.g.ShowCursor = true
 
-	if err := gui.g.MainLoop(); err != nil && err != gocui.ErrorQuit {
+	if err := gui.g.MainLoop(); err != nil && err != gocui.Quit {
 		log.Panicln(err)
 	}
 }

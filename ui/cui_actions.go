@@ -216,5 +216,5 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	consoleUserInterface.Shutdown()
 	// TODO wait for shutdown
 	// <-events.ShutdownUpdates()
-	return gocui.ErrorQuit
+	return gocui.Quit
 }
