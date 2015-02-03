@@ -13,6 +13,12 @@ type Track struct {
 	duration string
 }
 
+func InitPartialTrack(uri string) *Track {
+	return &Track{
+		Uri: uri,
+	}
+}
+
 func InitTrack(uri string, artist string, name string, duration string) *Track {
 	return &Track{
 		Uri:      uri,
@@ -35,4 +41,8 @@ func (track *Track) GetFullTitle() string {
 
 func (track *Track) GetTitle() string {
 	return fmt.Sprintf("%v - %v", track.artist, track.name)
+}
+
+func (track *Track) IsPartial() bool {
+	return track.artist == "" && track.name == "" && track.duration == ""
 }
