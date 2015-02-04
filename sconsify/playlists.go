@@ -212,20 +212,28 @@ func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrac
 }
 
 func (playlists *Playlists) GetNext() (*Track, bool) {
-	var playingPlaylist *Playlist
-
-	if playlists.hasPremadeTracks() {
-		playingPlaylist = playlists.premadeTracks
-	} else if playlist := playlists.getCurrentPlaylist(); playlist != nil {
-		playingPlaylist = playlist
-	}
-
-	if playingPlaylist != nil {
+	if playingPlaylist := playlists.getPlayingPlaylist(); playingPlaylist != nil {
 		var repeating bool
 		playlists.currentIndexTrack, repeating = playingPlaylist.GetNextTrack(playlists.currentIndexTrack)
 		return playingPlaylist.Track(playlists.currentIndexTrack), repeating
 	}
 	return nil, false
+}
+
+func (playlists *Playlists) GetPlayingTrack() *Track {
+	if playingPlaylist := playlists.getPlayingPlaylist(); playingPlaylist != nil {
+		return playingPlaylist.Track(playlists.currentIndexTrack)
+	}
+	return nil
+}
+
+func (playlists *Playlists) getPlayingPlaylist() *Playlist {
+	if playlists.hasPremadeTracks() {
+		return playlists.premadeTracks
+	} else if playlist := playlists.getCurrentPlaylist(); playlist != nil {
+		return playlist
+	}
+	return nil
 }
 
 func (playlists *Playlists) getCurrentPlaylist() *Playlist {

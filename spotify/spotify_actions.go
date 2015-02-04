@@ -22,6 +22,10 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 		return
 	}
 
+	if trackUri.IsPartial() {
+		trackUri = sconsify.ToSconsifyTrack(track)
+	}
+
 	if !spotify.isTrackAvailable(track) {
 		spotify.events.TrackNotAvailable(trackUri)
 		return

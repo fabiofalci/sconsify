@@ -10,6 +10,7 @@ import (
 type State struct {
 	SelectedPlaylist string
 	SelectedTrack    string
+	PlayingTrack     string
 }
 
 func loadState() *State {
@@ -25,14 +26,24 @@ func loadState() *State {
 }
 
 func persistState() {
+	state := State{}
 	selectedPlaylist, index := gui.getSelectedPlaylistAndTrack()
-	selectedTrack := selectedPlaylist.Track(index)
-	if selectedPlaylist != nil && selectedTrack != nil {
-		state := State{SelectedPlaylist: selectedPlaylist.Name(), SelectedTrack: selectedTrack.Uri}
-		if b, err := json.Marshal(state); err == nil {
-			if fileLocation := sconsify.GetStateFileLocation(); fileLocation != "" {
-				sconsify.SaveFile(fileLocation, b)
-			}
+
+	if selectedPlaylist != nil {
+		state.SelectedPlaylist = selectedPlaylist.Name()
+		selectedTrack := selectedPlaylist.Track(index)
+		if selectedTrack != nil {
+			state.SelectedTrack = selectedTrack.Uri
+		}
+	}
+
+	if playingTrack := playlists.GetPlayingTrack(); playingTrack != nil {
+		state.PlayingTrack = playingTrack.Uri
+	}
+
+	if b, err := json.Marshal(state); err == nil {
+		if fileLocation := sconsify.GetStateFileLocation(); fileLocation != "" {
+			sconsify.SaveFile(fileLocation, b)
 		}
 	}
 }
