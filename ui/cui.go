@@ -17,6 +17,7 @@ var (
 	queue                *Queue
 	playlists            *sconsify.Playlists
 	consoleUserInterface sconsify.UserInterface
+	player               Player
 )
 
 const (
@@ -36,9 +37,6 @@ type Gui struct {
 	queueView      *gocui.View
 	currentMessage string
 	initialised    bool
-
-	previousPlayingTrack    *sconsify.Track
-	previousPlayingPlaylist string
 }
 
 func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface {
@@ -46,6 +44,7 @@ func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface 
 	gui = &Gui{}
 	consoleUserInterface = &ConsoleUserInterface{}
 	queue = InitQueue()
+	player = &RegularPlayer{}
 	return consoleUserInterface
 }
 
@@ -302,8 +301,10 @@ func loadTrackFromState(state *State) {
 }
 
 func enablePreviousPlayingTrackToBePlayed(state *State) {
-	gui.previousPlayingTrack = sconsify.InitPartialTrack(state.PlayingTrackUri)
-	gui.previousPlayingPlaylist = state.PlayingPlaylist
+	player = &PersistStatePlayer{
+		previousPlayingTrack:    sconsify.InitPartialTrack(state.PlayingTrackUri),
+		previousPlayingPlaylist: state.PlayingPlaylist,
+	}
 	fmt.Fprintf(gui.statusView, "Paused: %v\n", state.PlayingTrackFullTitle)
 }
 
