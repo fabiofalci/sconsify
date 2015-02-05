@@ -382,5 +382,40 @@ func TestDuplicatedNames(t *testing.T) {
 	if playlist.Name() != "testing (3)" {
 		t.Error("Playlist Name should be 'testing (3)': ", playlist.Name())
 	}
+}
 
+func TestGet(t *testing.T) {
+	playlists := InitPlaylists()
+
+	playlists.AddPlaylist(createDummyPlaylistWithId("0", "name"))
+	playlists.AddPlaylist(createDummyPlaylistWithId("1", "any"))
+
+	if playlist := playlists.Get("name"); playlist.Name() != "name" {
+		t.Error("Playlist Name should be 'name': ", playlist.Name())
+	}
+	if playlist := playlists.Get("any"); playlist.Name() != "any" {
+		t.Error("Playlist Name should be 'any': ", playlist.Name())
+	}
+
+	if playlist := playlists.Get("not found"); playlist != nil {
+		t.Error("Playlist should not be found")
+	}
+}
+
+func TestGetById(t *testing.T) {
+	playlists := InitPlaylists()
+
+	playlists.AddPlaylist(createDummyPlaylistWithId("0", "name"))
+	playlists.AddPlaylist(createDummyPlaylistWithId("1", "any"))
+
+	if playlist := playlists.GetById("0"); playlist.Id() != "0" {
+		t.Error("Playlist Id should be '0': ", playlist.Id())
+	}
+	if playlist := playlists.GetById("1"); playlist.Id() != "1" {
+		t.Error("Playlist Id should be '1': ", playlist.Id())
+	}
+
+	if playlist := playlists.GetById("99"); playlist != nil {
+		t.Error("Playlist should not be found")
+	}
 }

@@ -42,6 +42,15 @@ func (playlists *Playlists) Get(name string) *Playlist {
 	return nil
 }
 
+func (playlists *Playlists) GetById(id string) *Playlist {
+	for _, playlist := range playlists.playlists {
+		if playlist.Id() == id {
+			return playlist
+		}
+	}
+	return nil
+}
+
 func (playlists *Playlists) Playlists() int {
 	return len(playlists.playlists)
 }
@@ -212,7 +221,7 @@ func (playlists *Playlists) SetCurrents(currentPlaylist string, currentIndexTrac
 }
 
 func (playlists *Playlists) GetNext() (*Track, bool) {
-	if playingPlaylist := playlists.getPlayingPlaylist(); playingPlaylist != nil {
+	if playingPlaylist := playlists.GetPlayingPlaylist(); playingPlaylist != nil {
 		var repeating bool
 		playlists.currentIndexTrack, repeating = playingPlaylist.GetNextTrack(playlists.currentIndexTrack)
 		return playingPlaylist.Track(playlists.currentIndexTrack), repeating
@@ -221,13 +230,13 @@ func (playlists *Playlists) GetNext() (*Track, bool) {
 }
 
 func (playlists *Playlists) GetPlayingTrack() *Track {
-	if playingPlaylist := playlists.getPlayingPlaylist(); playingPlaylist != nil {
+	if playingPlaylist := playlists.GetPlayingPlaylist(); playingPlaylist != nil {
 		return playingPlaylist.Track(playlists.currentIndexTrack)
 	}
 	return nil
 }
 
-func (playlists *Playlists) getPlayingPlaylist() *Playlist {
+func (playlists *Playlists) GetPlayingPlaylist() *Playlist {
 	if playlists.hasPremadeTracks() {
 		return playlists.premadeTracks
 	} else if playlist := playlists.getCurrentPlaylist(); playlist != nil {
