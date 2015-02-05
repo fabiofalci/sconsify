@@ -134,6 +134,7 @@ func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
 }
 
 func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
+	resetPreviousPlayingTrack()
 	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
 		track := playlist.Track(trackIndex)
 		playlists.SetCurrents(playlist.Name(), trackIndex)
@@ -143,8 +144,31 @@ func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 }
 
 func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
-	events.Pause()
+	if hasPreviousTrackToBePlayed() {
+		playPreviousPlayingTrack()
+	} else {
+		events.Pause()
+	}
 	return nil
+}
+
+func playPreviousPlayingTrack() {
+	if playlist := playlists.GetById(gui.previousPlayingPlaylist); playlist != nil {
+		if currentIndexTrack := playlist.IndexByUri(gui.previousPlayingTrack.Uri); currentIndexTrack != -1 {
+			playlists.SetCurrents(playlist.Name(), currentIndexTrack)
+			events.Play(gui.previousPlayingTrack)
+		}
+	}
+	resetPreviousPlayingTrack()
+}
+
+func resetPreviousPlayingTrack() {
+	gui.previousPlayingTrack = nil
+	gui.previousPlayingPlaylist = ""
+}
+
+func hasPreviousTrackToBePlayed() bool {
+	return gui.previousPlayingTrack != nil && gui.previousPlayingPlaylist != ""
 }
 
 func setRandomMode(g *gocui.Gui, v *gocui.View) error {

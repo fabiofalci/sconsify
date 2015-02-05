@@ -35,6 +35,10 @@ type Gui struct {
 	statusView     *gocui.View
 	queueView      *gocui.View
 	currentMessage string
+	initialised    bool
+
+	previousPlayingTrack    *sconsify.Track
+	previousPlayingPlaylist string
 }
 
 func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface {
@@ -190,19 +194,6 @@ func (gui *Gui) getSelectedPlaylistAndTrack() (*sconsify.Playlist, int) {
 	return nil, -1
 }
 
-func (gui *Gui) initTracksView(state *State) bool {
-	gui.updateTracksView()
-	if state.SelectedPlaylist != "" && state.SelectedTrack != "" {
-		if playlist := playlists.Get(state.SelectedPlaylist); playlist != nil {
-			if index := playlist.IndexByUri(state.SelectedTrack); index != -1 {
-				goTo(gui.g, gui.tracksView, index+1)
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func (gui *Gui) updateTracksView() {
 	gui.tracksView.Clear()
 	gui.tracksView.SetCursor(0, 0)
@@ -212,18 +203,6 @@ func (gui *Gui) updateTracksView() {
 		for i := 0; i < currentPlaylist.Tracks(); i++ {
 			track := currentPlaylist.Track(i)
 			fmt.Fprintf(gui.tracksView, "%v. %v\n", (i + 1), track.GetTitle())
-		}
-	}
-}
-
-func (gui *Gui) initPlaylistsView(state *State) {
-	gui.updatePlaylistsView()
-	if state.SelectedPlaylist != "" {
-		for index, name := range playlists.Names() {
-			if name == state.SelectedPlaylist {
-				goTo(gui.g, gui.playlistsView, index+1)
-				return
-			}
 		}
 	}
 }
@@ -245,9 +224,7 @@ func (gui *Gui) updateQueueView() {
 }
 
 func layout(g *gocui.Gui) error {
-	state := loadState()
 	maxX, maxY := g.Size()
-	var enableTracksView bool
 	if v, err := g.SetView(VIEW_PLAYLISTS, -1, -1, 25, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
@@ -255,7 +232,7 @@ func layout(g *gocui.Gui) error {
 		gui.playlistsView = v
 		gui.playlistsView.Highlight = true
 
-		gui.initPlaylistsView(state)
+		gui.updatePlaylistsView()
 
 		if err := g.SetCurrentView(VIEW_PLAYLISTS); err != nil {
 			return err
@@ -267,7 +244,7 @@ func layout(g *gocui.Gui) error {
 		}
 		gui.tracksView = v
 
-		enableTracksView = gui.initTracksView(state)
+		gui.updateTracksView()
 	}
 	if v, err := g.SetView(VIEW_QUEUE, maxX-50, -1, maxX, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
@@ -282,10 +259,52 @@ func layout(g *gocui.Gui) error {
 		gui.statusView = v
 	}
 
-	if enableTracksView {
-		gui.enableTracksView()
+	if !gui.initialised {
+		loadInitialState()
 	}
+	gui.initialised = true
 	return nil
+}
+
+func loadInitialState() {
+	state := loadState()
+	loadPlaylistFromState(state)
+	loadTrackFromState(state)
+	loadPlayingTrackFromState(state)
+}
+
+func loadPlayingTrackFromState(state *State) {
+	if state.PlayingTrackUri != "" {
+		enablePreviousPlayingTrackToBePlayed(state)
+	}
+}
+
+func loadPlaylistFromState(state *State) {
+	if state.SelectedPlaylist != "" {
+		for index, name := range playlists.Names() {
+			if name == state.SelectedPlaylist {
+				goTo(gui.g, gui.playlistsView, index+1)
+				break
+			}
+		}
+	}
+}
+
+func loadTrackFromState(state *State) {
+	if state.SelectedPlaylist != "" && state.SelectedTrack != "" {
+		if playlist := playlists.Get(state.SelectedPlaylist); playlist != nil {
+			if index := playlist.IndexByUri(state.SelectedTrack); index != -1 {
+				goTo(gui.g, gui.tracksView, index+1)
+				gui.enableTracksView()
+			}
+		}
+	}
+}
+
+func enablePreviousPlayingTrackToBePlayed(state *State) {
+	gui.previousPlayingTrack = sconsify.InitPartialTrack(state.PlayingTrackUri)
+	gui.previousPlayingPlaylist = state.PlayingPlaylist
+	fmt.Fprintf(gui.statusView, "Paused: %v\n", state.PlayingTrackFullTitle)
 }
 
 func (gui *Gui) enableTracksView() error {

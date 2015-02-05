@@ -10,7 +10,10 @@ import (
 type State struct {
 	SelectedPlaylist string
 	SelectedTrack    string
-	PlayingTrack     string
+
+	PlayingTrackUri       string
+	PlayingTrackFullTitle string
+	PlayingPlaylist       string
 }
 
 func loadState() *State {
@@ -38,7 +41,11 @@ func persistState() {
 	}
 
 	if playingTrack := playlists.GetPlayingTrack(); playingTrack != nil {
-		state.PlayingTrack = playingTrack.Uri
+		if playingPlaylist := playlists.GetPlayingPlaylist().Id(); playingPlaylist != "premade" {
+			state.PlayingTrackUri = playingTrack.Uri
+			state.PlayingTrackFullTitle = playingTrack.GetFullTitle()
+			state.PlayingPlaylist = playingPlaylist
+		}
 	}
 
 	if b, err := json.Marshal(state); err == nil {
