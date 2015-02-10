@@ -179,6 +179,10 @@ func (gui *Gui) playNext() {
 	events.NextPlay()
 }
 
+func (gui *Gui) replay() {
+	events.Replay()
+}
+
 func (gui *Gui) getSelectedPlaylistAndTrack() (*sconsify.Playlist, int) {
 	currentPlaylist := gui.getSelectedPlaylist()
 	currentTrack, errTrack := gui.getSelectedTrackName()

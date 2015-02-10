@@ -7,6 +7,7 @@ type Events struct {
 	play   chan *Track
 	pause  chan bool
 	search chan string
+	replay chan bool
 
 	nextPlay          chan bool
 	playTokenLost     chan bool
@@ -24,6 +25,7 @@ func InitialiseEvents() *Events {
 		play:   make(chan *Track),
 		pause:  make(chan bool),
 		search: make(chan string),
+		replay: make(chan bool),
 
 		nextPlay:          make(chan bool),
 		playTokenLost:     make(chan bool),
@@ -101,6 +103,14 @@ func (events *Events) Play(track *Track) {
 
 func (events *Events) PlayUpdates() <-chan *Track {
 	return events.play
+}
+
+func (events *Events) Replay() {
+	events.replay <- true
+}
+
+func (events *Events) ReplayUpdates() <-chan bool {
+	return events.replay
 }
 
 func (events *Events) Pause() {

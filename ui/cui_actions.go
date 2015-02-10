@@ -25,6 +25,7 @@ func keybindings() error {
 		addKeyBinding(&keys, newKeyMapping('r', view, setRandomMode))
 		addKeyBinding(&keys, newKeyMapping('R', view, setAllRandomMode))
 		addKeyBinding(&keys, newKeyMapping('>', view, nextCommand))
+		addKeyBinding(&keys, newKeyMapping('<', view, replayCommand))
 		addKeyBinding(&keys, newKeyMapping('/', view, enableSearchInputCommand))
 		addKeyBinding(&keys, newKeyMapping('j', view, cursorDown))
 		addKeyBinding(&keys, newKeyMapping('k', view, cursorUp))
@@ -157,6 +158,11 @@ func setAllRandomMode(g *gocui.Gui, v *gocui.View) error {
 
 func nextCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.playNext()
+	return nil
+}
+
+func replayCommand(g *gocui.Gui, v *gocui.View) error {
+	gui.replay()
 	return nil
 }
 
