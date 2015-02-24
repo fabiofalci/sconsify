@@ -1,11 +1,17 @@
 package sconsify
 
+import (
+	"strings"
+)
+
 type Playlist struct {
 	tracks []*Track
 	id     string
 	name   string
 	search bool
 }
+
+type PlaylistByName []Playlist
 
 func InitPlaylist(id string, name string, tracks []*Track) *Playlist {
 	return &Playlist{id: id, name: name, tracks: tracks}
@@ -52,4 +58,12 @@ func (playlist *Playlist) Id() string {
 
 func (playlist *Playlist) IsSearch() bool {
 	return playlist.search
+}
+
+// sort Interface
+func (p PlaylistByName) Len() int      { return len(p) }
+func (p PlaylistByName) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+
+func (p PlaylistByName) Less(i, j int) bool {
+	return strings.ToLower(p[i].name) < strings.ToLower(p[j].name)
 }

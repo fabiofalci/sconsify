@@ -204,6 +204,15 @@ func TestNames(t *testing.T) {
 			t.Errorf("Names is not in alphabetical order")
 		}
 	}
+
+	playlists.AddPlaylist(createDummyPlaylist("B list"))
+	names = playlists.Names()
+
+	for i, name := range []string{"a list", "B list", "name", "z list"} {
+		if name != names[i] {
+			t.Errorf("Names is not in alphabetical order")
+		}
+	}
 }
 
 func TestGetNext(t *testing.T) {

@@ -90,14 +90,21 @@ func (playlists *Playlists) Remove(playlistName string) {
 }
 
 func (playlists *Playlists) Names() []string {
-	names := make([]string, playlists.Playlists())
+	names := make([]Playlist, playlists.Playlists())
 	i := 0
 	for _, playlist := range playlists.playlists {
-		names[i] = playlist.Name()
+		names[i] = *playlist
 		i++
 	}
-	sort.Strings(names)
-	return names
+	sort.Sort(PlaylistByName(names))
+
+	namesAsString := make([]string, playlists.Playlists())
+	i = 0
+	for _, name := range names {
+		namesAsString[i] = name.name
+		i++
+	}
+	return namesAsString
 }
 
 func (playlists *Playlists) Tracks() int {
