@@ -29,9 +29,7 @@ func InitTrack(uri string, artist string, name string, duration string) *Track {
 }
 
 func ToSconsifyTrack(track *sp.Track) *Track {
-	track.Wait()
 	artist := track.Artist(0)
-	artist.Wait()
 	return InitTrack(track.Link().String(), artist.Name(), track.Name(), track.Duration().String())
 }
 

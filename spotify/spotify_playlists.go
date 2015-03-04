@@ -23,6 +23,8 @@ func (spotify *Spotify) initPlaylist() error {
 			tracks := make([]*sconsify.Track, playlist.Tracks())
 			for i := 0; i < playlist.Tracks(); i++ {
 				playlistTrack := playlist.Track(i)
+				playlistTrack.Track().Wait()
+				playlistTrack.Track().Artist(0).Wait()
 				tracks[i] = sconsify.ToSconsifyTrack(playlistTrack.Track())
 			}
 			id := playlist.Link().String()
