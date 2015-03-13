@@ -3,6 +3,7 @@ package ui
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/jroimartin/gocui"
@@ -207,7 +208,9 @@ func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 
 func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	// after user hit Enter, the typed command is at position -1
-	if query, _ := gui.statusView.Line(-1); query != "" {
+	query, _ := gui.statusView.Line(-1)
+	query = strings.Trim(query, " ")
+	if query != "" {
 		events.Search(query)
 	}
 	gui.enableSideView()
