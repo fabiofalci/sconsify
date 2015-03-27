@@ -101,6 +101,6 @@ sconsifyrc
 
 Similar to [.ackrc](http://beyondgrep.com/documentation/) you can define default parameters in `~/.sconsify/sconsifyrc`:
 
-	-username=you-username
+	-username=your-username
 	-noui-silent=true 
 	-noui-repeat-on=false
