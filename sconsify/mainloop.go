@@ -12,6 +12,12 @@ func StartMainLoop(events *Events, ui UserInterface, askForFirstTrack bool) erro
 		return nil
 	}
 
+	defer func() {
+		events.ShutdownSpotify()
+		// wait for spotify shutdown
+		<-events.ShutdownEngineUpdates()
+	}()
+
 	getNextToPlay := func() {
 		if track := ui.GetNextToPlay(); track != nil {
 			events.Play(track)
@@ -22,8 +28,7 @@ func StartMainLoop(events *Events, ui UserInterface, askForFirstTrack bool) erro
 		getNextToPlay()
 	}
 
-	running := true
-	for running {
+	for {
 		select {
 		case track := <-events.TrackPausedUpdates():
 			ui.TrackPaused(track)
@@ -33,20 +38,16 @@ func StartMainLoop(events *Events, ui UserInterface, askForFirstTrack bool) erro
 			ui.TrackNotAvailable(track)
 		case <-events.PlayTokenLostUpdates():
 			if err := ui.PlayTokenLost(); err != nil {
-				running = false
+				return nil
 			}
 		case <-events.NextPlayUpdates():
 			getNextToPlay()
 		case newPlaylist := <-events.PlaylistsUpdates():
 			ui.NewPlaylists(newPlaylist)
 		case <-events.ShutdownEngineUpdates():
-			running = false
+			return nil
 		}
 	}
-
-	events.ShutdownSpotify()
-	// wait for spotify shutdown
-	<-events.ShutdownEngineUpdates()
 
 	return nil
 }
