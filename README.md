@@ -6,14 +6,12 @@ A very early stage of a spotify console application.
 Requirements: [Libspotify SDK](https://developer.spotify.com/technologies/libspotify/) & [PortAudio](http://www.portaudio.com/).
 
 
-How to build using docker
-----------------------------
+How to build and run using docker
+---------------------------------
 
 * Get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
 
-* `make binary`
-
-* `./bundles/sconsify`
+* `make run`
 
 ![alt tag](https://raw.githubusercontent.com/wiki/fabiofalci/sconsify/sconsify.png)
 
