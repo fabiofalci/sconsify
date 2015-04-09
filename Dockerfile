@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:15.04
 
 RUN apt-get update && apt-get install -y curl build-essential git mercurial portaudio19-dev ca-certificates --no-install-recommends 
 
