@@ -10,8 +10,13 @@ default: build
 test:
 	go test -v ./...
 
-run: build
-	bundles/sconsify
+run: container-build
+	docker run --rm -it \
+		-v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" \
+		-v /dev/snd:/dev/snd \
+		--privileged \
+		sconsify-build \
+		bash -c 'make build && ./bundles/sconsify'
 
 #
 # To build create spotify/spotify_key_array.key containing your application key
@@ -33,7 +38,12 @@ binary: container-build
 	docker run --rm -it -v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" sconsify-build make build
 
 shell: container-build
-	docker run --rm -it -v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" sconsify-build bash
+	docker run --rm -it \
+		-v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" \
+		-v /dev/snd:/dev/snd \
+		--privileged \
+		sconsify-build \
+		bash
 
 bundles:
 	mkdir -p bundles
