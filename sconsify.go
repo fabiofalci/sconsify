@@ -36,6 +36,7 @@ func main() {
 		defer sconsify.CloseLogger()
 	}
 
+	fmt.Println("Sconsify - your awesome Spotify music service in a text-mode interface.")
 	username, pass := credentials(providedUsername)
 	events := sconsify.InitialiseEvents()
 
@@ -62,6 +63,7 @@ func credentials(providedUsername *string) (string, []byte) {
 		username, _ = reader.ReadString('\n')
 	} else {
 		username = *providedUsername
+		fmt.Println("Provided username: " + username)
 	}
 	return strings.Trim(username, " \n\r"), getPassword()
 }
@@ -69,8 +71,7 @@ func credentials(providedUsername *string) (string, []byte) {
 func getPassword() []byte {
 	passFromEnv := os.Getenv("SCONSIFY_PASSWORD")
 	if passFromEnv != "" {
-		fmt.Println("Password from environment variable SCONSIFY_PASSWORD.")
-		fmt.Println("Unset if you don't want to use it (unset SCONSIFY_PASSWORD).")
+		fmt.Println("Reading password from environment variable SCONSIFY_PASSWORD.")
 		return []byte(passFromEnv)
 	}
 	fmt.Print("Password: ")
