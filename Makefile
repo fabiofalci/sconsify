@@ -5,6 +5,10 @@ ifeq ($(UNAME), Darwin)
 	SED := sed -i '' -e '$$ d'
 endif
 
+VERSION := 0.1.0-local
+COMMIT := $(shell git rev-parse --short HEAD)
+BUILD_DATE := $(shell date -u)
+
 default: build
 
 test:
@@ -29,7 +33,9 @@ run: container-build
 #
 build:
 	go get ./...
-	$(SED) spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go && go build -o bundles/sconsify ; git checkout spotify/key.go
+	$(SED) spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go \
+		&& go build -ldflags "-X main.version $(VERSION) -X main.commit $(COMMIT) -X main.buildDate '$(BUILD_DATE)'" -o bundles/sconsify \
+		; git checkout spotify/key.go
 
 container-build: bundles
 	docker build -t sconsify-build .

@@ -15,6 +15,10 @@ import (
 	"github.com/howeyc/gopass"
 )
 
+var version string
+var commit string
+var buildDate string
+
 func init() {
 	rand.Seed(time.Now().Unix())
 }
@@ -29,7 +33,15 @@ func main() {
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
 	providedNoUiRandom := flag.Bool("noui-random", true, "Random between tracks or follow playlist order.")
 	providedDebug := flag.Bool("debug", false, "Enable debug mode.")
+	askingVersion := flag.Bool("version", false, "Print version.")
 	flag.Parse()
+
+	if *askingVersion {
+		fmt.Println("Version: " + version)
+		fmt.Println("Git commit: " + commit)
+		fmt.Println("Build date: " + buildDate)
+		os.Exit(0)
+	}
 
 	if *providedDebug {
 		sconsify.InitialiseLogger()
