@@ -70,7 +70,7 @@ func main() {
 func credentials(providedUsername *string) (string, []byte) {
 	username := ""
 	if *providedUsername == "" {
-		fmt.Print("Username: ")
+		fmt.Print("Premium account username: ")
 		reader := bufio.NewReader(os.Stdin)
 		username, _ = reader.ReadString('\n')
 	} else {
