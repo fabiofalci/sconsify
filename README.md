@@ -84,6 +84,8 @@ UI mode keyboard
 
 * `p`: pause.
 
+* `/`: open a search field.
+
 * `r`: random tracks in the current playlist. Press again to go back to normal mode.
 
 * `R`: random tracks in all playlists. Press again to go back to normal mode.
