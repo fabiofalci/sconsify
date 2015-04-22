@@ -6,6 +6,31 @@ A very early stage of a spotify console application.
 Requirements: [Libspotify SDK](https://developer.spotify.com/technologies/libspotify/) & [PortAudio](http://www.portaudio.com/).
 
 
+Installation
+------------
+
+* Download current version [0.1.0-rc1](https://github.com/fabiofalci/sconsify/releases) 
+
+* Install dependencies:
+
+`Archlinux`
+
+	$ pacman -S portaudio
+	$ yaourt -S libspotify
+
+`Ubuntu` & `debian` - please ubuntu/debian users we need your confirmation on this
+
+	$ curl http://apt.mopidy.com/mopidy.gpg | apt-key add - && curl -o /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
+	$ apt-get update && apt-get install -y libportaudio2 libspotify12 --no-install-recommends 
+
+`OSX`
+
+	$ brew install portaudio
+	$ brew install libspotify
+
+* Run `./sconsify`
+
+
 How to build and run using docker
 ---------------------------------
 
