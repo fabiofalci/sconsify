@@ -25,11 +25,13 @@ Installation
 
 `OSX`
 
+	$ brew tap homebrew/binary
 	$ brew install portaudio
 	$ brew install libspotify
+	$ cd /usr/local/opt/libspotify/lib/
+	$ ln -s libspotify.dylib libspotify
 
 * Run `./sconsify`
-
 
 How to build and run using docker
 ---------------------------------
