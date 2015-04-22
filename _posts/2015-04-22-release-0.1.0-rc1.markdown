@@ -1,0 +1,11 @@
+---
+layout: post
+title:  "Release 0.1.0-rc1"
+date:   2015-04-22 15:46:12
+categories: release
+---
+Please help us to test the first public release, Sconsify 0.1.0 release candidate 1.
+
+Find more information in how to install [here][install-instructions].
+
+[install-instructions]:      https://github.com/fabiofalci/sconsify#installation
