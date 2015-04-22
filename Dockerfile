@@ -3,7 +3,7 @@ FROM ubuntu:15.04
 RUN apt-get update && apt-get install -y curl build-essential git mercurial portaudio19-dev ca-certificates --no-install-recommends 
 
 # Libspotify
-RUN curl --insecure https://apt.mopidy.com/mopidy.gpg | apt-key add - && curl --insecure -o /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/mopidy.list
+RUN curl http://apt.mopidy.com/mopidy.gpg | apt-key add - && curl -o /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
 RUN apt-get update && apt-get install -y libspotify-dev
 
 # Install Go
