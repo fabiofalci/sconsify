@@ -33,15 +33,7 @@ Installation
 
 * Run `./sconsify`
 
-How to build and run using docker
----------------------------------
-
-* Get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
-
-* `make run`
-
 ![alt tag](https://raw.githubusercontent.com/wiki/fabiofalci/sconsify/sconsify.png)
-
 
 Modes
 -----
@@ -131,3 +123,18 @@ Similar to [.ackrc](http://beyondgrep.com/documentation/) you can define default
 	-username=your-username
 	-noui-silent=true 
 	-noui-repeat-on=false
+
+
+How to build and run using docker
+---------------------------------
+
+Get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
+
+	var key = []byte{
+	    0x02, 0xA2, ...
+	    ...
+	    0xA1}
+
+* `make run`
+
+When building for OSX you may face an issue where it doesn't get you application key. Just retry the build that eventually it will get the key.
