@@ -12,7 +12,7 @@ import (
 
 type NoUi struct {
 	output    Printer
-	random    bool
+	shuffle   bool
 	repeatOn  bool
 	playlists *sconsify.Playlists
 	events    *sconsify.Events
@@ -25,13 +25,13 @@ type Printer interface {
 type SilentPrinter struct{}
 type StandardOutputPrinter struct{}
 
-func InitialiseNoUserInterface(events *sconsify.Events, output Printer, repeatOn *bool, random *bool) sconsify.UserInterface {
+func InitialiseNoUserInterface(events *sconsify.Events, output Printer, repeatOn *bool, shuffle *bool) sconsify.UserInterface {
 	if output == nil {
 		output = new(StandardOutputPrinter)
 	}
 	noui := &NoUi{
 		output:   output,
-		random:   *random,
+		shuffle:  *shuffle,
 		repeatOn: *repeatOn,
 		events:   events,
 	}
@@ -75,8 +75,8 @@ func (noui *NoUi) NewPlaylists(playlists sconsify.Playlists) error {
 		noui.output.Print("No track selected\n")
 		return errors.New("No track selected")
 	}
-	if noui.random {
-		playlists.SetMode(sconsify.AllRandomMode)
+	if noui.shuffle {
+		playlists.SetMode(sconsify.ShuffleAllMode)
 	} else {
 		playlists.SetMode(sconsify.SequentialMode)
 	}

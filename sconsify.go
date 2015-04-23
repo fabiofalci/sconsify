@@ -27,11 +27,11 @@ func main() {
 	sconsify.ProcessSconsifyrc()
 
 	providedUsername := flag.String("username", "", "Spotify username.")
-	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only random between Playlists.")
+	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll shuffle tracks.")
 	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
 	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no UI is used.")
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
-	providedNoUiRandom := flag.Bool("noui-random", true, "Random between tracks or follow playlist order.")
+	providedNoUiShuffle := flag.Bool("noui-shuffle", true, "Shuffle tracks or follow playlist order.")
 	providedDebug := flag.Bool("debug", false, "Enable debug mode.")
 	askingVersion := flag.Bool("version", false, "Print version.")
 	flag.Parse()
@@ -62,7 +62,7 @@ func main() {
 		if *providedNoUiSilent {
 			output = new(ui.SilentPrinter)
 		}
-		ui := ui.InitialiseNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiRandom)
+		ui := ui.InitialiseNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiShuffle)
 		sconsify.StartMainLoop(events, ui, true)
 	}
 }

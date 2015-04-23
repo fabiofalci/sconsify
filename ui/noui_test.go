@@ -19,7 +19,7 @@ func (p *TestPrinter) Print(message string) {
 
 func TestNoUiEmptyPlaylists(t *testing.T) {
 	repeatOn := true
-	random := true
+	shuffle := true
 	events := sconsify.InitialiseEvents()
 
 	go func() {
@@ -27,7 +27,7 @@ func TestNoUiEmptyPlaylists(t *testing.T) {
 		events.NewPlaylist(playlists)
 	}()
 
-	ui := InitialiseNoUserInterface(events, nil, &repeatOn, &random)
+	ui := InitialiseNoUserInterface(events, nil, &repeatOn, &shuffle)
 	err := sconsify.StartMainLoop(events, ui, true)
 	if err == nil {
 		t.Errorf("No track selected should return an error")
@@ -36,10 +36,10 @@ func TestNoUiEmptyPlaylists(t *testing.T) {
 
 func TestNoUiSequentialAndRepeating(t *testing.T) {
 	repeatOn := true
-	random := false
+	shuffle := false
 	events := sconsify.InitialiseEvents()
 	output := &TestPrinter{message: make(chan string)}
-	ui := InitialiseNoUserInterface(events, output, &repeatOn, &random)
+	ui := InitialiseNoUserInterface(events, output, &repeatOn, &shuffle)
 
 	finished := make(chan bool)
 	go func() {
@@ -60,10 +60,10 @@ func TestNoUiSequentialAndRepeating(t *testing.T) {
 
 func TestNoUiSequentialAndNotRepeating(t *testing.T) {
 	repeatOn := false
-	random := false
+	shuffle := false
 	events := sconsify.InitialiseEvents()
 	output := &TestPrinter{message: make(chan string)}
-	ui := InitialiseNoUserInterface(events, output, &repeatOn, &random)
+	ui := InitialiseNoUserInterface(events, output, &repeatOn, &shuffle)
 
 	finished := make(chan bool)
 	go func() {
@@ -80,14 +80,14 @@ func TestNoUiSequentialAndNotRepeating(t *testing.T) {
 	assertNoNextTrack(events, finished)
 }
 
-func TestNoUiRandomAndRepeating(t *testing.T) {
+func TestNoUiShuffleAndRepeating(t *testing.T) {
 	rand.Seed(123456789) // repeatable
 
 	repeatOn := true
-	random := true
+	shuffle := true
 	events := sconsify.InitialiseEvents()
 	output := &TestPrinter{message: make(chan string)}
-	ui := InitialiseNoUserInterface(events, output, &repeatOn, &random)
+	ui := InitialiseNoUserInterface(events, output, &repeatOn, &shuffle)
 
 	finished := make(chan bool)
 	go func() {
@@ -99,21 +99,21 @@ func TestNoUiRandomAndRepeating(t *testing.T) {
 
 	assertPrintFourTracks(t, events, output)
 
-	assertRandomFirstTrack(t, events, output)
-	assertRandomNextThreeTracks(t, events, output)
-	assertRandomRepeatingAllFourTracks(t, events, output)
+	assertShuffleFirstTrack(t, events, output)
+	assertShuffleNextThreeTracks(t, events, output)
+	assertShuffleRepeatingAllFourTracks(t, events, output)
 
 	assertShutdown(t, ui, events, finished)
 }
 
-func TestNoUiRandomAndNotRepeating(t *testing.T) {
+func TestNoUiShuffleAndNotRepeating(t *testing.T) {
 	rand.Seed(123456789) // repeatable
 
 	repeatOn := false
-	random := true
+	shuffle := true
 	events := sconsify.InitialiseEvents()
 	output := &TestPrinter{message: make(chan string)}
-	ui := InitialiseNoUserInterface(events, output, &repeatOn, &random)
+	ui := InitialiseNoUserInterface(events, output, &repeatOn, &shuffle)
 
 	finished := make(chan bool)
 	go func() {
@@ -125,8 +125,8 @@ func TestNoUiRandomAndNotRepeating(t *testing.T) {
 
 	assertPrintFourTracks(t, events, output)
 
-	assertRandomFirstTrack(t, events, output)
-	assertRandomNextThreeTracks(t, events, output)
+	assertShuffleFirstTrack(t, events, output)
+	assertShuffleNextThreeTracks(t, events, output)
 	assertNoNextTrack(events, finished)
 }
 
@@ -173,7 +173,7 @@ func assertFirstTrack(t *testing.T, events *sconsify.Events, output *TestPrinter
 	}
 }
 
-func assertRandomFirstTrack(t *testing.T, events *sconsify.Events, output *TestPrinter) {
+func assertShuffleFirstTrack(t *testing.T, events *sconsify.Events, output *TestPrinter) {
 	events.TrackPlaying(<-events.PlayUpdates())
 	message := <-output.message
 	if message != "Playing: artist3 - name3 [duration3]" {
@@ -185,7 +185,7 @@ func assertNextThreeTracks(t *testing.T, events *sconsify.Events, output *TestPr
 	playNext(t, events, output, []string{"1", "2", "3"})
 }
 
-func assertRandomNextThreeTracks(t *testing.T, events *sconsify.Events, output *TestPrinter) {
+func assertShuffleNextThreeTracks(t *testing.T, events *sconsify.Events, output *TestPrinter) {
 	playNext(t, events, output, []string{"0", "2", "1"})
 }
 
@@ -193,7 +193,7 @@ func assertRepeatingAllFourTracks(t *testing.T, events *sconsify.Events, output 
 	playNext(t, events, output, []string{"0", "1", "2", "3"})
 }
 
-func assertRandomRepeatingAllFourTracks(t *testing.T, events *sconsify.Events, output *TestPrinter) {
+func assertShuffleRepeatingAllFourTracks(t *testing.T, events *sconsify.Events, output *TestPrinter) {
 	playNext(t, events, output, []string{"3", "0", "2", "1"})
 }
 

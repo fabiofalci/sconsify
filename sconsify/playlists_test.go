@@ -32,7 +32,7 @@ func TestNormalMode(t *testing.T) {
 	}
 }
 
-func TestRandomMode(t *testing.T) {
+func TestShuffleMode(t *testing.T) {
 	rand.Seed(123456789) // repeatable
 
 	playlists := InitPlaylists()
@@ -42,7 +42,7 @@ func TestRandomMode(t *testing.T) {
 
 	playlists.AddPlaylist(createDummyPlaylist("name"))
 	playlists.SetCurrents("name", 0)
-	playlists.SetMode(RandomMode)
+	playlists.SetMode(ShuffleMode)
 
 	order := []string{"3", "0", "2", "1"}
 	for _, expectedUri := range order {
@@ -57,7 +57,7 @@ func TestRandomMode(t *testing.T) {
 	}
 }
 
-func TestAllRandomMode(t *testing.T) {
+func TestShuffleAllMode(t *testing.T) {
 	rand.Seed(123456789) // repeatable
 
 	playlists := InitPlaylists()
@@ -68,7 +68,7 @@ func TestAllRandomMode(t *testing.T) {
 	playlists.AddPlaylist(createDummyPlaylist("name"))
 	playlists.AddPlaylist(createDummyPlaylist("name1"))
 	playlists.SetCurrents("name", 0)
-	playlists.SetMode(AllRandomMode)
+	playlists.SetMode(ShuffleAllMode)
 
 	order := []string{"3", "3", "2", "1", "0", "1", "2", "0"}
 
@@ -84,7 +84,7 @@ func TestAllRandomMode(t *testing.T) {
 	}
 }
 
-func TestSequentialRandomMode(t *testing.T) {
+func TestSequentialShuffleMode(t *testing.T) {
 	rand.Seed(123456789) // repeatable
 
 	playlists := InitPlaylists()
@@ -263,13 +263,13 @@ func TestStateMode(t *testing.T) {
 		t.Errorf("Empty playlists should be on empty state but it is [%v]", mode)
 	}
 
-	playlists.playMode = RandomMode
-	if mode := playlists.GetModeAsString(); mode != "[Random] " {
+	playlists.playMode = ShuffleMode
+	if mode := playlists.GetModeAsString(); mode != "[Shuffled] " {
 		t.Errorf("Mode was set to true but is returning %v", mode)
 	}
 
-	playlists.playMode = AllRandomMode
-	if mode := playlists.GetModeAsString(); mode != "[All Random] " {
+	playlists.playMode = ShuffleAllMode
+	if mode := playlists.GetModeAsString(); mode != "[Playlists Shuffled] " {
 		t.Errorf("Mode was set to true but is returning %v", mode)
 	}
 
@@ -282,24 +282,24 @@ func TestStateMode(t *testing.T) {
 func TestStateInvertMode(t *testing.T) {
 	playlists := InitPlaylists()
 
-	playlists.InvertMode(RandomMode)
-	if mode := playlists.GetModeAsString(); mode != "[Random] " {
-		t.Errorf("Mode was inverted to random but is returning %v", mode)
+	playlists.InvertMode(ShuffleMode)
+	if mode := playlists.GetModeAsString(); mode != "[Shuffled] " {
+		t.Errorf("Mode was inverted to shuffle but is returning %v", mode)
 	}
 
-	playlists.InvertMode(RandomMode)
+	playlists.InvertMode(ShuffleMode)
 	if mode := playlists.GetModeAsString(); mode != "" {
 		t.Errorf("Mode was inverted to normal but is returning %v", mode)
 	}
 
-	playlists.InvertMode(AllRandomMode)
-	if mode := playlists.GetModeAsString(); mode != "[All Random] " {
-		t.Errorf("Mode was inverted to allRandom but is returning %v", mode)
+	playlists.InvertMode(ShuffleAllMode)
+	if mode := playlists.GetModeAsString(); mode != "[Playlists Shuffled] " {
+		t.Errorf("Mode was inverted to shuffle all but is returning %v", mode)
 	}
 
-	playlists.InvertMode(AllRandomMode)
+	playlists.InvertMode(ShuffleAllMode)
 	if mode := playlists.GetModeAsString(); mode != "" {
-		t.Errorf("Mode was inverted to random but is returning %v", mode)
+		t.Errorf("Mode was inverted to shuffle but is returning %v", mode)
 	}
 }
 

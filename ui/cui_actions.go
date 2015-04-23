@@ -23,8 +23,8 @@ func keybindings() error {
 
 	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
 		addKeyBinding(&keys, newKeyMapping('p', view, pauseCurrentSelectedTrack))
-		addKeyBinding(&keys, newKeyMapping('r', view, setRandomMode))
-		addKeyBinding(&keys, newKeyMapping('R', view, setAllRandomMode))
+		addKeyBinding(&keys, newKeyMapping('s', view, setShuffleMode))
+		addKeyBinding(&keys, newKeyMapping('S', view, setShuffleAllMode))
 		addKeyBinding(&keys, newKeyMapping('>', view, nextCommand))
 		addKeyBinding(&keys, newKeyMapping('<', view, replayCommand))
 		addKeyBinding(&keys, newKeyMapping('/', view, enableSearchInputCommand))
@@ -145,14 +145,14 @@ func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func setRandomMode(g *gocui.Gui, v *gocui.View) error {
-	playlists.InvertMode(sconsify.RandomMode)
+func setShuffleMode(g *gocui.Gui, v *gocui.View) error {
+	playlists.InvertMode(sconsify.ShuffleMode)
 	gui.updateCurrentStatus()
 	return nil
 }
 
-func setAllRandomMode(g *gocui.Gui, v *gocui.View) error {
-	playlists.InvertMode(sconsify.AllRandomMode)
+func setShuffleAllMode(g *gocui.Gui, v *gocui.View) error {
+	playlists.InvertMode(sconsify.ShuffleAllMode)
 	gui.updateCurrentStatus()
 	return nil
 }

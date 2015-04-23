@@ -42,7 +42,7 @@ There are 2 modes:
 
 * `Console user interface` mode: it presents a text user interface with playlists and tracks.
 
-* `No user interface` mode: it doesn't present user interface and just random tracks between playlists.
+* `No user interface` mode: it doesn't present user interface and just suffle tracks.
 
 
 Parameters
@@ -52,7 +52,7 @@ Parameters
 
 * Password will be asked. To not be asked you can set an environment variable with your password `export SCONSIFY_PASSWORD=password`. Be aware your password will be exposed as plain text.
 
-* `-ui=true/false`: Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only random between Playlists.
+* `-ui=true/false`: Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll only shuffle tracks.
 
 * `-playlists=""`: Select just some playlists to play. Comma separated list.
 
@@ -64,7 +64,7 @@ No UI Parameters
 
 * `-noui-silent=true/false`: Silent mode when no UI is used.
 
-* `-noui-random=true/false`: Random between tracks or follow playlist order.
+* `-noui-shuffle=true/false`: Shuffle tracks or follow playlist order.
 
 
 UI mode keyboard 
@@ -80,9 +80,9 @@ UI mode keyboard
 
 * `/`: open a search field.
 
-* `r`: random tracks in the current playlist. Press again to go back to normal mode.
+* `s`: shuffle tracks from current playlist. Press again to go back to normal mode.
 
-* `R`: random tracks in all playlists. Press again to go back to normal mode.
+* `S`: shuffle tracks from all playlists. Press again to go back to normal mode.
 
 * `u`: queue selected track to play next.
 
