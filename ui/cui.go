@@ -228,7 +228,10 @@ func (gui *Gui) updateQueueView() {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView(VIEW_PLAYLISTS, -1, -1, 25, maxY-2); err != nil {
+	max := float32(maxX)
+	playlistSize := max * 0.15
+	trackSize := max * 0.70
+	if v, err := g.SetView(VIEW_PLAYLISTS, -1, -1, int(playlistSize), maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -241,7 +244,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 	}
-	if v, err := g.SetView(VIEW_TRACKS, 25, -1, maxX-50, maxY-2); err != nil {
+	if v, err := g.SetView(VIEW_TRACKS, int(playlistSize), -1, int(playlistSize+trackSize), maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
@@ -249,7 +252,7 @@ func layout(g *gocui.Gui) error {
 
 		gui.updateTracksView()
 	}
-	if v, err := g.SetView(VIEW_QUEUE, maxX-50, -1, maxX, maxY-2); err != nil {
+	if v, err := g.SetView(VIEW_QUEUE, int(playlistSize+trackSize), -1, maxX, maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
 		}
