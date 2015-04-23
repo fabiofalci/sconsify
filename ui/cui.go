@@ -230,7 +230,7 @@ func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	max := float32(maxX)
 	playlistSize := max * 0.15
-	trackSize := max * 0.70
+	trackSize := max * 0.60
 	if v, err := g.SetView(VIEW_PLAYLISTS, -1, -1, int(playlistSize), maxY-2); err != nil {
 		if err != gocui.ErrorUnkView {
 			return err
