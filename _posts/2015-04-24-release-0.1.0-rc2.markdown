@@ -1,0 +1,17 @@
+---
+layout: post
+title:  "Release 0.1.0-rc2"
+date:   2015-04-24 08:48:21
+categories: release
+---
+Sconsify 0.1.0 release candidate 2:
+
+* Rename from `random` to `shuffle`.
+
+* `Shuffle` mode keys: `s` and `S`.
+
+* Layout of playlists/tracks/queue: 15% - 60% - 25% of screen
+
+Installation instructions [here][install-instructions].
+
+[install-instructions]:      https://github.com/fabiofalci/sconsify#installation
