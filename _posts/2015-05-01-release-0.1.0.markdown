@@ -1,0 +1,27 @@
+---
+layout: post
+title:  "Release 0.1.0"
+date:   2015-05-01 08:20:00
+categories: release
+---
+Sconsify 0.1.0:
+
+* `OSX x86_64` and `Linux x86_64` binaries.
+
+* Premier account only.
+
+* Play tracks from your playlists.
+
+* 2 interface modes: console user interface & no user interface.
+
+* Shuffle tracks with `s` and `S`.
+
+* Queue tracks with `u`.
+
+* Search tracks with `/`.
+
+* Basic `vi` navigation `hjkl`.
+
+Installation instructions [here][install-instructions].
+
+[install-instructions]:      https://github.com/fabiofalci/sconsify#installation
