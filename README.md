@@ -25,6 +25,8 @@ Installation
 
 `OSX`
 
+Install [brew, the missing package manager for OS X](http://brew.sh/) and
+
 	$ brew tap homebrew/binary
 	$ brew install portaudio
 	$ brew install libspotify
