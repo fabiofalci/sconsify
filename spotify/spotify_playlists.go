@@ -16,6 +16,9 @@ func (spotify *Spotify) initPlaylist() error {
 	}
 	allPlaylists.Wait()
 	for i := 0; i < allPlaylists.Playlists(); i++ {
+		if allPlaylists.PlaylistType(i) != sp.PlaylistTypePlaylist {
+			continue
+		}
 		playlist := allPlaylists.Playlist(i)
 		playlist.Wait()
 
