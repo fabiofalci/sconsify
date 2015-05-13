@@ -1,0 +1,13 @@
+---
+layout: post
+title:  "Release 0.1.1-rc1"
+date:   2015-05-13 09:11:00
+categories: release
+---
+Sconsify 0.1.1 release candidate 1:
+
+* Fix panic when user has a PlaylistFolder.
+
+[Release page][release-page].
+
+[release-page]:      https://github.com/fabiofalci/sconsify/releases/tag/v0.1.1-rc1
