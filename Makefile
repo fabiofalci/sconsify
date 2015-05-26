@@ -5,7 +5,7 @@ ifeq ($(UNAME), Darwin)
 	SED := sed -i '' -e '$$ d'
 endif
 
-VERSION := 0.1.1-rc1
+VERSION := 0.1.1
 COMMIT := $(shell git rev-parse --short HEAD)
 BUILD_DATE := $(shell date -u)
 
