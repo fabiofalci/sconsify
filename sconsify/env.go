@@ -46,6 +46,13 @@ func GetStateFileLocation() string {
 	return ""
 }
 
+func GetKeyFunctionsFileLocation() string {
+	if basePath := getConfLocation(); basePath != "" {
+		return basePath + "/key-functions.json"
+	}
+	return ""
+}
+
 func SaveFile(fileLocation string, content []byte) {
 	file, err := os.OpenFile(fileLocation, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err == nil {

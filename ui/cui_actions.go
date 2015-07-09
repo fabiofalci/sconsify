@@ -2,7 +2,9 @@ package ui
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/fabiofalci/sconsify/sconsify"
@@ -15,31 +17,101 @@ type KeyMapping struct {
 	view string
 }
 
+type KeyFunctions struct {
+	PauseTrack               string
+	ShuffleMode              string
+	ShuffleAllMode           string
+	NextTrack                string
+	ReplayTrack              string
+	Search                   string
+	Quit                     string
+	QueueTrack               string
+	RemoveTrackFromPlaylist  string
+	RemoveTrackFromQueue     string
+	RemoveAllTracksFromQueue string
+}
+
 var multipleKeysBuffer bytes.Buffer
 var multipleKeysNumber int
 
+func (k *KeyFunctions) defaultValues() {
+	if k.PauseTrack == "" {
+		k.PauseTrack = "p"
+	} 
+	if k.ShuffleMode == "" {
+		k.ShuffleMode = "s"
+	} 
+	if k.ShuffleAllMode == "" {
+		k.ShuffleAllMode = "S"
+	} 
+	if k.NextTrack == "" {
+		k.NextTrack = ">"
+	} 
+	if k.ReplayTrack == "" {
+		k.ReplayTrack = "<"
+	} 
+	if k.Search == "" {
+		k.Search = "/"
+	} 
+	if k.Quit == "" {
+		k.Quit = "q"
+	} 
+	if k.QueueTrack == "" {
+		k.QueueTrack = "u"
+	} 
+	if k.RemoveTrackFromPlaylist == "" {
+		k.RemoveTrackFromPlaylist = "d"
+	} 
+	if k.RemoveTrackFromQueue == "" {
+		k.RemoveTrackFromQueue = "d"
+	} 
+	if k.RemoveAllTracksFromQueue == "" {
+		k.RemoveAllTracksFromQueue = "D"
+	} 
+}
+
+func loadKeyFunctions() *KeyFunctions {
+	if fileLocation := sconsify.GetKeyFunctionsFileLocation(); fileLocation != "" {
+		if b, err := ioutil.ReadFile(fileLocation); err == nil {
+			var keyFunctions KeyFunctions
+			if err := json.Unmarshal(b, &keyFunctions); err == nil {
+				return &keyFunctions
+			}
+		}
+	}
+	return &KeyFunctions{}
+}
+
+func getFirstRune(value string) rune {
+	runes := []rune(value)
+	return runes[0]
+}
+
 func keybindings() error {
+	keyFunctions := loadKeyFunctions()
+	keyFunctions.defaultValues()
+
 	keys := make([]*KeyMapping, 0)
 
 	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
-		addKeyBinding(&keys, newKeyMapping('p', view, pauseTrackCommand))
-		addKeyBinding(&keys, newKeyMapping('s', view, setShuffleMode))
-		addKeyBinding(&keys, newKeyMapping('S', view, setShuffleAllMode))
-		addKeyBinding(&keys, newKeyMapping('>', view, nextTrackCommand))
-		addKeyBinding(&keys, newKeyMapping('<', view, replayTrackCommand))
-		addKeyBinding(&keys, newKeyMapping('/', view, enableSearchInputCommand))
-		addKeyBinding(&keys, newKeyMapping('j', view, cursorDown))
+		addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.PauseTrack), view, pauseTrackCommand))
+		addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.ShuffleMode), view, setShuffleMode))
+		addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.ShuffleAllMode), view, setShuffleAllMode))
+		addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.NextTrack), view, nextTrackCommand))
+		addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.ReplayTrack), view, replayTrackCommand))
+		addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.Search), view, enableSearchInputCommand))
+		addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.Quit), view, quit))
+		addKeyBinding(&keys, newKeyMapping('j' , view, cursorDown))
 		addKeyBinding(&keys, newKeyMapping('k', view, cursorUp))
-		addKeyBinding(&keys, newKeyMapping('q', view, quit))
 	}
 
 	allViews := ""
 	addKeyBinding(&keys, newKeyMapping(gocui.KeySpace, VIEW_TRACKS, playCurrentSelectedTrack))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, VIEW_TRACKS, playCurrentSelectedTrack))
-	addKeyBinding(&keys, newKeyMapping('u', VIEW_TRACKS, queueTrackCommand))
-	addKeyBinding(&keys, newKeyMapping('d', VIEW_PLAYLISTS, removeTrackFromPlaylistsCommand))
-	addKeyBinding(&keys, newKeyMapping('d', VIEW_QUEUE, removeTrackFromQueueCommand))
-	addKeyBinding(&keys, newKeyMapping('D', VIEW_QUEUE, removeAllTracksFromQueueCommand))
+	addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.QueueTrack), VIEW_TRACKS, queueTrackCommand))
+	addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.RemoveTrackFromPlaylist), VIEW_PLAYLISTS, removeTrackFromPlaylistsCommand))
+	addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.RemoveTrackFromQueue), VIEW_QUEUE, removeTrackFromQueueCommand))
+	addKeyBinding(&keys, newKeyMapping(getFirstRune(keyFunctions.RemoveAllTracksFromQueue), VIEW_QUEUE, removeAllTracksFromQueueCommand))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyHome, allViews, cursorHome))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnd, allViews, cursorEnd))
