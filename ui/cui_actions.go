@@ -22,11 +22,11 @@ func keybindings() error {
 	keys := make([]*KeyMapping, 0)
 
 	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
-		addKeyBinding(&keys, newKeyMapping('p', view, pauseCurrentSelectedTrack))
+		addKeyBinding(&keys, newKeyMapping('p', view, pauseTrackCommand))
 		addKeyBinding(&keys, newKeyMapping('s', view, setShuffleMode))
 		addKeyBinding(&keys, newKeyMapping('S', view, setShuffleAllMode))
-		addKeyBinding(&keys, newKeyMapping('>', view, nextCommand))
-		addKeyBinding(&keys, newKeyMapping('<', view, replayCommand))
+		addKeyBinding(&keys, newKeyMapping('>', view, nextTrackCommand))
+		addKeyBinding(&keys, newKeyMapping('<', view, replayTrackCommand))
 		addKeyBinding(&keys, newKeyMapping('/', view, enableSearchInputCommand))
 		addKeyBinding(&keys, newKeyMapping('j', view, cursorDown))
 		addKeyBinding(&keys, newKeyMapping('k', view, cursorUp))
@@ -36,10 +36,10 @@ func keybindings() error {
 	allViews := ""
 	addKeyBinding(&keys, newKeyMapping(gocui.KeySpace, VIEW_TRACKS, playCurrentSelectedTrack))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, VIEW_TRACKS, playCurrentSelectedTrack))
-	addKeyBinding(&keys, newKeyMapping('u', VIEW_TRACKS, queueCommand))
-	addKeyBinding(&keys, newKeyMapping('d', VIEW_PLAYLISTS, removeFromPlaylistsCommand))
-	addKeyBinding(&keys, newKeyMapping('d', VIEW_QUEUE, removeFromQueueCommand))
-	addKeyBinding(&keys, newKeyMapping('D', VIEW_QUEUE, removeAllFromQueueCommand))
+	addKeyBinding(&keys, newKeyMapping('u', VIEW_TRACKS, queueTrackCommand))
+	addKeyBinding(&keys, newKeyMapping('d', VIEW_PLAYLISTS, removeTrackFromPlaylistsCommand))
+	addKeyBinding(&keys, newKeyMapping('d', VIEW_QUEUE, removeTrackFromQueueCommand))
+	addKeyBinding(&keys, newKeyMapping('D', VIEW_QUEUE, removeAllTracksFromQueueCommand))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyHome, allViews, cursorHome))
 	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnd, allViews, cursorEnd))
@@ -140,7 +140,7 @@ func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func pauseCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
+func pauseTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	player.Pause()
 	return nil
 }
@@ -157,17 +157,17 @@ func setShuffleAllMode(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func nextCommand(g *gocui.Gui, v *gocui.View) error {
+func nextTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.playNext()
 	return nil
 }
 
-func replayCommand(g *gocui.Gui, v *gocui.View) error {
+func replayTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.replay()
 	return nil
 }
 
-func queueCommand(g *gocui.Gui, v *gocui.View) error {
+func queueTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
 		track := playlist.Track(trackIndex)
 		fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
@@ -176,13 +176,13 @@ func queueCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func removeAllFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
+func removeAllTracksFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	queue.RemoveAll()
 	gui.updateQueueView()
 	return gui.enableTracksView()
 }
 
-func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
+func removeTrackFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	if index := gui.getQueueSelectedTrackIndex(); index > -1 {
 		queue.Remove(index)
 		gui.updateQueueView()
@@ -190,7 +190,7 @@ func removeFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func removeFromPlaylistsCommand(g *gocui.Gui, v *gocui.View) error {
+func removeTrackFromPlaylistsCommand(g *gocui.Gui, v *gocui.View) error {
 	if playlist := gui.getSelectedPlaylist(); playlist != nil && playlist.IsSearch() {
 		playlists.Remove(playlist.Name())
 		gui.updatePlaylistsView()
