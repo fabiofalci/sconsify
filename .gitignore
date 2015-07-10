@@ -2,3 +2,4 @@ spotify_appkey.key
 tmp/
 spotify/spotify_key_array.key
 bundles/
+.idea/
