@@ -192,13 +192,13 @@ func keybindings() error {
 	}
 
 	allViews := ""
-	keyboard.configureKey(queueTrackCommand, QueueTrack, allViews)
-	keyboard.configureKey(removeTrackFromPlaylistsCommand, RemoveTrackFromPlaylist, allViews)
-	keyboard.configureKey(removeTrackFromQueueCommand, RemoveTrackFromQueue, allViews)
-	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, allViews)
+	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
+	keyboard.configureKey(removeTrackFromPlaylistsCommand, RemoveTrackFromPlaylist, VIEW_PLAYLISTS)
+	keyboard.configureKey(removeTrackFromQueueCommand, RemoveTrackFromQueue, VIEW_QUEUE)
+	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, VIEW_QUEUE)
 	keyboard.configureKey(goToFirstLineCommand, GoToFirstLine, allViews)
 	keyboard.configureKey(goToLastLineCommand, GoToLastLine, allViews)
-	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, allViews)
+	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
 
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyHome, allViews, cursorHome))
