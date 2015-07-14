@@ -42,6 +42,8 @@ const (
 	RemoveTrackFromPlaylist string = "RemoveTrackFromPlaylist"
 	RemoveTrackFromQueue string = "RemoveTrackFromQueue"
 	RemoveAllTracksFromQueue string = "RemoveAllTracksFromQueue"
+	GoToFirstLine string = "GoToFirstLine"
+	GoToLastLine string = "GoToLastLine"
 )
 
 var multipleKeysBuffer bytes.Buffer
@@ -81,6 +83,12 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[RemoveAllTracksFromQueue] {
 		keyboard.addKey("D", RemoveAllTracksFromQueue)
+	}
+	if !keyboard.UsedFunctions[GoToFirstLine] {
+		keyboard.addKey("gg", GoToFirstLine)
+	}
+	if !keyboard.UsedFunctions[GoToLastLine] {
+		keyboard.addKey("G", GoToLastLine)
 	}
 }
 
@@ -177,6 +185,8 @@ func keybindings() error {
 	keyboard.configureKey(removeTrackFromPlaylistsCommand, RemoveTrackFromPlaylist, allViews)
 	keyboard.configureKey(removeTrackFromQueueCommand, RemoveTrackFromQueue, allViews)
 	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, allViews)
+	keyboard.configureKey(goToFirstLineCommand, GoToFirstLine, allViews)
+	keyboard.configureKey(goToLastLineCommand, GoToLastLine, allViews)
 
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeySpace, VIEW_TRACKS, playCurrentSelectedTrack))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_TRACKS, playCurrentSelectedTrack))
@@ -196,12 +206,6 @@ func keybindings() error {
 	addKeyBinding(&keyboard.Keys, newKeyMapping('l', VIEW_PLAYLISTS, nextView))
 	addKeyBinding(&keyboard.Keys, newKeyMapping('l', VIEW_TRACKS, mainNextViewRight))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, allViews, quit))
-	addKeyBinding(&keyboard.Keys, newKeyMapping('G', allViews, uppergCommand))
-
-	addKeyBinding(&keyboard.MultipleKeys, newKeyMapping('g', allViews,
-		func(g *gocui.Gui, v *gocui.View) error {
-			return multipleKeysPressed(g, v, 'g')
-		}))
 
 	// numbers
 	for i := 0; i < 10; i++ {

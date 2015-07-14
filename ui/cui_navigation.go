@@ -188,7 +188,7 @@ func goTo(g *gocui.Gui, v *gocui.View, position int) error {
 	return nil
 }
 
-func ggCommand(g *gocui.Gui, v *gocui.View) error {
+func goToFirstLineCommand(g *gocui.Gui, v *gocui.View) error {
 	if multipleKeysNumber <= 0 {
 		return cursorHome(g, v)
 	}
@@ -196,7 +196,7 @@ func ggCommand(g *gocui.Gui, v *gocui.View) error {
 	return goTo(g, v, multipleKeysNumber)
 }
 
-func uppergCommand(g *gocui.Gui, v *gocui.View) error {
+func goToLastLineCommand(g *gocui.Gui, v *gocui.View) error {
 	if multipleKeysNumber <= 0 {
 		return cursorEnd(g, v)
 	}
