@@ -18,7 +18,6 @@ type KeyMapping struct {
 }
 
 type Keyboard struct {
-	KeyFile        []KeyEntry
 	ConfiguredKeys map[string][]string
 	UsedFunctions  map[string]bool
 
@@ -88,8 +87,9 @@ func (keyboard *Keyboard) defaultValues() {
 func (keyboard *Keyboard) loadKeyFunctions() {
 	if fileLocation := sconsify.GetKeyFunctionsFileLocation(); fileLocation != "" {
 		if b, err := ioutil.ReadFile(fileLocation); err == nil {
-			if err := json.Unmarshal(b, &keyboard.KeyFile); err == nil {
-				for _, keyEntry := range keyboard.KeyFile {
+			fileContent := make([]KeyEntry, 0)
+			if err := json.Unmarshal(b, &fileContent); err == nil {
+				for _, keyEntry := range fileContent {
 					keyboard.addKey(keyEntry.Key, keyEntry.Command)
 				}
 			}
@@ -150,7 +150,6 @@ func (keyboard *Keyboard) addToKeys(isMultiple bool, keyMapping *KeyMapping) {
 
 func keybindings() error {
 	keyboard := &Keyboard{
-		KeyFile: make([]KeyEntry, 0),
 		ConfiguredKeys: make(map[string][]string),
 		UsedFunctions: make(map[string]bool),
 		Keys: make([]*KeyMapping, 0),
