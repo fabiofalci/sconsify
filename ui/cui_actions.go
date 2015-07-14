@@ -17,70 +17,103 @@ type KeyMapping struct {
 	view string
 }
 
-type KeyFunctions struct {
-	PauseTrack               string
-	ShuffleMode              string
-	ShuffleAllMode           string
-	NextTrack                string
-	ReplayTrack              string
-	Search                   string
-	Quit                     string
-	QueueTrack               string
-	RemoveTrackFromPlaylist  string
-	RemoveTrackFromQueue     string
-	RemoveAllTracksFromQueue string
+type Keyboard struct {
+	KeyFile        []KeyEntry
+	ConfiguredKeys map[string][]string
+	UsedFunctions  map[string]bool
+
+	Keys []*KeyMapping
+	MultipleKeys []*KeyMapping
 }
+
+type KeyEntry struct {
+	Key     string
+	Command string
+}
+
+const (
+	PauseTrack string = "PauseTrack"
+	ShuffleMode string = "ShuffleMode"
+	ShuffleAllMode string = "ShuffleAllMode"
+	NextTrack string = "NextTrack"
+	ReplayTrack string = "ReplayTrack"
+	Search string = "Search"
+	Quit string = "Quit"
+	QueueTrack string = "QueueTrack"
+	RemoveTrackFromPlaylist string = "RemoveTrackFromPlaylist"
+	RemoveTrackFromQueue string = "RemoveTrackFromQueue"
+	RemoveAllTracksFromQueue string = "RemoveAllTracksFromQueue"
+)
 
 var multipleKeysBuffer bytes.Buffer
 var multipleKeysNumber int
 var multipleKeysHandlers map[string]gocui.KeybindingHandler
 
-func (k *KeyFunctions) defaultValues() {
-	if k.PauseTrack == "" {
-		k.PauseTrack = "p"
+func (keyboard *Keyboard) defaultValues() {
+	if !keyboard.UsedFunctions[PauseTrack] {
+		keyboard.addKey("p", PauseTrack)
 	}
-	if k.ShuffleMode == "" {
-		k.ShuffleMode = "s"
+	if !keyboard.UsedFunctions[ShuffleMode] {
+		keyboard.addKey("s", ShuffleMode)
 	}
-	if k.ShuffleAllMode == "" {
-		k.ShuffleAllMode = "S"
+	if !keyboard.UsedFunctions[ShuffleAllMode] {
+		keyboard.addKey("S", ShuffleAllMode)
 	}
-	if k.NextTrack == "" {
-		k.NextTrack = ">"
+	if !keyboard.UsedFunctions[NextTrack] {
+		keyboard.addKey(">", NextTrack)
 	}
-	if k.ReplayTrack == "" {
-		k.ReplayTrack = "<"
+	if !keyboard.UsedFunctions[ReplayTrack] {
+		keyboard.addKey("<", ReplayTrack)
 	}
-	if k.Search == "" {
-		k.Search = "/"
+	if !keyboard.UsedFunctions[Search] {
+		keyboard.addKey("/", Search)
 	}
-	if k.Quit == "" {
-		k.Quit = "q"
+	if !keyboard.UsedFunctions[Quit] {
+		keyboard.addKey("q", Quit)
 	}
-	if k.QueueTrack == "" {
-		k.QueueTrack = "u"
+	if !keyboard.UsedFunctions[QueueTrack] {
+		keyboard.addKey("u", QueueTrack)
 	}
-	if k.RemoveTrackFromPlaylist == "" {
-		k.RemoveTrackFromPlaylist = "d"
+	if !keyboard.UsedFunctions[RemoveTrackFromPlaylist] {
+		keyboard.addKey("d", RemoveTrackFromPlaylist)
 	}
-	if k.RemoveTrackFromQueue == "" {
-		k.RemoveTrackFromQueue = "d"
+	if !keyboard.UsedFunctions[RemoveTrackFromQueue] {
+		keyboard.addKey("d", RemoveTrackFromQueue)
 	}
-	if k.RemoveAllTracksFromQueue == "" {
-		k.RemoveAllTracksFromQueue = "D"
+	if !keyboard.UsedFunctions[RemoveAllTracksFromQueue] {
+		keyboard.addKey("D", RemoveAllTracksFromQueue)
 	}
 }
 
-func loadKeyFunctions() *KeyFunctions {
+func (keyboard *Keyboard) loadKeyFunctions() {
 	if fileLocation := sconsify.GetKeyFunctionsFileLocation(); fileLocation != "" {
 		if b, err := ioutil.ReadFile(fileLocation); err == nil {
-			var keyFunctions KeyFunctions
-			if err := json.Unmarshal(b, &keyFunctions); err == nil {
-				return &keyFunctions
+			if err := json.Unmarshal(b, &keyboard.KeyFile); err == nil {
+				for _, keyEntry := range keyboard.KeyFile {
+					keyboard.addKey(keyEntry.Key, keyEntry.Command)
+				}
 			}
 		}
 	}
-	return &KeyFunctions{}
+}
+
+func (keyboard *Keyboard) addKey(key string, command string) {
+	if keyboard.ConfiguredKeys[key] == nil {
+		keyboard.ConfiguredKeys[key] = make([]string, 0)
+	}
+	keyboard.ConfiguredKeys[key] = append(keyboard.ConfiguredKeys[key], command)
+	keyboard.UsedFunctions[command] = true
+}
+
+func (keyboard *Keyboard) configureKey(handler gocui.KeybindingHandler, command string, view string) {
+	for key, commands := range keyboard.ConfiguredKeys {
+		for _, c := range commands {
+			if c == command {
+				keyMapping, isMultiple := createKeyMapping(handler, key, view)
+				keyboard.addToKeys(isMultiple, keyMapping)
+			}
+		}
+	}
 }
 
 func getFirstRune(value string) rune {
@@ -95,97 +128,78 @@ func isMultipleKey(value string) bool {
 	return len(getAsRuneArray(value)) > 1
 }
 
-func createKeyMapping(handler gocui.KeybindingHandler, command string, view string) (*KeyMapping, bool) {
-	if isMultipleKey(command) {
-		keyRune := getAsRuneArray(command)
-		multipleKeysHandlers[command] = handler
+func createKeyMapping(handler gocui.KeybindingHandler, key string, view string) (*KeyMapping, bool) {
+	if isMultipleKey(key) {
+		keyRune := getAsRuneArray(key)
+		multipleKeysHandlers[key] = handler
 		return newKeyMapping(keyRune[0], view,
 			func(g *gocui.Gui, v *gocui.View) error {
 				return multipleKeysPressed(g, v, keyRune[0])
 			}), true
 	}
-	return newKeyMapping(getFirstRune(command), view, handler), false
+	return newKeyMapping(getFirstRune(key), view, handler), false
 }
 
-func addToKeys(isMultiple bool, keyMapping *KeyMapping, keys *[]*KeyMapping, multipleKeys *[]*KeyMapping) {
+func (keyboard *Keyboard) addToKeys(isMultiple bool, keyMapping *KeyMapping) {
 	if isMultiple {
-		addKeyBinding(multipleKeys, keyMapping)
+		addKeyBinding(&keyboard.MultipleKeys, keyMapping)
 	} else {
-		addKeyBinding(keys, keyMapping)
+		addKeyBinding(&keyboard.Keys, keyMapping)
 	}
 }
 
 func keybindings() error {
-	keyFunctions := loadKeyFunctions()
-	keyFunctions.defaultValues()
+	keyboard := &Keyboard{
+		KeyFile: make([]KeyEntry, 0),
+		ConfiguredKeys: make(map[string][]string),
+		UsedFunctions: make(map[string]bool),
+		Keys: make([]*KeyMapping, 0),
+		MultipleKeys: make([]*KeyMapping, 0)}
 
-	keys := make([]*KeyMapping, 0)
-	multipleKeys := make([]*KeyMapping, 0)
+	keyboard.loadKeyFunctions()
+	keyboard.defaultValues()
+
 	multipleKeysHandlers = make(map[string]gocui.KeybindingHandler)
 
-	var keyMapping *KeyMapping
-	var isMultiple bool
-
 	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
-		keyMapping, isMultiple = createKeyMapping(pauseTrackCommand, keyFunctions.PauseTrack, view)
-		addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-		keyMapping, isMultiple = createKeyMapping(setShuffleMode, keyFunctions.ShuffleMode, view)
-		addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-		keyMapping, isMultiple = createKeyMapping(setShuffleAllMode, keyFunctions.ShuffleAllMode, view)
-		addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-		keyMapping, isMultiple = createKeyMapping(nextTrackCommand, keyFunctions.NextTrack, view)
-		addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-		keyMapping, isMultiple = createKeyMapping(replayTrackCommand, keyFunctions.ReplayTrack, view)
-		addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-		keyMapping, isMultiple = createKeyMapping(enableSearchInputCommand, keyFunctions.Search, view)
-		addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-		keyMapping, isMultiple = createKeyMapping(quit, keyFunctions.Quit, view)
-		addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-		addKeyBinding(&keys, newKeyMapping('j', view, cursorDown))
-		addKeyBinding(&keys, newKeyMapping('k', view, cursorUp))
+		keyboard.configureKey(pauseTrackCommand, PauseTrack, view)
+		keyboard.configureKey(setShuffleMode, ShuffleMode, view)
+		keyboard.configureKey(setShuffleAllMode, ShuffleAllMode, view)
+		keyboard.configureKey(nextTrackCommand, NextTrack, view)
+		keyboard.configureKey(replayTrackCommand, ReplayTrack, view)
+		keyboard.configureKey(enableSearchInputCommand, Search, view)
+		keyboard.configureKey(quit, Quit, view)
+		addKeyBinding(&keyboard.Keys, newKeyMapping('j', view, cursorDown))
+		addKeyBinding(&keyboard.Keys, newKeyMapping('k', view, cursorUp))
 	}
 
 	allViews := ""
-	keyMapping, isMultiple = createKeyMapping(queueTrackCommand, keyFunctions.QueueTrack, allViews)
-	addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
+	keyboard.configureKey(queueTrackCommand, QueueTrack, allViews)
+	keyboard.configureKey(removeTrackFromPlaylistsCommand, RemoveTrackFromPlaylist, allViews)
+	keyboard.configureKey(removeTrackFromQueueCommand, RemoveTrackFromQueue, allViews)
+	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, allViews)
 
-	keyMapping, isMultiple = createKeyMapping(removeTrackFromPlaylistsCommand, keyFunctions.RemoveTrackFromPlaylist, allViews)
-	addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeySpace, VIEW_TRACKS, playCurrentSelectedTrack))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_TRACKS, playCurrentSelectedTrack))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyHome, allViews, cursorHome))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnd, allViews, cursorEnd))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgup, allViews, cursorPgup))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgdn, allViews, cursorPgdn))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowDown, allViews, cursorDown))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowUp, allViews, cursorUp))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_TRACKS, mainNextViewLeft))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_QUEUE, nextView))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowRight, VIEW_PLAYLISTS, nextView))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowRight, VIEW_TRACKS, mainNextViewRight))
+	addKeyBinding(&keyboard.Keys, newKeyMapping('h', VIEW_TRACKS, mainNextViewLeft))
+	addKeyBinding(&keyboard.Keys, newKeyMapping('h', VIEW_QUEUE, nextView))
+	addKeyBinding(&keyboard.Keys, newKeyMapping('l', VIEW_PLAYLISTS, nextView))
+	addKeyBinding(&keyboard.Keys, newKeyMapping('l', VIEW_TRACKS, mainNextViewRight))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, allViews, quit))
+	addKeyBinding(&keyboard.Keys, newKeyMapping('G', allViews, uppergCommand))
 
-	keyMapping, isMultiple = createKeyMapping(removeTrackFromQueueCommand, keyFunctions.RemoveTrackFromQueue, allViews)
-	addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-	keyMapping, isMultiple = createKeyMapping(removeAllTracksFromQueueCommand, keyFunctions.RemoveAllTracksFromQueue, allViews)
-	addToKeys(isMultiple, keyMapping, &keys, &multipleKeys)
-
-	addKeyBinding(&keys, newKeyMapping(gocui.KeySpace, VIEW_TRACKS, playCurrentSelectedTrack))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, VIEW_TRACKS, playCurrentSelectedTrack))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyHome, allViews, cursorHome))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyEnd, allViews, cursorEnd))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyPgup, allViews, cursorPgup))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyPgdn, allViews, cursorPgdn))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowDown, allViews, cursorDown))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowUp, allViews, cursorUp))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_TRACKS, mainNextViewLeft))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_QUEUE, nextView))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowRight, VIEW_PLAYLISTS, nextView))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyArrowRight, VIEW_TRACKS, mainNextViewRight))
-	addKeyBinding(&keys, newKeyMapping('h', VIEW_TRACKS, mainNextViewLeft))
-	addKeyBinding(&keys, newKeyMapping('h', VIEW_QUEUE, nextView))
-	addKeyBinding(&keys, newKeyMapping('l', VIEW_PLAYLISTS, nextView))
-	addKeyBinding(&keys, newKeyMapping('l', VIEW_TRACKS, mainNextViewRight))
-	addKeyBinding(&keys, newKeyMapping(gocui.KeyCtrlC, allViews, quit))
-	addKeyBinding(&keys, newKeyMapping('G', allViews, uppergCommand))
-
-	addKeyBinding(&multipleKeys, newKeyMapping('g', allViews,
+	addKeyBinding(&keyboard.MultipleKeys, newKeyMapping('g', allViews,
 		func(g *gocui.Gui, v *gocui.View) error {
 			return multipleKeysPressed(g, v, 'g')
 		}))
@@ -193,13 +207,13 @@ func keybindings() error {
 	// numbers
 	for i := 0; i < 10; i++ {
 		numberCopy := i
-		addKeyBinding(&multipleKeys, newKeyMapping(rune(i+48), allViews,
+		addKeyBinding(&keyboard.MultipleKeys, newKeyMapping(rune(i+48), allViews,
 			func(g *gocui.Gui, v *gocui.View) error {
 				return multipleKeysNumberPressed(numberCopy)
 			}))
 	}
 
-	for _, key := range keys {
+	for _, key := range keyboard.Keys {
 		// it needs to copy the key because closures copy var references and we don't
 		// want to execute always the last action
 		keyCopy := key
@@ -213,7 +227,7 @@ func keybindings() error {
 		}
 	}
 
-	for _, key := range multipleKeys {
+	for _, key := range keyboard.MultipleKeys {
 		keyCopy := key
 		if err := gui.g.SetKeybinding(key.view, key.key, 0,
 			func(g *gocui.Gui, v *gocui.View) error {
@@ -254,12 +268,6 @@ func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
 	if handler != nil {
 		handler(g, v)
 		resetMultipleKeys()
-	} else {
-		switch multipleKeysBuffer.String() {
-		case "gg":
-			ggCommand(g, v)
-			resetMultipleKeys()
-		}
 	}
 
 	return nil
