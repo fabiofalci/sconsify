@@ -39,7 +39,7 @@ const (
 	Search string = "Search"
 	Quit string = "Quit"
 	QueueTrack string = "QueueTrack"
-	RemoveTrackFromPlaylist string = "RemoveTrackFromPlaylist"
+	RemoveSearchFromPlaylists string = "RemoveSearchFromPlaylists"
 	RemoveTrackFromQueue string = "RemoveTrackFromQueue"
 	RemoveAllTracksFromQueue string = "RemoveAllTracksFromQueue"
 	GoToFirstLine string = "GoToFirstLine"
@@ -76,8 +76,8 @@ func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[QueueTrack] {
 		keyboard.addKey("u", QueueTrack)
 	}
-	if !keyboard.UsedFunctions[RemoveTrackFromPlaylist] {
-		keyboard.addKey("d", RemoveTrackFromPlaylist)
+	if !keyboard.UsedFunctions[RemoveSearchFromPlaylists] {
+		keyboard.addKey("d", RemoveSearchFromPlaylists)
 	}
 	if !keyboard.UsedFunctions[RemoveTrackFromQueue] {
 		keyboard.addKey("d", RemoveTrackFromQueue)
@@ -193,7 +193,7 @@ func keybindings() error {
 
 	allViews := ""
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
-	keyboard.configureKey(removeTrackFromPlaylistsCommand, RemoveTrackFromPlaylist, VIEW_PLAYLISTS)
+	keyboard.configureKey(removeSearchPlaylistsCommand, RemoveSearchFromPlaylists, VIEW_PLAYLISTS)
 	keyboard.configureKey(removeTrackFromQueueCommand, RemoveTrackFromQueue, VIEW_QUEUE)
 	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, VIEW_QUEUE)
 	keyboard.configureKey(goToFirstLineCommand, GoToFirstLine, allViews)
@@ -341,7 +341,7 @@ func removeTrackFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func removeTrackFromPlaylistsCommand(g *gocui.Gui, v *gocui.View) error {
+func removeSearchPlaylistsCommand(g *gocui.Gui, v *gocui.View) error {
 	if playlist := gui.getSelectedPlaylist(); playlist != nil && playlist.IsSearch() {
 		playlists.Remove(playlist.Name())
 		gui.updatePlaylistsView()
