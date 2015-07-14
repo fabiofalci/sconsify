@@ -44,6 +44,7 @@ const (
 	RemoveAllTracksFromQueue string = "RemoveAllTracksFromQueue"
 	GoToFirstLine string = "GoToFirstLine"
 	GoToLastLine string = "GoToLastLine"
+	PlaySelectedTrack string = "PlaySelectedTrack"
 )
 
 var multipleKeysBuffer bytes.Buffer
@@ -89,6 +90,10 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[GoToLastLine] {
 		keyboard.addKey("G", GoToLastLine)
+	}
+	if !keyboard.UsedFunctions[PlaySelectedTrack] {
+		keyboard.addKey("<space>", PlaySelectedTrack)
+		keyboard.addKey("<enter>", PlaySelectedTrack)
 	}
 }
 
@@ -137,6 +142,12 @@ func isMultipleKey(value string) bool {
 }
 
 func createKeyMapping(handler gocui.KeybindingHandler, key string, view string) (*KeyMapping, bool) {
+	switch key {
+	case "<enter>":
+		return newKeyMapping(gocui.KeyEnter, view, handler), false
+	case "<space>":
+		return newKeyMapping(gocui.KeySpace, view, handler), false
+	}
 	if isMultipleKey(key) {
 		keyRune := getAsRuneArray(key)
 		multipleKeysHandlers[key] = handler
@@ -187,9 +198,8 @@ func keybindings() error {
 	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, allViews)
 	keyboard.configureKey(goToFirstLineCommand, GoToFirstLine, allViews)
 	keyboard.configureKey(goToLastLineCommand, GoToLastLine, allViews)
+	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, allViews)
 
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeySpace, VIEW_TRACKS, playCurrentSelectedTrack))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_TRACKS, playCurrentSelectedTrack))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyHome, allViews, cursorHome))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnd, allViews, cursorEnd))
@@ -276,7 +286,7 @@ func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
 	return nil
 }
 
-func playCurrentSelectedTrack(g *gocui.Gui, v *gocui.View) error {
+func playSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	player.Play()
 	return nil
 }
