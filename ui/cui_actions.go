@@ -330,28 +330,34 @@ func replayTrackCommand(g *gocui.Gui, v *gocui.View) error {
 
 func queueTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
-		track := playlist.Track(trackIndex)
-		fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
-		queue.Add(track)
+		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
+			track := playlist.Track(trackIndex)
+			fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
+			queue.Add(track)
+		}
 	}
 	return nil
 }
 
 func repeatPlayingTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	if gui.PlayingTrack != nil {
-		queue.Insert(gui.PlayingTrack)
-		gui.updateQueueView()
+		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
+			queue.Insert(gui.PlayingTrack)
+			gui.updateQueueView()
+		}
 	}
 	return nil
 }
 
 func queuePlaylistCommand(g *gocui.Gui, v *gocui.View) error {
 	if playlist, _ := gui.getSelectedPlaylistAndTrack(); playlist != nil {
-		for i := 0; i < playlist.Tracks(); i++ {
-			track := playlist.Track(i)
-			fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
-			if queue.Add(track) == nil {
-				return nil
+		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
+			for i := 0; i < playlist.Tracks(); i++ {
+				track := playlist.Track(i)
+				fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
+				if queue.Add(track) == nil {
+					return nil
+				}
 			}
 		}
 	}
