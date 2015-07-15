@@ -37,6 +37,7 @@ type Gui struct {
 	queueView      *gocui.View
 	currentMessage string
 	initialised    bool
+	PlayingTrack   *sconsify.Track
 }
 
 func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface {
@@ -53,6 +54,7 @@ func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 }
 
 func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
+	gui.PlayingTrack = track
 	gui.setStatus("Playing: " + track.GetFullTitle())
 }
 

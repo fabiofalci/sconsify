@@ -40,6 +40,7 @@ const (
 	Quit string = "Quit"
 	QueueTrack string = "QueueTrack"
 	QueuePlaylist string = "QueuePlaylist"
+	RepeatPlayingTrack string = "RepeatPlayingTrack"
 	RemoveSearchFromPlaylists string = "RemoveSearchFromPlaylists"
 	RemoveTrackFromQueue string = "RemoveTrackFromQueue"
 	RemoveAllTracksFromQueue string = "RemoveAllTracksFromQueue"
@@ -79,6 +80,9 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[QueuePlaylist] {
 		keyboard.addKey("u", QueuePlaylist)
+	}
+	if !keyboard.UsedFunctions[RepeatPlayingTrack] {
+		keyboard.addKey("r", RepeatPlayingTrack)
 	}
 	if !keyboard.UsedFunctions[RemoveSearchFromPlaylists] {
 		keyboard.addKey("d", RemoveSearchFromPlaylists)
@@ -190,6 +194,7 @@ func keybindings() error {
 		keyboard.configureKey(nextTrackCommand, NextTrack, view)
 		keyboard.configureKey(replayTrackCommand, ReplayTrack, view)
 		keyboard.configureKey(enableSearchInputCommand, Search, view)
+		keyboard.configureKey(repeatPlayingTrackCommand, RepeatPlayingTrack, view)
 		keyboard.configureKey(quit, Quit, view)
 		addKeyBinding(&keyboard.Keys, newKeyMapping('j', view, cursorDown))
 		addKeyBinding(&keyboard.Keys, newKeyMapping('k', view, cursorUp))
@@ -328,6 +333,14 @@ func queueTrackCommand(g *gocui.Gui, v *gocui.View) error {
 		track := playlist.Track(trackIndex)
 		fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
 		queue.Add(track)
+	}
+	return nil
+}
+
+func repeatPlayingTrackCommand(g *gocui.Gui, v *gocui.View) error {
+	if gui.PlayingTrack != nil {
+		queue.Insert(gui.PlayingTrack)
+		gui.updateQueueView()
 	}
 	return nil
 }
