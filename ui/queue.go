@@ -25,6 +25,20 @@ func (queue *Queue) Add(track *sconsify.Track) *sconsify.Track {
 	return queue.queue[n]
 }
 
+func (queue *Queue) Insert(track *sconsify.Track) *sconsify.Track {
+	n := len(queue.queue)
+	if n+1 > cap(queue.queue) {
+		queue.Remove(QUEUE_MAX_ELEMENTS - 1)
+	}
+
+	queue.queue = append(queue.queue, nil)
+
+	copy(queue.queue[1:], queue.queue)
+	queue.queue[0] = track
+
+	return queue.queue[0]
+}
+
 func (queue *Queue) Pop() *sconsify.Track {
 	if len(queue.queue) == 0 {
 		return nil

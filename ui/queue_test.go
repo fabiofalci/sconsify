@@ -46,6 +46,43 @@ func TestQueueAddPopEmptyAndContents(t *testing.T) {
 	}
 }
 
+func TestQueueInsertAndContents(t *testing.T) {
+	queue := InitQueue()
+
+	track0 := &sconsify.Track{}
+	track1 := &sconsify.Track{}
+	queue.Add(track0)
+	queue.Add(track1)
+
+	track2 := &sconsify.Track{}
+	queue.Insert(track2)
+
+	contents := queue.Contents()
+	if contents[0] != track2 || contents[1] != track0 || contents[2] != track1 {
+		t.Error("Queue content is not correct")
+	}
+
+	trackPop1 := queue.Pop()
+	if track2 != trackPop1 {
+		t.Error("Queue is not returning right element")
+	}
+
+	trackPop2 := queue.Pop()
+	if track0 != trackPop2 {
+		t.Error("Queue is not returning right element")
+	}
+
+	trackPop3 := queue.Pop()
+	if track1 != trackPop3 {
+		t.Error("Queue is not returning right element")
+	}
+
+	track := queue.Pop()
+	if track != nil {
+		t.Error("Queue should return nil but it isn't")
+	}
+}
+
 func TestQueueRemove(t *testing.T) {
 	queue := InitQueue()
 
@@ -118,5 +155,4 @@ func TestQueueAddToLimit(t *testing.T) {
 	if trackAdded != nil {
 		t.Error("Queue reached its limit, it should not add anymore")
 	}
-
 }
