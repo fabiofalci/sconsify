@@ -56,7 +56,7 @@ func (queue *Queue) RemoveAll() {
 }
 
 func (queue *Queue) Remove(index int) *sconsify.Track {
-	if len(queue.queue) == 0 {
+	if len(queue.queue) == 0 || index < 0 || index >= len(queue.queue) {
 		return nil
 	}
 	track := queue.queue[index]

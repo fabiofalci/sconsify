@@ -107,6 +107,24 @@ func TestQueueRemove(t *testing.T) {
 	}
 }
 
+func TestQueueRemoveOutOfBounds(t *testing.T) {
+	queue := InitQueue()
+
+	queue.Add(&sconsify.Track{})
+	queue.Add(&sconsify.Track{})
+	queue.Add(&sconsify.Track{})
+
+	if queue.Remove(-1) != nil {
+		t.Error("Index -1 is not valid for removal")
+	}
+	if queue.Remove(3) != nil {
+		t.Error("Index 3 is not valid for removal because Size is 3")
+	}
+	if queue.Remove(2) == nil {
+		t.Error("Index 2 is valid for removal because Size is 3")
+	}
+}
+
 func TestQueueRemoveAll(t *testing.T) {
 	queue := InitQueue()
 
