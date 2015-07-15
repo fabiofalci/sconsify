@@ -393,6 +393,47 @@ func TestDuplicatedNames(t *testing.T) {
 	}
 }
 
+func TestDuplicatedNamesWithFolderAndSubPlaylists(t *testing.T) {
+	playlists := InitPlaylists()
+
+	playlist := createDummyPlaylistWithId("0", "name")
+	playlists.AddPlaylist(playlist)
+
+	folder := createFolder("1", "name")
+	playlists.AddPlaylist(folder)
+
+	if folder.Name() != "name (1)" {
+		t.Error("Folder Name should be 'name (1)': ", folder.Name())
+	}
+
+	// folder has subplaylist: subPlaylist0, subPlaylist1, subPlaylist2, subPlaylist3
+	playlist = createDummyPlaylistWithId("2", " subPlaylist3")
+	playlists.AddPlaylist(playlist)
+
+	if playlist.Name() != " subPlaylist3 (1)" {
+		t.Error("Folder Name should be ' subPlaylist (1)': ", playlist.Name())
+	}
+
+	folder = createFolder("1", "name")
+	playlists.AddPlaylist(folder)
+
+	if folder.Name() != "name (2)" {
+		t.Error("Folder Name should be 'name (2)': ", folder.Name())
+	}
+	if folder.Playlist(0).Name() != " subPlaylist0 (1)" {
+		t.Error("Folder Name should be ' subPlaylist0 (1)': ", folder.Playlist(0).Name())
+	}
+	if folder.Playlist(1).Name() != " subPlaylist1 (1)" {
+		t.Error("Folder Name should be ' subPlaylist1 (1)': ", folder.Playlist(1).Name())
+	}
+	if folder.Playlist(2).Name() != " subPlaylist2 (1)" {
+		t.Error("Folder Name should be ' subPlaylist2 (1)': ", folder.Playlist(2).Name())
+	}
+	if folder.Playlist(3).Name() != " subPlaylist3 (2)" {
+		t.Error("Folder Name should be ' subPlaylist3 (2)': ", folder.Playlist(3).Name())
+	}
+}
+
 func TestGet(t *testing.T) {
 	playlists := InitPlaylists()
 
@@ -408,6 +449,20 @@ func TestGet(t *testing.T) {
 
 	if playlist := playlists.Get("not found"); playlist != nil {
 		t.Error("Playlist should not be found")
+	}
+}
+
+func TestGetWithSubPlaylists(t *testing.T) {
+	playlists := InitPlaylists()
+
+	playlists.AddPlaylist(createDummyPlaylistWithId("0", "name"))
+	playlists.AddPlaylist(createFolder("0", "folder"))
+
+	if playlist := playlists.Get("folder"); playlist.Name() != "folder" {
+		t.Error("Playlist Name should be 'folder': ", playlist.Name())
+	}
+	if playlist := playlists.Get(" subPlaylist3"); playlist.Name() != " subPlaylist3" {
+		t.Error("Playlist Name should be ' subPlaylist3': ", playlist.Name())
 	}
 }
 

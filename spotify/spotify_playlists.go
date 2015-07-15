@@ -5,6 +5,7 @@ import (
 
 	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
+	"strconv"
 )
 
 func (spotify *Spotify) initPlaylist() error {
@@ -15,13 +16,24 @@ func (spotify *Spotify) initPlaylist() error {
 		return err
 	}
 	allPlaylists.Wait()
+	var folderPlaylists []*sconsify.Playlist
+	var folder *sp.PlaylistFolder
 	for i := 0; i < allPlaylists.Playlists(); i++ {
+		if allPlaylists.PlaylistType(i) == sp.PlaylistTypeStartFolder {
+			folder, _ = allPlaylists.Folder(i)
+			folderPlaylists = make([]*sconsify.Playlist, 0)
+		} else if allPlaylists.PlaylistType(i) == sp.PlaylistTypeEndFolder {
+			playlists.AddPlaylist(sconsify.InitFolder(strconv.Itoa(int(folder.Id())), folder.Name(), folderPlaylists))
+			folderPlaylists = nil
+			folder = nil
+		}
+
 		if allPlaylists.PlaylistType(i) != sp.PlaylistTypePlaylist {
 			continue
 		}
+
 		playlist := allPlaylists.Playlist(i)
 		playlist.Wait()
-
 		if spotify.canAddPlaylist(playlist, allPlaylists.PlaylistType(i)) {
 			tracks := make([]*sconsify.Track, playlist.Tracks())
 			for i := 0; i < playlist.Tracks(); i++ {
@@ -31,7 +43,11 @@ func (spotify *Spotify) initPlaylist() error {
 				tracks[i] = sconsify.ToSconsifyTrack(playlistTrack.Track())
 			}
 			id := playlist.Link().String()
-			playlists.AddPlaylist(sconsify.InitPlaylist(id, playlist.Name(), tracks))
+			if folderPlaylists == nil {
+				playlists.AddPlaylist(sconsify.InitPlaylist(id, playlist.Name(), tracks))
+			} else {
+				folderPlaylists = append(folderPlaylists, sconsify.InitSubPlaylist(id, playlist.Name(), tracks))
+			}
 		}
 	}
 

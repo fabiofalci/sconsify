@@ -38,6 +38,13 @@ func (playlists *Playlists) Get(name string) *Playlist {
 		if playlist.Name() == name {
 			return playlist
 		}
+		if playlist.IsFolder() {
+			for _, subPlaylist := range playlist.playlists {
+				if subPlaylist.Name() == name {
+					return subPlaylist
+				}
+			}
+		}
 	}
 	return nil
 }
@@ -63,11 +70,16 @@ func (playlists *Playlists) AddPlaylist(playlist *Playlist) {
 
 func (playlists *Playlists) checkDuplicatedNames(newPlaylist *Playlist, originalName string, diff int) {
 	for _, playlist := range playlists.playlists {
-		if newPlaylist.Name() == playlist.Name() {
+		if playlist.HasSameNameIncludingSubPlaylists(newPlaylist) {
 			newPlaylist.name = originalName + " (" + strconv.Itoa(diff) + ")"
 			diff = diff + 1
 			playlists.checkDuplicatedNames(newPlaylist, originalName, diff)
-			return
+			break
+		}
+	}
+	if (newPlaylist.IsFolder()) {
+		for _, subPlaylist := range newPlaylist.playlists {
+			playlists.checkDuplicatedNames(subPlaylist, subPlaylist.Name(), 1)
 		}
 	}
 }

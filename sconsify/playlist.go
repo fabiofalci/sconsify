@@ -9,6 +9,9 @@ type Playlist struct {
 	id     string
 	name   string
 	search bool
+
+	subPlaylist bool
+	playlists []*Playlist
 }
 
 type PlaylistByName []Playlist
@@ -17,8 +20,16 @@ func InitPlaylist(id string, name string, tracks []*Track) *Playlist {
 	return &Playlist{id: id, name: name, tracks: tracks}
 }
 
+func InitSubPlaylist(id string, name string, tracks []*Track) *Playlist {
+	return &Playlist{id: id, name: " " + name, tracks: tracks, subPlaylist: true}
+}
+
 func InitSearchPlaylist(id string, name string, tracks []*Track) *Playlist {
 	return &Playlist{id: id, name: name, tracks: tracks, search: true}
+}
+
+func InitFolder(id string, name string, playlists []*Playlist) *Playlist {
+	return &Playlist{id: id, name: name, playlists: playlists, search: false}
 }
 
 func (playlist *Playlist) GetNextTrack(currentIndexTrack int) (int, bool) {
@@ -35,6 +46,13 @@ func (playlist *Playlist) Track(index int) *Track {
 	return nil
 }
 
+func (playlist *Playlist) Playlist(index int) *Playlist {
+	if index < len(playlist.playlists) {
+		return playlist.playlists[index]
+	}
+	return nil
+}
+
 func (playlist *Playlist) IndexByUri(uri string) int {
 	for i, track := range playlist.tracks {
 		if track.Uri == uri {
@@ -44,8 +62,27 @@ func (playlist *Playlist) IndexByUri(uri string) int {
 	return -1
 }
 
+func (playlist *Playlist) HasSameNameIncludingSubPlaylists(otherPlaylist *Playlist) bool {
+	if playlist.name == otherPlaylist.name {
+		return true
+	}
+	if playlist.IsFolder() {
+		for _, subPlaylist := range playlist.playlists {
+			if subPlaylist.name == otherPlaylist.name {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+
 func (playlist *Playlist) Tracks() int {
 	return len(playlist.tracks)
+}
+
+func (playlist *Playlist) Playlists() int {
+	return len(playlist.playlists)
 }
 
 func (playlist *Playlist) Name() string {
@@ -58,6 +95,10 @@ func (playlist *Playlist) Id() string {
 
 func (playlist *Playlist) IsSearch() bool {
 	return playlist.search
+}
+
+func (playlist *Playlist) IsFolder() bool {
+	return playlist.playlists != nil
 }
 
 // sort Interface

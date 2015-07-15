@@ -2,6 +2,7 @@ package sconsify
 
 import (
 	"testing"
+	"strconv"
 )
 
 func TestPlaylistTracks(t *testing.T) {
@@ -87,6 +88,71 @@ func TestSearchPlaylist(t *testing.T) {
 	}
 }
 
+func TestSubPlaylist(t *testing.T) {
+	subPlaylist := createSubPlaylist("1", "testing0")
+
+	if subPlaylist.Name() != " testing0" {
+		t.Errorf("Should not be a search playlists")
+	}
+}
+
+func TestFolderPlaylist(t *testing.T) {
+	playlist := createFolder("0", "folder0")
+
+	if playlist.IsSearch() {
+		t.Errorf("Should not be a search playlists")
+	}
+
+	if !playlist.IsFolder() {
+		t.Errorf("Should be a folder")
+	}
+
+	if playlist.Playlists() != 4 {
+		t.Errorf("Folder playlists should be 4")
+	}
+	for i := 0; i > playlist.Playlists(); i++ {
+		if playlist.Playlist(i).Name() != "folder" + strconv.Itoa(i) {
+			t.Errorf("Playlist order is not correct")
+		}
+	}
+}
+
+func TestPlaylistHasSameNameIncludingSubPlaylists(t *testing.T) {
+	playlist0 := createDummyPlaylistWithId("0", "testing0")
+	playlist1 := createDummyPlaylistWithId("1", "testing1")
+
+	if playlist0.HasSameNameIncludingSubPlaylists(playlist1) || playlist1.HasSameNameIncludingSubPlaylists(playlist0) {
+		t.Errorf("Playlists don't have same name")
+	}
+
+	otherPlaylist0 := createDummyPlaylistWithId("2", "testing0")
+	if !playlist0.HasSameNameIncludingSubPlaylists(otherPlaylist0) || !otherPlaylist0.HasSameNameIncludingSubPlaylists(playlist0) {
+		t.Errorf("Playlists have same name")
+	}
+}
+
+func TestSubPlaylistHasSameNameIncludingSubPlaylists(t *testing.T) {
+	playlist0 := createDummyPlaylistWithId("0", "playlist0")
+	folder0 := createFolder("0", "folder0")
+
+	if playlist0.HasSameNameIncludingSubPlaylists(folder0) || folder0.HasSameNameIncludingSubPlaylists(playlist0) {
+		t.Errorf("Playlists don't have same name")
+	}
+
+	otherPlaylist0 := createDummyPlaylistWithId("2", " subPlaylist3")
+	if !folder0.HasSameNameIncludingSubPlaylists(otherPlaylist0) {
+		t.Errorf("Playlists have same name")
+	}
+	if otherPlaylist0.HasSameNameIncludingSubPlaylists(folder0) {
+		t.Errorf("Playlists don't have same name")
+	}
+
+	anotherFolder0 := createFolder("1", "folder0")
+	if !anotherFolder0.HasSameNameIncludingSubPlaylists(folder0) || !folder0.HasSameNameIncludingSubPlaylists(anotherFolder0) {
+		t.Errorf("Playlists have same name")
+	}
+}
+
 func createDummyPlaylist(name string) *Playlist {
 	tracks := make([]*Track, 4)
 	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
@@ -103,4 +169,22 @@ func createDummyPlaylistWithId(id string, name string) *Playlist {
 	tracks[2] = InitTrack("2", "artist2", "name2", "duration2")
 	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
 	return InitPlaylist(id, name, tracks)
+}
+
+func createSubPlaylist(id string, name string) *Playlist {
+	tracks := make([]*Track, 4)
+	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
+	tracks[1] = InitTrack("1", "artist1", "name1", "duration1")
+	tracks[2] = InitTrack("2", "artist2", "name2", "duration2")
+	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
+	return InitSubPlaylist(id, name, tracks)
+}
+
+func createFolder(id string, name string) *Playlist {
+	playlists := make([]*Playlist, 4)
+	playlists[0] = createSubPlaylist("0", "subPlaylist0")
+	playlists[1] = createSubPlaylist("1", "subPlaylist1")
+	playlists[2] = createSubPlaylist("2", "subPlaylist2")
+	playlists[3] = createSubPlaylist("3", "subPlaylist3")
+	return InitFolder(id, name, playlists)
 }

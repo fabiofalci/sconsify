@@ -216,6 +216,13 @@ func (gui *Gui) updatePlaylistsView() {
 	gui.playlistsView.Clear()
 	for _, key := range playlists.Names() {
 		fmt.Fprintln(gui.playlistsView, key)
+		playlist := playlists.Get(key)
+		if playlist.IsFolder() {
+			for i := 0; i < playlist.Playlists(); i++ {
+				subPlaylist := playlist.Playlist(i)
+				fmt.Fprintln(gui.playlistsView, subPlaylist.Name())
+			}
+		}
 	}
 }
 
