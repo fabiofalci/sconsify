@@ -47,6 +47,10 @@ const (
 	GoToFirstLine string = "GoToFirstLine"
 	GoToLastLine string = "GoToLastLine"
 	PlaySelectedTrack string = "PlaySelectedTrack"
+	Up string = "Up"
+	Down string = "Down"
+	Left string = "Left"
+	Right string = "Right"
 )
 
 var multipleKeysBuffer bytes.Buffer
@@ -103,6 +107,22 @@ func (keyboard *Keyboard) defaultValues() {
 		keyboard.addKey("<space>", PlaySelectedTrack)
 		keyboard.addKey("<enter>", PlaySelectedTrack)
 	}
+	if !keyboard.UsedFunctions[Up] {
+		keyboard.addKey("<up>", Up)
+		keyboard.addKey("k", Up)
+	}
+	if !keyboard.UsedFunctions[Down] {
+		keyboard.addKey("<down>", Down)
+		keyboard.addKey("j", Down)
+	}
+	if !keyboard.UsedFunctions[Left] {
+		keyboard.addKey("<left>", Left)
+		keyboard.addKey("h", Left)
+	}
+	if !keyboard.UsedFunctions[Right] {
+		keyboard.addKey("<right>", Right)
+		keyboard.addKey("l", Right)
+	}
 }
 
 func (keyboard *Keyboard) loadKeyFunctions() {
@@ -155,6 +175,14 @@ func createKeyMapping(handler gocui.KeybindingHandler, key string, view string) 
 		return newKeyMapping(gocui.KeyEnter, view, handler), false
 	case "<space>":
 		return newKeyMapping(gocui.KeySpace, view, handler), false
+	case "<up>":
+		return newKeyMapping(gocui.KeyArrowUp, view, handler), false
+	case "<down>":
+		return newKeyMapping(gocui.KeyArrowDown, view, handler), false
+	case "<left>":
+		return newKeyMapping(gocui.KeyArrowLeft, view, handler), false
+	case "<right>":
+		return newKeyMapping(gocui.KeyArrowRight, view, handler), false
 	}
 	if isMultipleKey(key) {
 		keyRune := getAsRuneArray(key)
@@ -202,10 +230,8 @@ func keybindings() error {
 		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnd, view, cursorEnd))
 		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgup, view, cursorPgup))
 		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgdn, view, cursorPgdn))
-		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowDown, view, cursorDown))
-		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowUp, view, cursorUp))
-		addKeyBinding(&keyboard.Keys, newKeyMapping('j', view, cursorDown))
-		addKeyBinding(&keyboard.Keys, newKeyMapping('k', view, cursorUp))
+		keyboard.configureKey(cursorUp, Up, view)
+		keyboard.configureKey(cursorDown, Down, view)
 	}
 
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
@@ -216,14 +242,10 @@ func keybindings() error {
 	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
 
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_TRACKS, mainNextViewLeft))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_QUEUE, nextView))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowRight, VIEW_PLAYLISTS, nextView))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowRight, VIEW_TRACKS, mainNextViewRight))
-	addKeyBinding(&keyboard.Keys, newKeyMapping('h', VIEW_TRACKS, mainNextViewLeft))
-	addKeyBinding(&keyboard.Keys, newKeyMapping('h', VIEW_QUEUE, nextView))
-	addKeyBinding(&keyboard.Keys, newKeyMapping('l', VIEW_PLAYLISTS, nextView))
-	addKeyBinding(&keyboard.Keys, newKeyMapping('l', VIEW_TRACKS, mainNextViewRight))
+	keyboard.configureKey(mainNextViewLeft, Left, VIEW_TRACKS)
+	keyboard.configureKey(nextView, Left, VIEW_QUEUE)
+	keyboard.configureKey(nextView, Right, VIEW_PLAYLISTS)
+	keyboard.configureKey(mainNextViewRight, Right, VIEW_TRACKS)
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
 
 	// numbers
