@@ -139,7 +139,7 @@ func TestQueueEmpty(t *testing.T) {
 	}
 }
 
-func TestQueueAddToLimit(t *testing.T) {
+func TestQueueAddAndInsertToLimit(t *testing.T) {
 	queue := InitQueue()
 
 	for i := 0; i < QUEUE_MAX_ELEMENTS; i++ {
@@ -152,6 +152,63 @@ func TestQueueAddToLimit(t *testing.T) {
 
 	track := &sconsify.Track{}
 	trackAdded := queue.Add(track)
+	if trackAdded != nil {
+		t.Error("Queue reached its limit, it should not add anymore")
+	}
+
+	track = &sconsify.Track{}
+	trackAdded = queue.Insert(track)
+	if trackAdded != trackAdded {
+		t.Error("Queue insert should always insert and discard the last one if that's the case")
+	}
+
+	queue.Remove(99)
+	track = &sconsify.Track{}
+	trackAdded = queue.Add(track)
+	if track != trackAdded {
+		t.Error("Queue add should return the very same element")
+	}
+
+	track = &sconsify.Track{}
+	trackAdded = queue.Add(track)
+	if trackAdded != nil {
+		t.Error("Queue reached its limit, it should not add anymore")
+	}
+}
+
+func TestQueueAddAndPopToLimit(t *testing.T) {
+	queue := InitQueue()
+
+	for i := 0; i < QUEUE_MAX_ELEMENTS; i++ {
+		track := &sconsify.Track{}
+		trackAdded := queue.Add(track)
+		if track != trackAdded {
+			t.Error("Queue add should return the very same element")
+		}
+	}
+
+	track := &sconsify.Track{}
+	trackAdded := queue.Add(track)
+	if trackAdded != nil {
+		t.Error("Queue reached its limit, it should not add anymore")
+	}
+
+	track = &sconsify.Track{}
+	trackAdded = queue.Insert(track)
+	if trackAdded != trackAdded {
+		t.Error("Queue insert should always insert and discard the last one if that's the case")
+	}
+
+	queue.Pop()
+
+	track = &sconsify.Track{}
+	trackAdded = queue.Add(track)
+	if track != trackAdded {
+		t.Error("Queue add should return the very same element")
+	}
+
+	track = &sconsify.Track{}
+	trackAdded = queue.Add(track)
 	if trackAdded != nil {
 		t.Error("Queue reached its limit, it should not add anymore")
 	}

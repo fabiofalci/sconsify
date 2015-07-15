@@ -11,23 +11,22 @@ type Queue struct {
 const QUEUE_MAX_ELEMENTS = 100
 
 func InitQueue() *Queue {
-	return &Queue{queue: make([]*sconsify.Track, 0, QUEUE_MAX_ELEMENTS)}
+	return &Queue{queue: make([]*sconsify.Track, 0, 0)}
 }
 
 func (queue *Queue) Add(track *sconsify.Track) *sconsify.Track {
 	n := len(queue.queue)
-	if n+1 > cap(queue.queue) {
+	if n >= QUEUE_MAX_ELEMENTS {
 		return nil
 	}
-	queue.queue = queue.queue[0 : n+1]
-	queue.queue[n] = track
+	queue.queue = append(queue.queue, track)
 
 	return queue.queue[n]
 }
 
 func (queue *Queue) Insert(track *sconsify.Track) *sconsify.Track {
 	n := len(queue.queue)
-	if n+1 > cap(queue.queue) {
+	if n >= QUEUE_MAX_ELEMENTS {
 		queue.Remove(QUEUE_MAX_ELEMENTS - 1)
 	}
 
@@ -53,7 +52,7 @@ func (queue *Queue) RemoveAll() {
 		return
 	}
 
-	queue.queue = make([]*sconsify.Track, 0, QUEUE_MAX_ELEMENTS)
+	queue.queue = make([]*sconsify.Track, 0, 0)
 }
 
 func (queue *Queue) Remove(index int) *sconsify.Track {
