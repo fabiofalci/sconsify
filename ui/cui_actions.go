@@ -196,27 +196,26 @@ func keybindings() error {
 		keyboard.configureKey(enableSearchInputCommand, Search, view)
 		keyboard.configureKey(repeatPlayingTrackCommand, RepeatPlayingTrack, view)
 		keyboard.configureKey(quit, Quit, view)
+		keyboard.configureKey(goToFirstLineCommand, GoToFirstLine, view)
+		keyboard.configureKey(goToLastLineCommand, GoToLastLine, view)
+		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyHome, view, cursorHome))
+		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnd, view, cursorEnd))
+		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgup, view, cursorPgup))
+		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgdn, view, cursorPgdn))
+		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowDown, view, cursorDown))
+		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowUp, view, cursorUp))
 		addKeyBinding(&keyboard.Keys, newKeyMapping('j', view, cursorDown))
 		addKeyBinding(&keyboard.Keys, newKeyMapping('k', view, cursorUp))
 	}
 
-	allViews := ""
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
 	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)
 	keyboard.configureKey(removeSearchPlaylistsCommand, RemoveSearchFromPlaylists, VIEW_PLAYLISTS)
 	keyboard.configureKey(removeTrackFromQueueCommand, RemoveTrackFromQueue, VIEW_QUEUE)
 	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, VIEW_QUEUE)
-	keyboard.configureKey(goToFirstLineCommand, GoToFirstLine, allViews)
-	keyboard.configureKey(goToLastLineCommand, GoToLastLine, allViews)
 	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
 
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyHome, allViews, cursorHome))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnd, allViews, cursorEnd))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgup, allViews, cursorPgup))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgdn, allViews, cursorPgdn))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowDown, allViews, cursorDown))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowUp, allViews, cursorUp))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_TRACKS, mainNextViewLeft))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowLeft, VIEW_QUEUE, nextView))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyArrowRight, VIEW_PLAYLISTS, nextView))
@@ -225,12 +224,12 @@ func keybindings() error {
 	addKeyBinding(&keyboard.Keys, newKeyMapping('h', VIEW_QUEUE, nextView))
 	addKeyBinding(&keyboard.Keys, newKeyMapping('l', VIEW_PLAYLISTS, nextView))
 	addKeyBinding(&keyboard.Keys, newKeyMapping('l', VIEW_TRACKS, mainNextViewRight))
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, allViews, quit))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
 
 	// numbers
 	for i := 0; i < 10; i++ {
 		numberCopy := i
-		addKeyBinding(&keyboard.MultipleKeys, newKeyMapping(rune(i+48), allViews,
+		addKeyBinding(&keyboard.MultipleKeys, newKeyMapping(rune(i+48), "",
 			func(g *gocui.Gui, v *gocui.View) error {
 				return multipleKeysNumberPressed(numberCopy)
 			}))
