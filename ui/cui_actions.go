@@ -373,7 +373,11 @@ func removeAllTracksFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 
 func removeTrackFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	if index := gui.getQueueSelectedTrackIndex(); index > -1 {
-		queue.Remove(index)
+		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
+			if queue.Remove(index) != nil {
+				continue
+			}
+		}
 		gui.updateQueueView()
 	}
 	return nil
