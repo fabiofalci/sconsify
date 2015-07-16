@@ -11,7 +11,6 @@ var file *os.File
 func InitialiseLogger() {
 	filename := GetLogFileLocation()
 	if filename != "" {
-		DeleteLogFile(filename)
 		file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err == nil {
 			logger = log.New(file, "", log.Lshortfile)

@@ -32,13 +32,6 @@ func GetLogFileLocation() string {
 	return ""
 }
 
-func DeleteLogFile(logFileLocation string) error {
-	if strings.HasSuffix(logFileLocation, SCONSIFY_CONF_LOCATION+"/sconsify.log") {
-		return os.Remove(logFileLocation)
-	}
-	return errors.New("Invalid log location: " + logFileLocation)
-}
-
 func GetStateFileLocation() string {
 	if basePath := getConfLocation(); basePath != "" {
 		return basePath + "/state.json"
