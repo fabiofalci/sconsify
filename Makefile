@@ -37,6 +37,9 @@ build:
 		&& go build -ldflags "-X main.version $(VERSION) -X main.commit $(COMMIT) -X main.buildDate '$(BUILD_DATE)'" -o bundles/sconsify \
 		; git checkout spotify/key.go
 
+build-run: build
+	./bundles/sconsify -debug
+
 container-build: bundles
 	docker build -t sconsify-build .
 
