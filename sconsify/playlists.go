@@ -89,20 +89,23 @@ func (playlists *Playlists) Remove(playlistName string) {
 	}
 }
 
-func (playlists *Playlists) Names() []string {
+func (playlists *Playlists) playlistsAsArray() []Playlist {
 	names := make([]Playlist, playlists.Playlists())
 	i := 0
 	for _, playlist := range playlists.playlists {
 		names[i] = *playlist
 		i++
 	}
-	sort.Sort(PlaylistByName(names))
+	return names
+}
+
+func (playlists *Playlists) Names() []string {
+	playlistsAsArray := playlists.playlistsAsArray()
+	sort.Sort(PlaylistByName(playlistsAsArray))
 
 	namesAsString := make([]string, playlists.Playlists())
-	i = 0
-	for _, name := range names {
-		namesAsString[i] = name.name
-		i++
+	for index, name := range playlistsAsArray {
+		namesAsString[index] = name.name
 	}
 	return namesAsString
 }
