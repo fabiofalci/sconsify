@@ -29,7 +29,16 @@ func InitSearchPlaylist(id string, name string, tracks []*Track) *Playlist {
 }
 
 func InitFolder(id string, name string, playlists []*Playlist) *Playlist {
-	return &Playlist{id: id, name: name, playlists: playlists, search: false}
+	folder := &Playlist{id: id, name: name, playlists: playlists, search: false}
+
+	folder.tracks = make([]*Track, 0)
+	for _, subPlaylist := range playlists {
+		for _, track := range subPlaylist.tracks {
+			folder.tracks = append(folder.tracks, track)
+		}
+	}
+
+	return folder
 }
 
 func (playlist *Playlist) GetNextTrack(currentIndexTrack int) (int, bool) {

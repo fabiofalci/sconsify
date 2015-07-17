@@ -97,23 +97,30 @@ func TestSubPlaylist(t *testing.T) {
 }
 
 func TestFolderPlaylist(t *testing.T) {
-	playlist := createFolder("0", "folder0")
+	folder := createFolder("0", "folder0")
 
-	if playlist.IsSearch() {
+	if folder.IsSearch() {
 		t.Errorf("Should not be a search playlists")
 	}
 
-	if !playlist.IsFolder() {
+	if !folder.IsFolder() {
 		t.Errorf("Should be a folder")
 	}
 
-	if playlist.Playlists() != 4 {
+	if folder.Playlists() != 4 {
 		t.Errorf("Folder playlists should be 4")
 	}
-	for i := 0; i > playlist.Playlists(); i++ {
-		if playlist.Playlist(i).Name() != "folder" + strconv.Itoa(i) {
-			t.Errorf("Playlist order is not correct")
+
+	tracks := 0
+	for i := 0; i < folder.Playlists(); i++ {
+		if folder.Playlist(i).Name() != " subPlaylist" + strconv.Itoa(i) {
+			t.Errorf("Playlist order is not correct: %v", folder.Playlist(i).Name())
 		}
+		tracks += folder.Playlist(i).Tracks()
+	}
+
+	if tracks != folder.Tracks() {
+		t.Errorf("Folder should contain all subplaylist tracks, %v != %v", tracks, folder.Tracks())
 	}
 }
 
