@@ -51,6 +51,8 @@ func (spotify *Spotify) initPlaylist() error {
 		}
 	}
 
+	searchPlaylist := sconsify.InitFolder("Search", "*Search", make([]*sconsify.Playlist, 0))
+	playlists.AddPlaylist(searchPlaylist)
 	spotify.events.NewPlaylist(playlists)
 	return nil
 }

@@ -65,7 +65,7 @@ func (spotify *Spotify) search(query string) {
 	}
 
 	playlists := sconsify.InitPlaylists()
-	name := "*" + query
+	name := " " + query
 	playlists.AddPlaylist(sconsify.InitSearchPlaylist(name, name, tracks))
 
 	spotify.events.NewPlaylist(playlists)

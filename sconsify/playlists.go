@@ -84,9 +84,15 @@ func (playlists *Playlists) checkDuplicatedNames(newPlaylist *Playlist, original
 	}
 }
 
-func (playlists *Playlists) Merge(newPlaylist *Playlists) {
-	for key, value := range newPlaylist.playlists {
-		playlists.playlists[key] = value
+func (playlists *Playlists) Merge(newPlaylists *Playlists) {
+	for key, newPlaylist := range newPlaylists.playlists {
+		if newPlaylist.IsSearch() {
+			if searchPlaylist := playlists.GetById("Search"); searchPlaylist != nil {
+				searchPlaylist.AddPlaylist(newPlaylist)
+			}
+		} else {
+			playlists.playlists[key] = newPlaylist
+		}
 	}
 	playlists.buildPlaylistForNewMode()
 }
