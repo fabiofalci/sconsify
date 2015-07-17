@@ -11,7 +11,8 @@ type Playlist struct {
 	search bool
 
 	subPlaylist bool
-	playlists []*Playlist
+	open        bool
+	playlists   []*Playlist
 }
 
 type PlaylistByName []Playlist
@@ -29,7 +30,7 @@ func InitSearchPlaylist(id string, name string, tracks []*Track) *Playlist {
 }
 
 func InitFolder(id string, name string, playlists []*Playlist) *Playlist {
-	folder := &Playlist{id: id, name: name, playlists: playlists, search: false}
+	folder := &Playlist{id: id, name: name, playlists: playlists, search: false, open: true}
 
 	folder.tracks = make([]*Track, 0)
 	for _, subPlaylist := range playlists {
@@ -108,6 +109,14 @@ func (playlist *Playlist) IsSearch() bool {
 
 func (playlist *Playlist) IsFolder() bool {
 	return playlist.playlists != nil
+}
+
+func (playlist *Playlist) IsFolderOpen() bool {
+	return playlist.open
+}
+
+func (playlist *Playlist) InvertOpenClose() {
+	playlist.open = !playlist.open
 }
 
 // sort Interface

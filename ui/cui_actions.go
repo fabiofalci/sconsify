@@ -247,6 +247,7 @@ func keybindings() error {
 	keyboard.configureKey(nextView, Left, VIEW_QUEUE)
 	keyboard.configureKey(nextView, Right, VIEW_PLAYLISTS)
 	keyboard.configureKey(mainNextViewRight, Right, VIEW_TRACKS)
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeySpace, VIEW_PLAYLISTS, openCloseCommand))
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
 
 	// numbers
@@ -357,6 +358,16 @@ func queueTrackCommand(g *gocui.Gui, v *gocui.View) error {
 			if queue.Add(track) != nil {
 				fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
 			}
+		}
+	}
+	return nil
+}
+
+func openCloseCommand(g *gocui.Gui, v *gocui.View) error {
+	if playlist := gui.getSelectedPlaylist(); playlist != nil {
+		if playlist.IsFolder() {
+			playlist.InvertOpenClose()
+			gui.updatePlaylistsView()
 		}
 	}
 	return nil

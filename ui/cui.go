@@ -217,7 +217,7 @@ func (gui *Gui) updatePlaylistsView() {
 	for _, key := range playlists.Names() {
 		fmt.Fprintln(gui.playlistsView, key)
 		playlist := playlists.Get(key)
-		if playlist.IsFolder() {
+		if playlist.IsFolder() && playlist.IsFolderOpen() {
 			for i := 0; i < playlist.Playlists(); i++ {
 				subPlaylist := playlist.Playlist(i)
 				fmt.Fprintln(gui.playlistsView, subPlaylist.Name())

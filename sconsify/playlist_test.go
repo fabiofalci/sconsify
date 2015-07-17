@@ -160,6 +160,26 @@ func TestSubPlaylistHasSameNameIncludingSubPlaylists(t *testing.T) {
 	}
 }
 
+func TestOpenClose(t *testing.T) {
+	folder := createFolder("0", "testing")
+
+	if !folder.IsFolderOpen() {
+		t.Errorf("Folder should initialise as open")
+	}
+
+	folder.InvertOpenClose()
+
+	if folder.IsFolderOpen() {
+		t.Errorf("Folder should be closed")
+	}
+
+	folder.InvertOpenClose()
+
+	if !folder.IsFolderOpen() {
+		t.Errorf("Folder should be opened")
+	}
+}
+
 func createDummyPlaylist(name string) *Playlist {
 	tracks := make([]*Track, 4)
 	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
