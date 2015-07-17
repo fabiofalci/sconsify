@@ -166,17 +166,26 @@ func TestOpenClose(t *testing.T) {
 	if !folder.IsFolderOpen() {
 		t.Errorf("Folder should initialise as open")
 	}
+	if folder.Name() != folder.OriginalName() || folder.Name() != "testing" {
+		t.Errorf("Folder name should not be closed. Name %v, original %v", folder.Name(), folder.OriginalName())
+	}
 
 	folder.InvertOpenClose()
 
 	if folder.IsFolderOpen() {
 		t.Errorf("Folder should be closed")
 	}
+	if folder.Name() != "[testing]" && folder.OriginalName() != "testing" {
+		t.Errorf("Folder name should be closed. Name %v, original %v", folder.Name(), folder.OriginalName())
+	}
 
 	folder.InvertOpenClose()
 
 	if !folder.IsFolderOpen() {
 		t.Errorf("Folder should be opened")
+	}
+	if folder.Name() != folder.OriginalName() || folder.Name() != "testing" {
+		t.Errorf("Folder name should not be closed. Name %v, original %v", folder.Name(), folder.OriginalName())
 	}
 }
 

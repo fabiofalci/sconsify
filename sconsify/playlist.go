@@ -99,6 +99,17 @@ func (playlist *Playlist) Name() string {
 	return playlist.name
 }
 
+func (playlist *Playlist) OriginalName() string {
+	if playlist.IsFolder() && !playlist.IsFolderOpen() {
+		return playlist.removeClosedFolderName()
+	}
+	return playlist.name
+}
+
+func (playlist *Playlist) removeClosedFolderName() string {
+	return playlist.name[1:len(playlist.name) - 1]
+}
+
 func (playlist *Playlist) Id() string {
 	return playlist.id
 }
@@ -117,6 +128,15 @@ func (playlist *Playlist) IsFolderOpen() bool {
 
 func (playlist *Playlist) InvertOpenClose() {
 	playlist.open = !playlist.open
+	if playlist.open {
+		playlist.name = playlist.removeClosedFolderName()
+	} else {
+		playlist.name = "[" + playlist.name + "]"
+	}
+}
+
+func (playlist *Playlist) getName() {
+
 }
 
 // sort Interface
@@ -124,5 +144,5 @@ func (p PlaylistByName) Len() int      { return len(p) }
 func (p PlaylistByName) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
 func (p PlaylistByName) Less(i, j int) bool {
-	return strings.ToLower(p[i].name) < strings.ToLower(p[j].name)
+	return strings.ToLower(p[i].OriginalName()) < strings.ToLower(p[j].OriginalName())
 }
