@@ -14,6 +14,8 @@ type State struct {
 	PlayingTrackUri       string
 	PlayingTrackFullTitle string
 	PlayingPlaylist       string
+
+	ClosedFolders []string
 }
 
 func loadState() *State {
@@ -29,7 +31,7 @@ func loadState() *State {
 }
 
 func persistState() {
-	state := State{}
+	state := State{ClosedFolders: make([]string, 0)}
 	selectedPlaylist, index := gui.getSelectedPlaylistAndTrack()
 
 	if selectedPlaylist != nil {
@@ -48,6 +50,12 @@ func persistState() {
 		}
 	}
 
+	for _, playlistName := range playlists.Names() {
+		playlist := playlists.Get(playlistName)
+		if playlist.IsFolder() && !playlist.IsFolderOpen() {
+			state.ClosedFolders	= append(state.ClosedFolders, playlist.Id())
+		}
+	}
 	if b, err := json.Marshal(state); err == nil {
 		if fileLocation := infrastructure.GetStateFileLocation(); fileLocation != "" {
 			infrastructure.SaveFile(fileLocation, b)

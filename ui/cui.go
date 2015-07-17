@@ -286,6 +286,7 @@ func loadInitialState() {
 	loadPlaylistFromState(state)
 	loadTrackFromState(state)
 	loadPlayingTrackFromState(state)
+	loadClosedFoldersFromState(state)
 }
 
 func loadPlayingTrackFromState(state *State) {
@@ -312,6 +313,21 @@ func loadTrackFromState(state *State) {
 				goTo(gui.g, gui.tracksView, index+1)
 				gui.enableTracksView()
 			}
+		}
+	}
+}
+
+func loadClosedFoldersFromState(state *State) {
+	if state.ClosedFolders != nil && len(state.ClosedFolders) > 0 {
+		updatePlaylist := false
+		for _, id := range state.ClosedFolders {
+			if playlist := playlists.GetById(id); playlist != nil {
+				playlist.InvertOpenClose()
+				updatePlaylist = true
+			}
+		}
+		if updatePlaylist {
+			gui.updatePlaylistsView()
 		}
 	}
 }
