@@ -87,10 +87,14 @@ func (playlists *Playlists) checkDuplicatedNames(newPlaylist *Playlist, original
 func (playlists *Playlists) Merge(newPlaylists *Playlists) {
 	for key, newPlaylist := range newPlaylists.playlists {
 		if newPlaylist.IsSearch() {
-			if searchPlaylist := playlists.GetById("Search"); searchPlaylist != nil {
-				searchPlaylist.AddPlaylist(newPlaylist)
-				searchPlaylist.OpenFolder()
+			searchPlaylist := playlists.GetById("Search")
+			if searchPlaylist == nil {
+				searchPlaylist = InitFolder("Search", "*Search", make([]*Playlist, 0))
+				playlists.AddPlaylist(searchPlaylist)
 			}
+
+			searchPlaylist.AddPlaylist(newPlaylist)
+			searchPlaylist.OpenFolder()
 		} else {
 			playlists.playlists[key] = newPlaylist
 		}
