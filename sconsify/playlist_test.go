@@ -189,6 +189,32 @@ func TestOpenClose(t *testing.T) {
 	}
 }
 
+func TestOpenFolder(t *testing.T) {
+	folder := createFolder("0", "testing")
+
+	if !folder.IsFolderOpen() {
+		t.Errorf("Folder should initialise as open")
+	}
+
+	folder.InvertOpenClose()
+
+	if folder.IsFolderOpen() {
+		t.Errorf("Folder should be closed")
+	}
+
+	folder.OpenFolder()
+
+	if !folder.IsFolderOpen() {
+		t.Errorf("Folder should be open")
+	}
+
+	folder.OpenFolder()
+
+	if !folder.IsFolderOpen() {
+		t.Errorf("Folder should be open")
+	}
+}
+
 func TestAddPlaylist(t *testing.T) {
 	folder := createFolder("0", "testing")
 	playlist0 := createDummyPlaylistWithId("0", "playlist0")

@@ -148,6 +148,12 @@ func (playlist *Playlist) IsFolderOpen() bool {
 	return playlist.open
 }
 
+func (playlist *Playlist) OpenFolder() {
+	if !playlist.IsFolderOpen() {
+		playlist.InvertOpenClose()
+	}
+}
+
 func (playlist *Playlist) InvertOpenClose() {
 	playlist.open = !playlist.open
 	if playlist.open {

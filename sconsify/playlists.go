@@ -89,6 +89,7 @@ func (playlists *Playlists) Merge(newPlaylists *Playlists) {
 		if newPlaylist.IsSearch() {
 			if searchPlaylist := playlists.GetById("Search"); searchPlaylist != nil {
 				searchPlaylist.AddPlaylist(newPlaylist)
+				searchPlaylist.OpenFolder()
 			}
 		} else {
 			playlists.playlists[key] = newPlaylist
