@@ -326,6 +326,23 @@ func TestRemove(t *testing.T) {
 	}
 }
 
+func TestRemoveSubPlaylist(t *testing.T) {
+	playlists := InitPlaylists()
+	folder0 := createFolder("0", "name0")
+	playlists.AddPlaylist(folder0)
+	playlists.AddPlaylist(createDummyPlaylistWithId("1", "name1"))
+
+	if folder0.Playlists() != 4 {
+		t.Error("Number of playlists should be 4")
+	}
+
+	playlists.Remove(" subPlaylist3")
+
+	if folder0.Playlists() != 3 {
+		t.Error("Number of playlists should be 3")
+	}
+}
+
 func TestDuplicatedNames(t *testing.T) {
 	playlists := InitPlaylists()
 

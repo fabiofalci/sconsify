@@ -104,6 +104,12 @@ func (playlists *Playlists) Remove(playlistName string) {
 			playlists.buildPlaylistForNewMode()
 			return
 		}
+		if playlist.IsFolder() {
+			if playlist.RemovePlaylist(playlistName) {
+				playlists.buildPlaylistForNewMode()
+				return
+			}
+		}
 	}
 }
 

@@ -203,6 +203,23 @@ func TestAddPlaylist(t *testing.T) {
 	}
 }
 
+func TestRemovePlaylist(t *testing.T) {
+	folder := createFolder("0", "testing")
+	playlist0 := createDummyPlaylistWithId("0", "playlist0")
+
+	if !folder.RemovePlaylist(" subPlaylist3") {
+		t.Errorf("Folder should remove existing playlist")
+	}
+
+	if folder.RemovePlaylist(" subPlaylist99") {
+		t.Errorf("Folder should not remove playlist")
+	}
+
+	if playlist0.RemovePlaylist(" subPlaylist3") {
+		t.Errorf("Playlist should not remove playlist")
+	}
+}
+
 func createDummyPlaylist(name string) *Playlist {
 	tracks := make([]*Track, 4)
 	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")

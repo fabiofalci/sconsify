@@ -71,6 +71,20 @@ func (playlist *Playlist) AddPlaylist(subPlaylist *Playlist) bool {
 	return true
 }
 
+func (playlist *Playlist) RemovePlaylist(playlistName string) bool {
+	if !playlist.IsFolder() {
+		return false
+	}
+	for index, p := range playlist.playlists {
+		if p.Name() == playlistName {
+			playlist.playlists = append(playlist.playlists[:index], playlist.playlists[index+1:]...)
+			return true
+		}
+	}
+
+	return false
+}
+
 func (playlist *Playlist) IndexByUri(uri string) int {
 	for i, track := range playlist.tracks {
 		if track.Uri == uri {
