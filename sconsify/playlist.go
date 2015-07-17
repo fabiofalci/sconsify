@@ -135,10 +135,6 @@ func (playlist *Playlist) InvertOpenClose() {
 	}
 }
 
-func (playlist *Playlist) getName() {
-
-}
-
 // sort Interface
 func (p PlaylistByName) Len() int      { return len(p) }
 func (p PlaylistByName) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
