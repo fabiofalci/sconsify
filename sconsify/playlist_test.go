@@ -189,6 +189,20 @@ func TestOpenClose(t *testing.T) {
 	}
 }
 
+func TestAddPlaylist(t *testing.T) {
+	folder := createFolder("0", "testing")
+	playlist0 := createDummyPlaylistWithId("0", "playlist0")
+	playlist1 := createDummyPlaylistWithId("1", "playlist1")
+
+	if !folder.AddPlaylist(playlist0) {
+		t.Errorf("Folder should accept new playlist")
+	}
+
+	if playlist1.AddPlaylist(playlist0) {
+		t.Errorf("Playlist should not accept new playlist")
+	}
+}
+
 func createDummyPlaylist(name string) *Playlist {
 	tracks := make([]*Track, 4)
 	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")

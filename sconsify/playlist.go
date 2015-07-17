@@ -63,6 +63,14 @@ func (playlist *Playlist) Playlist(index int) *Playlist {
 	return nil
 }
 
+func (playlist *Playlist) AddPlaylist(subPlaylist *Playlist) bool {
+	if !playlist.IsFolder() {
+		return false
+	}
+	playlist.playlists = append(playlist.playlists, subPlaylist)
+	return true
+}
+
 func (playlist *Playlist) IndexByUri(uri string) int {
 	for i, track := range playlist.tracks {
 		if track.Uri == uri {
