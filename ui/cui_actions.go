@@ -52,6 +52,7 @@ const (
 	Down string = "Down"
 	Left string = "Left"
 	Right string = "Right"
+	OpenCloseFolder string = "OpenCloseFolder"
 )
 
 var multipleKeysBuffer bytes.Buffer
@@ -123,6 +124,9 @@ func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[Right] {
 		keyboard.addKey("<right>", Right)
 		keyboard.addKey("l", Right)
+	}
+	if !keyboard.UsedFunctions[OpenCloseFolder] {
+		keyboard.addKey("<space>", OpenCloseFolder)
 	}
 }
 
@@ -247,7 +251,7 @@ func keybindings() error {
 	keyboard.configureKey(nextView, Left, VIEW_QUEUE)
 	keyboard.configureKey(nextView, Right, VIEW_PLAYLISTS)
 	keyboard.configureKey(mainNextViewRight, Right, VIEW_TRACKS)
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeySpace, VIEW_PLAYLISTS, openCloseCommand))
+	keyboard.configureKey(openCloseFolderCommand, OpenCloseFolder, VIEW_PLAYLISTS)
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
 
 	// numbers
@@ -363,7 +367,7 @@ func queueTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func openCloseCommand(g *gocui.Gui, v *gocui.View) error {
+func openCloseFolderCommand(g *gocui.Gui, v *gocui.View) error {
 	if playlist := gui.getSelectedPlaylist(); playlist != nil {
 		if playlist.IsFolder() {
 			playlist.InvertOpenClose()
