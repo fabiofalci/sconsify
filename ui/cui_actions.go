@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/fabiofalci/sconsify/sconsify"
+	"github.com/fabiofalci/sconsify/infrastructure"
 	"github.com/jroimartin/gocui"
 )
 
@@ -126,7 +127,7 @@ func (keyboard *Keyboard) defaultValues() {
 }
 
 func (keyboard *Keyboard) loadKeyFunctions() {
-	if fileLocation := sconsify.GetKeyFunctionsFileLocation(); fileLocation != "" {
+	if fileLocation := infrastructure.GetKeyFunctionsFileLocation(); fileLocation != "" {
 		if b, err := ioutil.ReadFile(fileLocation); err == nil {
 			fileContent := make([]KeyEntry, 0)
 			if err := json.Unmarshal(b, &fileContent); err == nil {

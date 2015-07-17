@@ -1,4 +1,4 @@
-package sconsify
+package infrastructure
 
 import (
 	"errors"

@@ -7,6 +7,7 @@ import (
 
 	"code.google.com/p/portaudio-go/portaudio"
 	"github.com/fabiofalci/sconsify/sconsify"
+	"github.com/fabiofalci/sconsify/infrastructure"
 	sp "github.com/op/go-libspotify/spotify"
 )
 
@@ -78,11 +79,11 @@ func (spotify *Spotify) initKey() error {
 }
 
 func (spotify *Spotify) initCache() (string, error) {
-	cacheLocation := sconsify.GetCacheLocation()
+	cacheLocation := infrastructure.GetCacheLocation()
 	if cacheLocation == "" {
 		return "", errors.New("Cannot find cache dir")
 	}
-	if err := sconsify.DeleteCache(cacheLocation); err != nil {
+	if err := infrastructure.DeleteCache(cacheLocation); err != nil {
 		return "", err
 	}
 	return cacheLocation, nil

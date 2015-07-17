@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/fabiofalci/sconsify/sconsify"
+	"github.com/fabiofalci/sconsify/infrastructure"
 )
 
 type State struct {
@@ -17,7 +17,7 @@ type State struct {
 }
 
 func loadState() *State {
-	if fileLocation := sconsify.GetStateFileLocation(); fileLocation != "" {
+	if fileLocation := infrastructure.GetStateFileLocation(); fileLocation != "" {
 		if b, err := ioutil.ReadFile(fileLocation); err == nil {
 			var state State
 			if err := json.Unmarshal(b, &state); err == nil {
@@ -49,8 +49,8 @@ func persistState() {
 	}
 
 	if b, err := json.Marshal(state); err == nil {
-		if fileLocation := sconsify.GetStateFileLocation(); fileLocation != "" {
-			sconsify.SaveFile(fileLocation, b)
+		if fileLocation := infrastructure.GetStateFileLocation(); fileLocation != "" {
+			infrastructure.SaveFile(fileLocation, b)
 		}
 	}
 }

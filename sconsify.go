@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/fabiofalci/sconsify/sconsify"
+	"github.com/fabiofalci/sconsify/infrastructure"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/fabiofalci/sconsify/ui"
 	"github.com/howeyc/gopass"
@@ -24,7 +25,7 @@ func init() {
 }
 
 func main() {
-	sconsify.ProcessSconsifyrc()
+	infrastructure.ProcessSconsifyrc()
 
 	providedUsername := flag.String("username", "", "Spotify username.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll shuffle tracks.")
@@ -44,8 +45,8 @@ func main() {
 	}
 
 	if *providedDebug {
-		sconsify.InitialiseLogger()
-		defer sconsify.CloseLogger()
+		infrastructure.InitialiseLogger()
+		defer infrastructure.CloseLogger()
 	}
 
 	fmt.Println("Sconsify - your awesome Spotify music service in a text-mode interface.")
