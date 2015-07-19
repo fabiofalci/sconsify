@@ -37,10 +37,7 @@ func (spotify *Spotify) initPlaylist() error {
 		if spotify.canAddPlaylist(playlist, allPlaylists.PlaylistType(i)) {
 			tracks := make([]*sconsify.Track, playlist.Tracks())
 			for i := 0; i < playlist.Tracks(); i++ {
-				playlistTrack := playlist.Track(i)
-				playlistTrack.Track().Wait()
-				playlistTrack.Track().Artist(0).Wait()
-				tracks[i] = sconsify.ToSconsifyTrack(playlistTrack.Track())
+				tracks[i] = spotify.initTrack(playlist.Track(i))
 			}
 			id := playlist.Link().String()
 			if folderPlaylists == nil {
@@ -53,6 +50,15 @@ func (spotify *Spotify) initPlaylist() error {
 
 	spotify.events.NewPlaylist(playlists)
 	return nil
+}
+
+func (spotify *Spotify) initTrack(playlistTrack *sp.PlaylistTrack) *sconsify.Track {
+	track := playlistTrack.Track()
+	track.Wait()
+	for i := 0; i < track.Artists(); i++ {
+		track.Artist(i).Wait()
+	}
+	return sconsify.ToSconsifyTrack(track)
 }
 
 func (spotify *Spotify) canAddPlaylist(playlist *sp.Playlist, playlistType sp.PlaylistType) bool {
