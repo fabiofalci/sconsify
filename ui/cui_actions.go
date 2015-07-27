@@ -22,6 +22,8 @@ type Keyboard struct {
 	ConfiguredKeys map[string][]string
 	UsedFunctions  map[string]bool
 
+	SequentialKeys map[string]gocui.KeybindingHandler
+
 	Keys []*KeyMapping
 	MultipleKeys []*KeyMapping
 }
@@ -57,7 +59,7 @@ const (
 
 var multipleKeysBuffer bytes.Buffer
 var multipleKeysNumber int
-var multipleKeysHandlers map[string]gocui.KeybindingHandler
+var keyboard *Keyboard
 
 func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[PauseTrack] {
@@ -153,72 +155,72 @@ func (keyboard *Keyboard) addKey(key string, command string) {
 
 func (keyboard *Keyboard) configureKey(handler gocui.KeybindingHandler, command string, view string) {
 	for key, commands := range keyboard.ConfiguredKeys {
+		switch key {
+		case "<enter>":
+			key = string(gocui.KeyEnter)
+		case "<space>":
+			key = string(gocui.KeySpace)
+		case "<up>":
+			key = string(gocui.KeyArrowUp)
+		case "<down>":
+			key = string(gocui.KeyArrowDown)
+		case "<left>":
+			key = string(gocui.KeyArrowLeft)
+		case "<right>":
+			key = string(gocui.KeyArrowRight)
+		}
 		for _, c := range commands {
 			if c == command {
-				keyMapping, isMultiple := createKeyMapping(handler, key, view)
-				keyboard.addToKeys(isMultiple, keyMapping)
+				if view == "" {
+					keyboard.SequentialKeys[VIEW_PLAYLISTS + " " + key] = handler
+					keyboard.SequentialKeys[VIEW_QUEUE + " " + key] = handler
+					keyboard.SequentialKeys[VIEW_TRACKS + " " + key] = handler
+				} else {
+					keyboard.SequentialKeys[view + " " + key] = handler
+				}
 			}
 		}
 	}
 }
 
-func getFirstRune(value string) rune {
-	return getAsRuneArray(value)[0]
-}
-
-func getAsRuneArray(value string) []rune {
-	return []rune(value)
-}
-
-func isMultipleKey(value string) bool {
-	return len(getAsRuneArray(value)) > 1
-}
-
-func createKeyMapping(handler gocui.KeybindingHandler, key string, view string) (*KeyMapping, bool) {
-	switch key {
-	case "<enter>":
-		return newKeyMapping(gocui.KeyEnter, view, handler), false
-	case "<space>":
-		return newKeyMapping(gocui.KeySpace, view, handler), false
-	case "<up>":
-		return newKeyMapping(gocui.KeyArrowUp, view, handler), false
-	case "<down>":
-		return newKeyMapping(gocui.KeyArrowDown, view, handler), false
-	case "<left>":
-		return newKeyMapping(gocui.KeyArrowLeft, view, handler), false
-	case "<right>":
-		return newKeyMapping(gocui.KeyArrowRight, view, handler), false
-	}
-	if isMultipleKey(key) {
-		keyRune := getAsRuneArray(key)
-		multipleKeysHandlers[key] = handler
-		return newKeyMapping(keyRune[0], view,
-			func(g *gocui.Gui, v *gocui.View) error {
-				return multipleKeysPressed(g, v, keyRune[0])
-			}), true
-	}
-	return newKeyMapping(getFirstRune(key), view, handler), false
-}
-
-func (keyboard *Keyboard) addToKeys(isMultiple bool, keyMapping *KeyMapping) {
-	if isMultiple {
-		addKeyBinding(&keyboard.MultipleKeys, keyMapping)
-	} else {
-		addKeyBinding(&keyboard.Keys, keyMapping)
-	}
-}
-
 func keybindings() error {
-	keyboard := &Keyboard{
+	keyboard = &Keyboard{
 		ConfiguredKeys: make(map[string][]string),
 		UsedFunctions: make(map[string]bool),
 		Keys: make([]*KeyMapping, 0),
-		MultipleKeys: make([]*KeyMapping, 0)}
+		MultipleKeys: make([]*KeyMapping, 0),
+		SequentialKeys: make(map[string]gocui.KeybindingHandler)}
 
 	keyboard.loadKeyFunctions()
 	keyboard.defaultValues()
 
-	multipleKeysHandlers = make(map[string]gocui.KeybindingHandler)
+	for i := 'a'; i <= 'z'; i++ {
+		key := i
+		addKeyBinding(&keyboard.Keys, newKeyMapping(i, "", func(g *gocui.Gui, v *gocui.View) error {
+			return keyPressed(key, g, v)
+		}))
+	}
+
+	for i := 'A'; i <= 'Z'; i++ {
+		key := i
+		addKeyBinding(&keyboard.Keys, newKeyMapping(i, "", func(g *gocui.Gui, v *gocui.View) error {
+			return keyPressed(key, g, v)
+		}))
+	}
+
+	for _, value := range []rune{'>', '<', '/'} {
+		key := value
+		addKeyBinding(&keyboard.Keys, newKeyMapping(key, "", func(g *gocui.Gui, v *gocui.View) error {
+			return keyPressed(key, g, v)
+		}))
+	}
+
+	for _, value := range []gocui.Key{gocui.KeySpace, gocui.KeyArrowUp, gocui.KeyArrowDown, gocui.KeyArrowLeft, gocui.KeyArrowRight} {
+		key := value
+		addKeyBinding(&keyboard.Keys, newKeyMapping(key, "", func(g *gocui.Gui, v *gocui.View) error {
+			return keyPressed(rune(key), g, v)
+		}))
+	}
 
 	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
 		keyboard.configureKey(pauseTrackCommand, PauseTrack, view)
@@ -269,23 +271,12 @@ func keybindings() error {
 		keyCopy := key
 		if err := gui.g.SetKeybinding(key.view, key.key, 0,
 			func(g *gocui.Gui, v *gocui.View) error {
-				err := keyCopy.h(g, v)
-				resetMultipleKeys()
-				return err
-			}); err != nil {
-			return err
-		}
-	}
-
-	for _, key := range keyboard.MultipleKeys {
-		keyCopy := key
-		if err := gui.g.SetKeybinding(key.view, key.key, 0,
-			func(g *gocui.Gui, v *gocui.View) error {
 				return keyCopy.h(g, v)
 			}); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -295,6 +286,22 @@ func addKeyBinding(keys *[]*KeyMapping, key *KeyMapping) {
 
 func newKeyMapping(key interface{}, view string, h gocui.KeybindingHandler) *KeyMapping {
 	return &KeyMapping{key: key, h: h, view: view}
+}
+
+func keyPressed(key rune, g *gocui.Gui, v *gocui.View) error {
+	multipleKeysBuffer.WriteRune(key)
+	keyCombination := multipleKeysBuffer.String()
+
+	if handler := keyboard.SequentialKeys[v.Name() + " " + keyCombination]; handler != nil {
+		resetMultipleKeys()
+		return handler(g, v)
+	}
+
+	if len(keyCombination) >= 2 {
+		resetMultipleKeys()
+		return keyPressed(rune(keyCombination[1]), g, v)
+	}
+	return nil
 }
 
 func resetMultipleKeys() {
@@ -308,18 +315,6 @@ func multipleKeysNumberPressed(pressedNumber int) error {
 	} else {
 		multipleKeysNumber = multipleKeysNumber*10 + pressedNumber
 	}
-	return nil
-}
-
-func multipleKeysPressed(g *gocui.Gui, v *gocui.View, pressedKey rune) error {
-	multipleKeysBuffer.WriteRune(pressedKey)
-
-	handler := multipleKeysHandlers[multipleKeysBuffer.String()]
-	if handler != nil {
-		handler(g, v)
-		resetMultipleKeys()
-	}
-
 	return nil
 }
 
