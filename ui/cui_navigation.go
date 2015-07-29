@@ -92,13 +92,29 @@ func updateTracksView(g *gocui.Gui, v *gocui.View) {
 
 func getCurrentViewSize(v *gocui.View) int {
 	if v == gui.tracksView {
-		if selectedPlaylist := gui.getSelectedPlaylist(); selectedPlaylist != nil {
-			return selectedPlaylist.Tracks() - 1
-		}
+		return getTracksViewSize(v)
 	} else if v == gui.playlistsView {
-		return playlists.Playlists() - 1
+		return getPlaylistsViewSize(v)
 	}
 	return -1
+}
+
+func getTracksViewSize(v *gocui.View) int {
+	if selectedPlaylist := gui.getSelectedPlaylist(); selectedPlaylist != nil {
+		return selectedPlaylist.Tracks() - 1
+	}
+	return -1
+}
+
+func getPlaylistsViewSize(v *gocui.View) int {
+	subPlaylists := 0
+	for _, key := range playlists.Names() {
+		playlist := playlists.Get(key)
+		if playlist.IsFolder() && playlist.IsFolderOpen() {
+			subPlaylists += playlist.Playlists()
+		}
+	}
+	return playlists.Playlists() + subPlaylists - 1
 }
 
 func hasMorePages(newOriginY int, cursorY int, maxSize int) bool {
