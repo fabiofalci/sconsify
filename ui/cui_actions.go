@@ -25,7 +25,6 @@ type Keyboard struct {
 	SequentialKeys map[string]gocui.KeybindingHandler
 
 	Keys []*KeyMapping
-	MultipleKeys []*KeyMapping
 }
 
 type KeyEntry struct {
@@ -188,7 +187,6 @@ func keybindings() error {
 		ConfiguredKeys: make(map[string][]string),
 		UsedFunctions: make(map[string]bool),
 		Keys: make([]*KeyMapping, 0),
-		MultipleKeys: make([]*KeyMapping, 0),
 		SequentialKeys: make(map[string]gocui.KeybindingHandler)}
 
 	keyboard.loadKeyFunctions()
@@ -259,7 +257,7 @@ func keybindings() error {
 	// numbers
 	for i := 0; i < 10; i++ {
 		numberCopy := i
-		addKeyBinding(&keyboard.MultipleKeys, newKeyMapping(rune(i+48), "",
+		addKeyBinding(&keyboard.Keys, newKeyMapping(rune(i+48), "",
 			func(g *gocui.Gui, v *gocui.View) error {
 				return multipleKeysNumberPressed(numberCopy)
 			}))
@@ -293,20 +291,17 @@ func keyPressed(key rune, g *gocui.Gui, v *gocui.View) error {
 	keyCombination := multipleKeysBuffer.String()
 
 	if handler := keyboard.SequentialKeys[v.Name() + " " + keyCombination]; handler != nil {
-		resetMultipleKeys()
-		return handler(g, v)
+		multipleKeysBuffer.Reset()
+		err := handler(g, v)
+		multipleKeysNumber = 0
+		return err
 	}
 
 	if len(keyCombination) >= 2 {
-		resetMultipleKeys()
+		multipleKeysBuffer.Reset()
 		return keyPressed(rune(keyCombination[1]), g, v)
 	}
 	return nil
-}
-
-func resetMultipleKeys() {
-	multipleKeysBuffer.Reset()
-	multipleKeysNumber = 0
 }
 
 func multipleKeysNumberPressed(pressedNumber int) error {
