@@ -283,10 +283,10 @@ func layout(g *gocui.Gui) error {
 
 func loadInitialState() {
 	state := loadState()
+	loadClosedFoldersFromState(state)
 	loadPlaylistFromState(state)
 	loadTrackFromState(state)
 	loadPlayingTrackFromState(state)
-	loadClosedFoldersFromState(state)
 }
 
 func loadPlayingTrackFromState(state *State) {
@@ -297,10 +297,23 @@ func loadPlayingTrackFromState(state *State) {
 
 func loadPlaylistFromState(state *State) {
 	if state.SelectedPlaylist != "" {
-		for index, name := range playlists.Names() {
+		position := 0
+		for _, name := range playlists.Names() {
 			if name == state.SelectedPlaylist {
-				goTo(gui.g, gui.playlistsView, index+1)
-				break
+				goTo(gui.g, gui.playlistsView, position+1)
+				return
+			}
+			position++
+			playlist := playlists.Get(name)
+			if  playlist.IsFolder() && playlist.IsFolderOpen() {
+				for i := 0; i < playlist.Playlists(); i++ {
+					subPlaylist := playlist.Playlist(i)
+					if subPlaylist.Name() == state.SelectedPlaylist {
+						goTo(gui.g, gui.playlistsView, position+1)
+						return
+					}
+					position++
+				}
 			}
 		}
 	}
