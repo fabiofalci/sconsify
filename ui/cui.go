@@ -287,6 +287,21 @@ func loadInitialState() {
 	loadPlaylistFromState(state)
 	loadTrackFromState(state)
 	loadPlayingTrackFromState(state)
+	loadQueueFromState(state)
+}
+
+func loadQueueFromState(state *State) {
+	for _, track := range state.Queue {
+		addToQueue(track)
+	}
+}
+
+func addToQueue(track *sconsify.Track) bool {
+	if queue.Add(track) == nil {
+		return false
+	}
+	fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
+	return true
 }
 
 func loadPlayingTrackFromState(state *State) {

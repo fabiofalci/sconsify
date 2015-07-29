@@ -382,8 +382,7 @@ func queuePlaylistCommand(g *gocui.Gui, v *gocui.View) error {
 		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
 			for i := 0; i < playlist.Tracks(); i++ {
 				track := playlist.Track(i)
-				fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
-				if queue.Add(track) == nil {
+				if !addToQueue(track) {
 					return nil
 				}
 			}

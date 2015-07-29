@@ -8,9 +8,9 @@ import (
 
 type Track struct {
 	Uri      string
-	artist   string
-	name     string
-	duration string
+	Artist   string
+	Name     string
+	Duration string
 }
 
 func InitPartialTrack(uri string) *Track {
@@ -22,9 +22,9 @@ func InitPartialTrack(uri string) *Track {
 func InitTrack(uri string, artist string, name string, duration string) *Track {
 	return &Track{
 		Uri:      uri,
-		artist:   artist,
-		name:     name,
-		duration: duration,
+		Artist:   artist,
+		Name:     name,
+		Duration: duration,
 	}
 }
 
@@ -34,13 +34,13 @@ func ToSconsifyTrack(track *sp.Track) *Track {
 }
 
 func (track *Track) GetFullTitle() string {
-	return fmt.Sprintf("%v - %v [%v]", track.artist, track.name, track.duration)
+	return fmt.Sprintf("%v - %v [%v]", track.Artist, track.Name, track.Duration)
 }
 
 func (track *Track) GetTitle() string {
-	return fmt.Sprintf("%v - %v", track.artist, track.name)
+	return fmt.Sprintf("%v - %v", track.Artist, track.Name)
 }
 
 func (track *Track) IsPartial() bool {
-	return track.artist == "" && track.name == "" && track.duration == ""
+	return track.Artist == "" && track.Name == "" && track.Duration == ""
 }

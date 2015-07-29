@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 
 	"github.com/fabiofalci/sconsify/infrastructure"
+	"github.com/fabiofalci/sconsify/sconsify"
 )
 
 type State struct {
@@ -16,6 +17,7 @@ type State struct {
 	PlayingPlaylist       string
 
 	ClosedFolders []string
+	Queue         []*sconsify.Track
 }
 
 func loadState() *State {
@@ -31,7 +33,9 @@ func loadState() *State {
 }
 
 func persistState() {
-	state := State{ClosedFolders: make([]string, 0)}
+	state := State{
+		ClosedFolders: make([]string, 0),
+		Queue: make([]*sconsify.Track, 0)}
 	selectedPlaylist, index := gui.getSelectedPlaylistAndTrack()
 
 	if selectedPlaylist != nil {
@@ -56,6 +60,11 @@ func persistState() {
 			state.ClosedFolders	= append(state.ClosedFolders, playlist.Id())
 		}
 	}
+
+	for _, track := range queue.Contents() {
+		state.Queue = append(state.Queue, track)
+	}
+
 	if b, err := json.Marshal(state); err == nil {
 		if fileLocation := infrastructure.GetStateFileLocation(); fileLocation != "" {
 			infrastructure.SaveFile(fileLocation, b)
