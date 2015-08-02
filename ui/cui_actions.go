@@ -14,6 +14,7 @@ import (
 
 type KeyMapping struct {
 	key  interface{}
+	mod  gocui.Modifier
 	h    gocui.KeybindingHandler
 	view string
 }
@@ -267,7 +268,7 @@ func keybindings() error {
 		// it needs to copy the key because closures copy var references and we don't
 		// want to execute always the last action
 		keyCopy := key
-		if err := gui.g.SetKeybinding(key.view, key.key, 0,
+		if err := gui.g.SetKeybinding(key.view, key.key, key.mod,
 			func(g *gocui.Gui, v *gocui.View) error {
 				return keyCopy.h(g, v)
 			}); err != nil {
@@ -283,7 +284,11 @@ func addKeyBinding(keys *[]*KeyMapping, key *KeyMapping) {
 }
 
 func newKeyMapping(key interface{}, view string, h gocui.KeybindingHandler) *KeyMapping {
-	return &KeyMapping{key: key, h: h, view: view}
+	return newModifiedKeyMapping(gocui.ModNone, key, view, h)
+}
+
+func newModifiedKeyMapping(mod gocui.Modifier, key interface{}, view string, h gocui.KeybindingHandler) *KeyMapping {
+	return &KeyMapping{mod: mod, key: key, h: h, view: view}
 }
 
 func keyPressed(key rune, g *gocui.Gui, v *gocui.View) error {
