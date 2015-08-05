@@ -4,7 +4,7 @@ import (
 	"github.com/fabiofalci/sconsify/sconsify"
 )
 
-func Initialise(username string, pass []byte, events *sconsify.Events, playlistFilter *string) {
+func Initialise(events *sconsify.Events) {
 	playlists := sconsify.InitPlaylists()
 
 	tracks := make([]*sconsify.Track, 2)
