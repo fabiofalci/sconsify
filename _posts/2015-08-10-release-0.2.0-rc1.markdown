@@ -1,0 +1,23 @@
+---
+layout: post
+title:  "Release 0.2.0-rc1"
+date:   2015-08-10 09:33:00
+categories: release
+---
+Sconsify 0.2.0 release candidate 1:
+
+* Queue entire playlist when playlist is selected
+
+* Repeat track `r`
+
+* Queue and repeat commands repeatable when number typed before: `2u` will queue the track twice
+
+* Improved folder support
+
+* Searches grouped as a folder
+
+* Persist queue locally
+
+[Release page][release-page].
+
+[release-page]:      https://github.com/fabiofalci/sconsify/releases/tag/v0.2.0-rc1
