@@ -28,7 +28,7 @@ func main() {
 }
 
 func generateKeys(output *bytes.Buffer) {
-	time.Sleep(2 * time.Second)
+	sleep()
 
 	cmd("h")
 	cmd("h")
@@ -38,30 +38,37 @@ func generateKeys(output *bytes.Buffer) {
 		output.WriteString("Playlist Bob Marley not found on position 1")
 		cmd("q")
 	}
-	time.Sleep(2 * time.Second)
+	sleep()
 
 	cmd("j")
 	if !ui.CuiAssertSelectedPlaylist("My folder") {
 		output.WriteString("Playlist My folder not found on position 2")
 		cmd("q")
 	}
-	time.Sleep(2 * time.Second)
+	sleep()
 
 	cmd("space")
 	if !ui.CuiAssertSelectedPlaylist("[My folder]") {
 		output.WriteString("Playlist [My folder] not found on position 2")
 		cmd("q")
 	}
-	time.Sleep(2 * time.Second)
+	sleep()
 
 	cmd("space")
 	if !ui.CuiAssertSelectedPlaylist("My folder") {
 		output.WriteString("Playlist My folder not found on position 2")
 		cmd("q")
 	}
-	time.Sleep(2 * time.Second)
+	sleep()
+
+
 
 	cmd("q")
+}
+
+
+func sleep() {
+	time.Sleep(1 * time.Second)
 }
 
 func cmd(key string) {
