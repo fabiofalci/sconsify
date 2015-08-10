@@ -10,7 +10,10 @@ import (
 	"github.com/fabiofalci/sconsify/spotify/mock"
 	"os/exec"
 	"bytes"
+	"strconv"
 )
+
+var output bytes.Buffer
 
 func main() {
 	infrastructure.ProcessSconsifyrc()
@@ -20,57 +23,40 @@ func main() {
 
 	go mock.Initialise(events)
 
-	var output bytes.Buffer
-	go generateKeys(&output)
+	go testSequence()
 	ui := ui.InitialiseConsoleUserInterface(events)
 	sconsify.StartMainLoop(events, ui, false)
 	println(output.String())
 }
 
-func generateKeys(output *bytes.Buffer) {
+func testSequence() {
 	sleep()
 
 	cmd("h")
 	cmd("h")
 	cmd("g")
-	cmd("g")
-	if !ui.CuiAssertSelectedPlaylist("Bob Marley") {
-		output.WriteString("Playlist Bob Marley not found on position 1")
-		cmd("q")
-	}
-	sleep()
-
-	cmd("j")
-	if !ui.CuiAssertSelectedPlaylist("My folder") {
-		output.WriteString("Playlist My folder not found on position 2")
-		cmd("q")
-	}
-	sleep()
-
-	cmd("space")
-	if !ui.CuiAssertSelectedPlaylist("[My folder]") {
-		output.WriteString("Playlist [My folder] not found on position 2")
-		cmd("q")
-	}
-	sleep()
-
-	cmd("space")
-	if !ui.CuiAssertSelectedPlaylist("My folder") {
-		output.WriteString("Playlist My folder not found on position 2")
-		cmd("q")
-	}
-	sleep()
-
-
+	cmdAndAssert("g", "Bob Marley", "", 1)
+	cmdAndAssert("j", "My folder", "", 2)
+	cmdAndAssert("space", "[My folder]", "", 2)
+	cmdAndAssert("space", "My folder", "", 3)
 
 	cmd("q")
 }
 
-
-func sleep() {
-	time.Sleep(1 * time.Second)
+func cmdAndAssert(key string, selectedPlaylist string, selectedTrack string, playlistPosition int) {
+	cmd(key)
+	if !ui.CuiAssertSelectedPlaylist(selectedPlaylist) {
+		output.WriteString("Playlist '" + selectedPlaylist + "' not found on position " + strconv.Itoa(playlistPosition))
+		cmd("q")
+	}
+	sleep()
 }
 
 func cmd(key string) {
 	exec.Command("xdotool", "key", key).Run()
 }
+
+func sleep() {
+	time.Sleep(1 * time.Second)
+}
+
