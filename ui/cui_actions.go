@@ -45,7 +45,7 @@ const (
 	QueuePlaylist string = "QueuePlaylist"
 	RepeatPlayingTrack string = "RepeatPlayingTrack"
 	RemoveSearchFromPlaylists string = "RemoveSearchFromPlaylists"
-	RemoveTrackFromQueue string = "RemoveTrackFromQueue"
+	RemoveTrack string = "RemoveTrack"
 	RemoveAllTracksFromQueue string = "RemoveAllTracksFromQueue"
 	GoToFirstLine string = "GoToFirstLine"
 	GoToLastLine string = "GoToLastLine"
@@ -95,8 +95,8 @@ func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[RemoveSearchFromPlaylists] {
 		keyboard.addKey("d", RemoveSearchFromPlaylists)
 	}
-	if !keyboard.UsedFunctions[RemoveTrackFromQueue] {
-		keyboard.addKey("d", RemoveTrackFromQueue)
+	if !keyboard.UsedFunctions[RemoveTrack] {
+		keyboard.addKey("d", RemoveTrack)
 	}
 	if !keyboard.UsedFunctions[RemoveAllTracksFromQueue] {
 		keyboard.addKey("D", RemoveAllTracksFromQueue)
@@ -238,12 +238,12 @@ func keybindings() error {
 		addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyPgdn, view, cursorPgdn))
 		keyboard.configureKey(cursorUp, Up, view)
 		keyboard.configureKey(cursorDown, Down, view)
+		keyboard.configureKey(removeTrackCommand, RemoveTrack, view)
 	}
 
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
 	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)
 	keyboard.configureKey(removeSearchPlaylistsCommand, RemoveSearchFromPlaylists, VIEW_PLAYLISTS)
-	keyboard.configureKey(removeTrackFromQueueCommand, RemoveTrackFromQueue, VIEW_QUEUE)
 	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, VIEW_QUEUE)
 	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
 
@@ -402,14 +402,25 @@ func removeAllTracksFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 	return gui.enableTracksView()
 }
 
-func removeTrackFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
-	if index := gui.getQueueSelectedTrackIndex(); index > -1 {
-		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
-			if queue.Remove(index) != nil {
-				continue
+func removeTrackCommand(g *gocui.Gui, v *gocui.View) error {
+	switch v.Name() {
+	case VIEW_TRACKS:
+		if playlist, index := gui.getSelectedPlaylistAndTrack(); index > -1 {
+			for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
+				playlist.RemoveTrack(index)
 			}
+			gui.updateTracksView()
+			goTo(g, v, index+1)
 		}
-		gui.updateQueueView()
+	case VIEW_QUEUE:
+		if index := gui.getQueueSelectedTrackIndex(); index > -1 {
+			for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
+				if queue.Remove(index) != nil {
+					continue
+				}
+			}
+			gui.updateQueueView()
+		}
 	}
 	return nil
 }

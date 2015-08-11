@@ -163,6 +163,14 @@ func (playlist *Playlist) InvertOpenClose() {
 	}
 }
 
+
+func (playlist *Playlist) RemoveTrack(index int) {
+	if len(playlist.tracks) == 0 || index < 0 || index >= len(playlist.tracks) {
+		return
+	}
+	playlist.tracks = append(playlist.tracks[:index], playlist.tracks[index+1:]...)
+}
+
 // sort Interface
 func (p PlaylistByName) Len() int      { return len(p) }
 func (p PlaylistByName) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
