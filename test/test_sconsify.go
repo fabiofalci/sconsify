@@ -11,12 +11,14 @@ import (
 	"os/exec"
 	"bytes"
 	"strconv"
+	"flag"
 )
 
 var output bytes.Buffer
 
 func main() {
-	infrastructure.ProcessSconsifyrc()
+	runTest := flag.Bool("run-test", false, "Run the test sequence.")
+	flag.Parse()
 
 	fmt.Println("Sconsify - your awesome Spotify music service in a text-mode interface.")
 	events := sconsify.InitialiseEvents()
@@ -26,7 +28,10 @@ func main() {
 
 	go mock.Initialise(events)
 
-	go testSequence()
+	if *runTest {
+		go testSequence()
+	}
+
 	ui := ui.InitialiseConsoleUserInterface(events)
 	sconsify.StartMainLoop(events, ui, false)
 	println(output.String())
