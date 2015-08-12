@@ -21,6 +21,9 @@ func main() {
 	fmt.Println("Sconsify - your awesome Spotify music service in a text-mode interface.")
 	events := sconsify.InitialiseEvents()
 
+	infrastructure.InitialiseLogger()
+	defer infrastructure.CloseLogger()
+
 	go mock.Initialise(events)
 
 	go testSequence()
