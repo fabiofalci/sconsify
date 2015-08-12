@@ -44,7 +44,6 @@ const (
 	QueueTrack string = "QueueTrack"
 	QueuePlaylist string = "QueuePlaylist"
 	RepeatPlayingTrack string = "RepeatPlayingTrack"
-	RemoveSearchFromPlaylists string = "RemoveSearchFromPlaylists"
 	RemoveTrack string = "RemoveTrack"
 	RemoveAllTracksFromQueue string = "RemoveAllTracksFromQueue"
 	GoToFirstLine string = "GoToFirstLine"
@@ -91,9 +90,6 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[RepeatPlayingTrack] {
 		keyboard.addKey("r", RepeatPlayingTrack)
-	}
-	if !keyboard.UsedFunctions[RemoveSearchFromPlaylists] {
-		keyboard.addKey("d", RemoveSearchFromPlaylists)
 	}
 	if !keyboard.UsedFunctions[RemoveTrack] {
 		keyboard.addKey("d", RemoveTrack)
@@ -243,7 +239,6 @@ func keybindings() error {
 
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
 	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)
-	keyboard.configureKey(removeSearchPlaylistsCommand, RemoveSearchFromPlaylists, VIEW_PLAYLISTS)
 	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, VIEW_QUEUE)
 	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
 
@@ -404,6 +399,12 @@ func removeAllTracksFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
 
 func removeTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	switch v.Name() {
+	case VIEW_PLAYLISTS:
+		if playlist := gui.getSelectedPlaylist(); playlist != nil {
+			playlists.Remove(playlist.Name())
+			gui.updatePlaylistsView()
+			gui.updateTracksView()
+		}
 	case VIEW_TRACKS:
 		if playlist, index := gui.getSelectedPlaylistAndTrack(); index > -1 {
 			for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
@@ -421,15 +422,6 @@ func removeTrackCommand(g *gocui.Gui, v *gocui.View) error {
 			}
 			gui.updateQueueView()
 		}
-	}
-	return nil
-}
-
-func removeSearchPlaylistsCommand(g *gocui.Gui, v *gocui.View) error {
-	if playlist := gui.getSelectedPlaylist(); playlist != nil && playlist.IsSearch() {
-		playlists.Remove(playlist.Name())
-		gui.updatePlaylistsView()
-		gui.updateTracksView()
 	}
 	return nil
 }
