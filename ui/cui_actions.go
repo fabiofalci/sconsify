@@ -45,7 +45,7 @@ const (
 	QueuePlaylist string = "QueuePlaylist"
 	RepeatPlayingTrack string = "RepeatPlayingTrack"
 	RemoveTrack string = "RemoveTrack"
-	RemoveAllTracksFromQueue string = "RemoveAllTracksFromQueue"
+	RemoveAllTracks string = "RemoveAllTracks"
 	GoToFirstLine string = "GoToFirstLine"
 	GoToLastLine string = "GoToLastLine"
 	PlaySelectedTrack string = "PlaySelectedTrack"
@@ -94,8 +94,8 @@ func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[RemoveTrack] {
 		keyboard.addKey("d", RemoveTrack)
 	}
-	if !keyboard.UsedFunctions[RemoveAllTracksFromQueue] {
-		keyboard.addKey("D", RemoveAllTracksFromQueue)
+	if !keyboard.UsedFunctions[RemoveAllTracks] {
+		keyboard.addKey("D", RemoveAllTracks)
 	}
 	if !keyboard.UsedFunctions[GoToFirstLine] {
 		keyboard.addKey("gg", GoToFirstLine)
@@ -235,11 +235,11 @@ func keybindings() error {
 		keyboard.configureKey(cursorUp, Up, view)
 		keyboard.configureKey(cursorDown, Down, view)
 		keyboard.configureKey(removeTrackCommand, RemoveTrack, view)
+		keyboard.configureKey(removeAllTracksCommand, RemoveAllTracks, view)
 	}
 
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
 	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)
-	keyboard.configureKey(removeAllTracksFromQueueCommand, RemoveAllTracksFromQueue, VIEW_QUEUE)
 	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
 
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
@@ -391,10 +391,21 @@ func queuePlaylistCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func removeAllTracksFromQueueCommand(g *gocui.Gui, v *gocui.View) error {
-	queue.RemoveAll()
-	gui.updateQueueView()
-	return gui.enableTracksView()
+func removeAllTracksCommand(g *gocui.Gui, v *gocui.View) error {
+	switch v.Name() {
+	case VIEW_PLAYLISTS:
+	case VIEW_TRACKS:
+		if playlist, index := gui.getSelectedPlaylistAndTrack(); index > -1 {
+			playlist.RemoveAllTracks()
+			gui.updateTracksView()
+			return gui.enableSideView()
+		}
+	case VIEW_QUEUE:
+		queue.RemoveAll()
+		gui.updateQueueView()
+		return gui.enableTracksView()
+	}
+	return nil
 }
 
 func removeTrackCommand(g *gocui.Gui, v *gocui.View) error {
