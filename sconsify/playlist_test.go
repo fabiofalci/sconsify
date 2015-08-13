@@ -270,6 +270,16 @@ func TestRemoveTrackFromPlaylist(t *testing.T) {
 	}
 }
 
+func TestRemoveAllTracksFromPlaylist(t *testing.T) {
+	playlist := createDummyPlaylist("testing")
+
+	playlist.RemoveAllTracks()
+
+	if count := playlist.Tracks(); count != 0 {
+		t.Errorf("After a remove all track number of tracks should be 0")
+	}
+}
+
 func createDummyPlaylist(name string) *Playlist {
 	tracks := make([]*Track, 4)
 	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")

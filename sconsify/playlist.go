@@ -109,6 +109,7 @@ func (playlist *Playlist) HasSameNameIncludingSubPlaylists(otherPlaylist *Playli
 }
 
 
+
 func (playlist *Playlist) Tracks() int {
 	return len(playlist.tracks)
 }
@@ -169,6 +170,10 @@ func (playlist *Playlist) RemoveTrack(index int) {
 		return
 	}
 	playlist.tracks = append(playlist.tracks[:index], playlist.tracks[index+1:]...)
+}
+
+func (playlist *Playlist) RemoveAllTracks() {
+	playlist.tracks = make([]*Track, 0)
 }
 
 // sort Interface
