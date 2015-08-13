@@ -92,7 +92,7 @@ func (keyboard *Keyboard) defaultValues() {
 		keyboard.addKey("r", RepeatPlayingTrack)
 	}
 	if !keyboard.UsedFunctions[RemoveTrack] {
-		keyboard.addKey("d", RemoveTrack)
+		keyboard.addKey("dd", RemoveTrack)
 	}
 	if !keyboard.UsedFunctions[RemoveAllTracks] {
 		keyboard.addKey("D", RemoveAllTracks)
