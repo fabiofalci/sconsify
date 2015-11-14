@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"code.google.com/p/portaudio-go/portaudio"
+	"github.com/gordonklaus/portaudio"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/infrastructure"
 	sp "github.com/op/go-libspotify/spotify"

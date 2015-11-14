@@ -2,7 +2,7 @@
 package spotify
 
 import (
-	"code.google.com/p/portaudio-go/portaudio"
+	"github.com/gordonklaus/portaudio"
 	sp "github.com/op/go-libspotify/spotify"
 )
 
