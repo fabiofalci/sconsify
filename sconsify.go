@@ -56,7 +56,7 @@ func main() {
 	go spotify.Initialise(username, pass, events, providedPlaylists)
 
 	if *providedUi {
-		ui := ui.InitialiseConsoleUserInterface(events)
+		ui := ui.InitialiseConsoleUserInterface(events, true)
 		sconsify.StartMainLoop(events, ui, false)
 	} else {
 		var output ui.Printer

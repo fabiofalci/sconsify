@@ -39,7 +39,7 @@ func main() {
 		go runTests()
 	}
 
-	ui := ui.InitialiseConsoleUserInterface(events)
+	ui := ui.InitialiseConsoleUserInterface(events, false)
 	sconsify.StartMainLoop(events, ui, false)
 	println(output.String())
 	sleep() // otherwise gocui eventually fails to quit properly

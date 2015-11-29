@@ -18,6 +18,7 @@ var (
 	playlists            *sconsify.Playlists
 	consoleUserInterface sconsify.UserInterface
 	player               Player
+	loadStateWheInit     bool
 )
 
 const (
@@ -40,12 +41,13 @@ type Gui struct {
 	PlayingTrack   *sconsify.Track
 }
 
-func InitialiseConsoleUserInterface(ev *sconsify.Events) sconsify.UserInterface {
+func InitialiseConsoleUserInterface(ev *sconsify.Events, loadState bool) sconsify.UserInterface {
 	events = ev
 	gui = &Gui{}
 	consoleUserInterface = &ConsoleUserInterface{}
 	queue = InitQueue()
 	player = &RegularPlayer{}
+	loadStateWheInit = loadState
 	return consoleUserInterface
 }
 
@@ -274,7 +276,7 @@ func layout(g *gocui.Gui) error {
 		gui.statusView = v
 	}
 
-	if !gui.initialised {
+	if !gui.initialised && loadStateWheInit {
 		loadInitialState()
 	}
 	gui.initialised = true
