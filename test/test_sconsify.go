@@ -16,12 +16,15 @@ import (
 var output bytes.Buffer
 
 var left = "h"
+var right = "l"
+var up = "k"
 var down = "j"
 var openClose = "space"
 var search = "slash"
 var enter = "Return"
 var quit = "q"
 var firstLine = "gg"
+var lastLine = "G"
 
 func main() {
 	runTest := flag.Bool("run-test", false, "Run the test sequence.")
@@ -48,29 +51,61 @@ func main() {
 func runTests() {
 	sleep()
 	viNavigation()
+	folders()
 	searching()
 }
 
 func viNavigation() {
-	goFirstPlaylist()
+	goToFirstPlaylist()
 
 	assert("Bob Marley", "")
 	cmdAndAssert(down, "My folder", "")
-	cmdAndAssert(openClose, "[My folder]", "")
-	cmdAndAssert(openClose, "My folder", "")
-	cmdAndAssert(openClose, "[My folder]", "")
+	cmdAndAssert(down, " Bob Marley and The Wailers", "")
+	cmdAndAssert(down, " The Ramones", "")
 	cmdAndAssert(down, "Ramones", "")
+	cmdAndAssert(down, "Ramones", "")
+
+	cmdAndAssert(up, " The Ramones", "")
+	cmdAndAssert(up, " Bob Marley and The Wailers", "")
+	cmdAndAssert(up, "My folder", "")
+	cmdAndAssert(up, "Bob Marley", "")
+	cmdAndAssert(up, "Bob Marley", "")
+
+	cmd(firstLine)
+	assert("Bob Marley", "")
+	cmd(lastLine)
+	assert("Ramones", "")
+
+	cmdAndAssert(right, "Ramones", "I wanna be sedated")
 
 }
 
+func folders() {
+	goToFirstPlaylist()
+
+	cmdAndAssert(down, "My folder", "")
+	cmdAndAssert(openClose, "[My folder]", "")
+	cmdAndAssert(down, "Ramones", "")
+
+	cmdAndAssert(up, "[My folder]", "")
+	cmdAndAssert(openClose, "My folder", "")
+	cmdAndAssert(down, " Bob Marley and The Wailers", "")
+	cmdAndAssert(down, " The Ramones", "")
+	cmdAndAssert(down, "Ramones", "")
+
+	cmdAndAssert(up, " The Ramones", "")
+	cmdAndAssert(up, " Bob Marley and The Wailers", "")
+	cmdAndAssert(up, "My folder", "")
+}
+
 func searching() {
-	goFirstPlaylist()
+	goToFirstPlaylist()
 
 	cmd(search)
 	cmds("elvis")
 	cmd(enter)
 
-	goFirstPlaylist()
+	goToFirstPlaylist()
 	assert("*Search", "")
 	cmdAndAssert(openClose, "[*Search]", "")
 	cmdAndAssert(openClose, "*Search", "")
@@ -78,7 +113,7 @@ func searching() {
 	cmd(quit)
 }
 
-func goFirstPlaylist() {
+func goToFirstPlaylist() {
 	cmd(left)
 	cmd(left)
 	cmds(firstLine)

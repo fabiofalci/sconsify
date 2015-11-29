@@ -28,9 +28,9 @@ func Initialise(events *sconsify.Events) {
 	playlists.AddPlaylist(sconsify.InitFolder("folder", "My folder", folderPlaylists))
 
 	tracks = make([]*sconsify.Track, 3)
-	tracks[0] = sconsify.InitTrack("ramones3", "Ramones", "Ramones", "2m3s")
-	tracks[1] = sconsify.InitTrack("ramones4", "Ramones", "Ramones...", "3m21s")
-	tracks[2] = sconsify.InitTrack("ramones5", "Ramones", "The Ramones", "1m9s")
+	tracks[0] = sconsify.InitTrack("ramones3", "Ramones", "I wanna be sedated", "2m3s")
+	tracks[1] = sconsify.InitTrack("ramones4", "Ramones", "Pet semetary", "3m21s")
+	tracks[2] = sconsify.InitTrack("ramones5", "Ramones", "Judy is a punk", "1m9s")
 	playlists.AddPlaylist(sconsify.InitPlaylist("ramonesplaylist1", "Ramones", tracks))
 
 	events.NewPlaylist(playlists)
