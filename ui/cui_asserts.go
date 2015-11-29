@@ -1,11 +1,11 @@
 package ui
 
-func CuiAssertSelectedPlaylist(playlist string) bool {
+func CuiAssertSelectedPlaylist(playlist string) (bool, string) {
 	selectedPlaylist := gui.getSelectedPlaylist()
 
 	if playlist != selectedPlaylist.Name() {
-		return false
+		return false, selectedPlaylist.Name()
 	}
 
-	return true
+	return true, ""
 }

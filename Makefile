@@ -14,6 +14,9 @@ default: build
 test:
 	go test -v ./...
 
+test-ui:
+	go run test/test_sconsify.go -run-test |&pp
+
 run: container-build
 	docker run --rm -it \
 		-v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" \

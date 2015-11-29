@@ -10,11 +10,18 @@ import (
 	"github.com/fabiofalci/sconsify/spotify/mock"
 	"os/exec"
 	"bytes"
-	"strconv"
 	"flag"
 )
 
 var output bytes.Buffer
+
+var left = "h"
+var down = "j"
+var openClose = "space"
+var search = "slash"
+var enter = "Return"
+var quit = "q"
+var firstLine = "gg"
 
 func main() {
 	runTest := flag.Bool("run-test", false, "Run the test sequence.")
@@ -29,35 +36,71 @@ func main() {
 	go mock.Initialise(events)
 
 	if *runTest {
-		go testSequence()
+		go runTests()
 	}
 
 	ui := ui.InitialiseConsoleUserInterface(events)
 	sconsify.StartMainLoop(events, ui, false)
 	println(output.String())
+	sleep() // otherwise gocui eventually fails to quit properly
 }
 
-func testSequence() {
+func runTests() {
 	sleep()
-
-	cmd("h")
-	cmd("h")
-	cmd("g")
-	cmdAndAssert("g", "Bob Marley", "", 1)
-	cmdAndAssert("j", "My folder", "", 2)
-	cmdAndAssert("space", "[My folder]", "", 2)
-	cmdAndAssert("space", "My folder", "", 3)
-
-	cmd("q")
+	viNavigation()
+	searching()
 }
 
-func cmdAndAssert(key string, selectedPlaylist string, selectedTrack string, playlistPosition int) {
+func viNavigation() {
+	goFirstPlaylist()
+
+	assert("Bob Marley", "")
+	cmdAndAssert(down, "My folder", "")
+	cmdAndAssert(openClose, "[My folder]", "")
+	cmdAndAssert(openClose, "My folder", "")
+	cmdAndAssert(openClose, "[My folder]", "")
+	cmdAndAssert(down, "Ramones", "")
+
+}
+
+func searching() {
+	goFirstPlaylist()
+
+	cmd(search)
+	cmds("elvis")
+	cmd(enter)
+
+	goFirstPlaylist()
+	assert("*Search", "")
+	cmdAndAssert(openClose, "[*Search]", "")
+	cmdAndAssert(openClose, "*Search", "")
+
+	cmd(quit)
+}
+
+func goFirstPlaylist() {
+	cmd(left)
+	cmd(left)
+	cmds(firstLine)
+}
+
+func cmdAndAssert(key string, expectedPlaylist string, expectedTrack string) {
 	cmd(key)
-	if !ui.CuiAssertSelectedPlaylist(selectedPlaylist) {
-		output.WriteString("Playlist '" + selectedPlaylist + "' not found on position " + strconv.Itoa(playlistPosition))
+	assert(expectedPlaylist, expectedTrack)
+}
+
+func assert(expectedPlaylist string, expectedTrack string) {
+	if valid, actualPlaylist := ui.CuiAssertSelectedPlaylist(expectedPlaylist); !valid {
+		output.WriteString(fmt.Sprintf("Playlist '%v' not found on position but '%v'", expectedPlaylist, actualPlaylist))
 		cmd("q")
+		panic("Boom!")
 	}
-	sleep()
+}
+
+func cmds(keys string) {
+	for _, key := range keys {
+		cmd(string(key))
+	}
 }
 
 func cmd(key string) {
@@ -65,6 +108,6 @@ func cmd(key string) {
 }
 
 func sleep() {
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 }
 

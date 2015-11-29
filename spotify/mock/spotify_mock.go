@@ -17,24 +17,35 @@ func Initialise(events *sconsify.Events) {
 	tracks = make([]*sconsify.Track, 2)
 	tracks[0] = sconsify.InitTrack("bobmarley2", "Bob Marley", "Waiting in vain", "2m3s")
 	tracks[1] = sconsify.InitTrack("bobmarley3", "Bob Marley", "Testing", "5m3s")
-	folderPlaylists[0] = sconsify.InitPlaylist("bobmarleyplaylist1", " Bob Marley", tracks)
+	folderPlaylists[0] = sconsify.InitPlaylist("bobmarleyplaylist1", " Bob Marley and The Wailers", tracks)
 
 	tracks = make([]*sconsify.Track, 3)
 	tracks[0] = sconsify.InitTrack("ramones0", "The Ramones", "Ramones", "2m3s")
 	tracks[1] = sconsify.InitTrack("ramones1", "The Ramones", "Ramones...", "3m21s")
 	tracks[2] = sconsify.InitTrack("ramones2", "The Ramones", "The Ramones", "1m9s")
-	folderPlaylists[1] = sconsify.InitPlaylist("ramonesplaylist0", " Ramones", tracks)
+	folderPlaylists[1] = sconsify.InitPlaylist("ramonesplaylist0", " The Ramones", tracks)
 
 	playlists.AddPlaylist(sconsify.InitFolder("folder", "My folder", folderPlaylists))
 
 	tracks = make([]*sconsify.Track, 3)
-	tracks[0] = sconsify.InitTrack("ramones3", "The Ramones", "Ramones", "2m3s")
-	tracks[1] = sconsify.InitTrack("ramones4", "The Ramones", "Ramones...", "3m21s")
-	tracks[2] = sconsify.InitTrack("ramones5", "The Ramones", "The Ramones", "1m9s")
+	tracks[0] = sconsify.InitTrack("ramones3", "Ramones", "Ramones", "2m3s")
+	tracks[1] = sconsify.InitTrack("ramones4", "Ramones", "Ramones...", "3m21s")
+	tracks[2] = sconsify.InitTrack("ramones5", "Ramones", "The Ramones", "1m9s")
 	playlists.AddPlaylist(sconsify.InitPlaylist("ramonesplaylist1", "Ramones", tracks))
 
 	events.NewPlaylist(playlists)
 	waitForMockEvents(events)
+}
+
+func getSearchedPlaylist() *sconsify.Playlists {
+	playlists := sconsify.InitPlaylists()
+	tracks := make([]*sconsify.Track, 3)
+	tracks[0] = sconsify.InitTrack("elvispreley0", "Elvis Presley", "Burning Love", "2m3s")
+	tracks[1] = sconsify.InitTrack("elvispreley1", "Elvis Presley", "Love me tender", "2m4s")
+	tracks[2] = sconsify.InitTrack("elvispreley2", "Elvis Presley", "It's now or never", "2m5s")
+	playlists.AddPlaylist(sconsify.InitSearchPlaylist("elvispresley1", " Elvis Presley", tracks))
+
+	return playlists
 }
 
 func waitForMockEvents(events *sconsify.Events) {
@@ -46,6 +57,7 @@ func waitForMockEvents(events *sconsify.Events) {
 		case <-events.ShutdownSpotifyUpdates():
 			events.ShutdownEngine()
 		case <-events.SearchUpdates():
+			events.NewPlaylist(getSearchedPlaylist())
 		}
 	}
 }
