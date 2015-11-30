@@ -71,13 +71,25 @@ func viNavigation() {
 	cmdAndAssert(up, "Bob Marley", "")
 	cmdAndAssert(up, "Bob Marley", "")
 
-	cmd(firstLine)
-	assert("Bob Marley", "")
 	cmd(lastLine)
 	assert("Ramones", "")
+	cmds(firstLine)
+	assert("Bob Marley", "")
 
+	cmd(lastLine)
 	cmdAndAssert(right, "Ramones", "I wanna be sedated")
+	cmdAndAssert(down, "Ramones", "Pet semetary")
+	cmdAndAssert(down, "Ramones", "Judy is a punk")
+	cmdAndAssert(down, "Ramones", "Judy is a punk")
 
+	cmdAndAssert(up, "Ramones", "Pet semetary")
+	cmdAndAssert(up, "Ramones", "I wanna be sedated")
+	cmdAndAssert(up, "Ramones", "I wanna be sedated")
+
+	cmd(lastLine)
+	assert("Ramones", "Judy is a punk")
+	cmds(firstLine)
+	assert("Ramones", "I wanna be sedated")
 }
 
 func folders() {
@@ -129,6 +141,13 @@ func assert(expectedPlaylist string, expectedTrack string) {
 		output.WriteString(fmt.Sprintf("Playlist '%v' not found on position but '%v'", expectedPlaylist, actualPlaylist))
 		cmd("q")
 		panic("Boom!")
+	}
+	if (expectedTrack != "") {
+		if valid, actualTrack := ui.CuiAssertSelectedTrack(expectedTrack); !valid {
+			output.WriteString(fmt.Sprintf("Track '%v' not found but '%v'", expectedTrack, actualTrack))
+			cmd("q")
+			panic("Boom!")
+		}
 	}
 }
 

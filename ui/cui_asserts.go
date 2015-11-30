@@ -9,3 +9,14 @@ func CuiAssertSelectedPlaylist(playlist string) (bool, string) {
 
 	return true, ""
 }
+
+func CuiAssertSelectedTrack(track string) (bool, string) {
+	selectedPlaylist, index := gui.getSelectedPlaylistAndTrack()
+	selectedTrack := selectedPlaylist.Track(index)
+
+	if track != selectedTrack.Name {
+		return false, selectedTrack.Name
+	}
+
+	return true, ""
+}
