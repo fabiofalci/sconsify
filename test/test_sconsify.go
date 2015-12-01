@@ -51,8 +51,11 @@ func main() {
 func runTests() {
 	sleep()
 	viNavigation()
+	viNavigationJump()
 	folders()
 	searching()
+
+	cmd(quit)
 }
 
 func viNavigation() {
@@ -92,6 +95,19 @@ func viNavigation() {
 	assert("Ramones", "I wanna be sedated")
 }
 
+func viNavigationJump() {
+	goToFirstPlaylist()
+
+	assert("Bob Marley", "")
+	cmd("3")
+	cmd(down)
+	assert(" The Ramones", "")
+
+	cmd("2")
+	cmd(up)
+	assert("My folder", "")
+}
+
 func folders() {
 	goToFirstPlaylist()
 
@@ -121,8 +137,6 @@ func searching() {
 	assert("*Search", "")
 	cmdAndAssert(openClose, "[*Search]", "")
 	cmdAndAssert(openClose, "*Search", "")
-
-	cmd(quit)
 }
 
 func goToFirstPlaylist() {
