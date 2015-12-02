@@ -25,6 +25,8 @@ var enter = "Return"
 var quit = "q"
 var firstLine = "gg"
 var lastLine = "G"
+var queue = "u"
+var removeAll = "D"
 
 func main() {
 	runTest := flag.Bool("run-test", false, "Run the test sequence.")
@@ -50,9 +52,13 @@ func main() {
 
 func runTests() {
 	sleep()
+
 	viNavigation()
 	viNavigationJump()
 	folders()
+	queueing()
+	queueingPlaylist()
+	clearingQueue()
 	searching()
 
 	cmd(quit)
@@ -139,6 +145,47 @@ func searching() {
 	cmdAndAssert(openClose, "*Search", "")
 }
 
+func queueing() {
+	goToFirstPlaylist()
+
+	cmd(right)
+	assert("Bob Marley", "Waiting in vain")
+	cmd(queue)
+	cmd(queue)
+	cmd(down)
+	cmd(queue)
+
+	assertNextTrackFromQueue("Waiting in vain")
+	assertNextTrackFromQueue("Waiting in vain")
+	assertNextTrackFromQueue("Testing")
+	assertNextTrackFromQueue("")
+}
+
+func queueingPlaylist() {
+	goToFirstPlaylist()
+
+	assert("Bob Marley", "")
+	cmd(queue)
+
+	assertNextTrackFromQueue("Waiting in vain")
+	assertNextTrackFromQueue("Testing")
+	assertNextTrackFromQueue("")
+}
+
+func clearingQueue() {
+	goToFirstPlaylist()
+
+	assert("Bob Marley", "")
+	cmd(queue)
+
+	cmd(right)
+	cmd(right)
+
+	cmd(removeAll)
+
+	assertNextTrackFromQueue("")
+}
+
 func goToFirstPlaylist() {
 	cmd(left)
 	cmd(left)
@@ -162,6 +209,14 @@ func assert(expectedPlaylist string, expectedTrack string) {
 			cmd("q")
 			panic("Boom!")
 		}
+	}
+}
+
+func assertNextTrackFromQueue(expectedNextTrackFromQueue string) {
+	if valid, actualTrack := ui.CuiAssertQueueNextTrack(expectedNextTrackFromQueue); !valid {
+		output.WriteString(fmt.Sprintf("Track '%v' is not the next in the queue but '%v'", expectedNextTrackFromQueue, actualTrack))
+		cmd("q")
+		panic("Boom!")
 	}
 }
 

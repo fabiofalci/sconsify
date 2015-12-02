@@ -1,4 +1,5 @@
 package ui
+import "github.com/fabiofalci/sconsify/sconsify"
 
 func CuiAssertSelectedPlaylist(playlist string) (bool, string) {
 	selectedPlaylist := gui.getSelectedPlaylist()
@@ -19,4 +20,21 @@ func CuiAssertSelectedTrack(track string) (bool, string) {
 	}
 
 	return true, ""
+}
+
+func CuiAssertQueueNextTrack(trackName string) (bool, string) {
+	nextTrackName := getTrackName(gui.getNextFromQueue())
+
+	if trackName == nextTrackName {
+		return true, ""
+	}
+
+	return false, nextTrackName
+}
+
+func getTrackName(track *sconsify.Track) string {
+	if track != nil {
+		return track.Name
+	}
+	return ""
 }
