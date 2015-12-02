@@ -2,10 +2,10 @@ package ui
 import "github.com/fabiofalci/sconsify/sconsify"
 
 func CuiAssertSelectedPlaylist(playlist string) (bool, string) {
-	selectedPlaylist := gui.getSelectedPlaylist()
+	selectedPlaylistName := getPlaylistName(gui.getSelectedPlaylist())
 
-	if playlist != selectedPlaylist.Name() {
-		return false, selectedPlaylist.Name()
+	if playlist != selectedPlaylistName {
+		return false, selectedPlaylistName
 	}
 
 	return true, ""
@@ -30,6 +30,13 @@ func CuiAssertQueueNextTrack(trackName string) (bool, string) {
 	}
 
 	return false, nextTrackName
+}
+
+func getPlaylistName(playlist *sconsify.Playlist) string {
+	if playlist != nil {
+		return playlist.Name()
+	}
+	return ""
 }
 
 func getTrackName(track *sconsify.Track) string {

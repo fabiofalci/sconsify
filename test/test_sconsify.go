@@ -27,6 +27,7 @@ var firstLine = "gg"
 var lastLine = "G"
 var queue = "u"
 var removeAll = "D"
+var remove = "dd"
 
 func main() {
 	runTest := flag.Bool("run-test", false, "Run the test sequence.")
@@ -60,6 +61,8 @@ func runTests() {
 	queueingPlaylist()
 	clearingQueue()
 	searching()
+	removingTrack()
+	removingPlaylist()
 
 	cmd(quit)
 }
@@ -186,10 +189,37 @@ func clearingQueue() {
 	assertNextTrackFromQueue("")
 }
 
+func removingTrack() {
+	goToLastPlaylist()
+
+	assert("Ramones", "")
+	cmd(right)
+	assert("Ramones", "I wanna be sedated")
+
+	cmds(remove)
+	assert("Ramones", "Pet semetary")
+}
+
+func removingPlaylist() {
+	goToLastPlaylist()
+
+	assert("Ramones", "")
+	cmds(remove)
+	assert("", "")
+
+	cmdAndAssert(up, " The Ramones", "")
+}
+
 func goToFirstPlaylist() {
 	cmd(left)
 	cmd(left)
 	cmds(firstLine)
+}
+
+func goToLastPlaylist() {
+	cmd(left)
+	cmd(left)
+	cmds(lastLine)
 }
 
 func cmdAndAssert(key string, expectedPlaylist string, expectedTrack string) {
