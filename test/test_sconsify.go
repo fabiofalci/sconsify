@@ -59,6 +59,7 @@ func runTests() {
 	folders()
 	queueing()
 	queueingPlaylist()
+	removingFromQueue()
 	clearingQueue()
 	searching()
 	removingTrack()
@@ -171,6 +172,21 @@ func queueingPlaylist() {
 	cmd(queue)
 
 	assertNextTrackFromQueue("Waiting in vain")
+	assertNextTrackFromQueue("Testing")
+	assertNextTrackFromQueue("")
+}
+
+func removingFromQueue() {
+	goToFirstPlaylist()
+
+	assert("Bob Marley", "")
+	cmd(queue)
+
+	cmd(right)
+	cmd(right)
+
+	cmds(remove)
+
 	assertNextTrackFromQueue("Testing")
 	assertNextTrackFromQueue("")
 }
