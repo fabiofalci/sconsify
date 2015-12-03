@@ -19,9 +19,6 @@ var left = "h"
 var right = "l"
 var up = "k"
 var down = "j"
-var openClose = "space"
-var search = "slash"
-var enter = "Return"
 var quit = "q"
 var firstLine = "gg"
 var lastLine = "G"
@@ -86,7 +83,7 @@ func viNavigation() {
 
 	cmd(lastLine)
 	assert("Ramones", "")
-	cmds(firstLine)
+	cmd(firstLine)
 	assert("Bob Marley", "")
 
 	cmd(lastLine)
@@ -101,7 +98,7 @@ func viNavigation() {
 
 	cmd(lastLine)
 	assert("Ramones", "Judy is a punk")
-	cmds(firstLine)
+	cmd(firstLine)
 	assert("Ramones", "I wanna be sedated")
 }
 
@@ -122,11 +119,13 @@ func folders() {
 	goToFirstPlaylist()
 
 	cmdAndAssert(down, "My folder", "")
-	cmdAndAssert(openClose, "[My folder]", "")
+	openClose()
+	assert("[My folder]", "")
 	cmdAndAssert(down, "Ramones", "")
 
 	cmdAndAssert(up, "[My folder]", "")
-	cmdAndAssert(openClose, "My folder", "")
+	openClose()
+	assert("My folder", "")
 	cmdAndAssert(down, " Bob Marley and The Wailers", "")
 	cmdAndAssert(down, " The Ramones", "")
 	cmdAndAssert(down, "Ramones", "")
@@ -139,14 +138,16 @@ func folders() {
 func searching() {
 	goToFirstPlaylist()
 
-	cmd(search)
-	cmds("elvis")
-	cmd(enter)
+	search()
+	cmd("elvis")
+	enter()
 
 	goToFirstPlaylist()
 	assert("*Search", "")
-	cmdAndAssert(openClose, "[*Search]", "")
-	cmdAndAssert(openClose, "*Search", "")
+	openClose()
+	assert( "[*Search]", "")
+	openClose()
+	assert("*Search", "")
 }
 
 func queueing() {
@@ -185,7 +186,7 @@ func removingFromQueue() {
 	cmd(right)
 	cmd(right)
 
-	cmds(remove)
+	cmd(remove)
 
 	assertNextTrackFromQueue("Testing")
 	assertNextTrackFromQueue("")
@@ -212,7 +213,7 @@ func removingTrack() {
 	cmd(right)
 	assert("Ramones", "I wanna be sedated")
 
-	cmds(remove)
+	cmd(remove)
 	assert("Ramones", "Pet semetary")
 }
 
@@ -220,7 +221,7 @@ func removingPlaylist() {
 	goToLastPlaylist()
 
 	assert("Ramones", "")
-	cmds(remove)
+	cmd(remove)
 	assert("", "")
 
 	cmdAndAssert(up, " The Ramones", "")
@@ -229,13 +230,13 @@ func removingPlaylist() {
 func goToFirstPlaylist() {
 	cmd(left)
 	cmd(left)
-	cmds(firstLine)
+	cmd(firstLine)
 }
 
 func goToLastPlaylist() {
 	cmd(left)
 	cmd(left)
-	cmds(lastLine)
+	cmd(lastLine)
 }
 
 func cmdAndAssert(key string, expectedPlaylist string, expectedTrack string) {
@@ -266,14 +267,22 @@ func assertNextTrackFromQueue(expectedNextTrackFromQueue string) {
 	}
 }
 
-func cmds(keys string) {
+func cmd(keys string) {
 	for _, key := range keys {
-		cmd(string(key))
+		exec.Command("xdotool", "key", string(key)).Run()
 	}
 }
 
-func cmd(key string) {
-	exec.Command("xdotool", "key", key).Run()
+func openClose() {
+	exec.Command("xdotool", "key", "space").Run()
+}
+
+func search() {
+	exec.Command("xdotool", "key", "slash").Run()
+}
+
+func enter() {
+	exec.Command("xdotool", "key", "Return").Run()
 }
 
 func sleep() {
