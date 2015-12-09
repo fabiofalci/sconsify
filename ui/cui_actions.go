@@ -49,6 +49,8 @@ const (
 	GoToFirstLine string = "GoToFirstLine"
 	GoToLastLine string = "GoToLastLine"
 	PlaySelectedTrack string = "PlaySelectedTrack"
+	CopySelectedTrack string = "CopySelectedTrack"
+	PasteSelectedTrack string = "PasteSelectedTrack"
 	Up string = "Up"
 	Down string = "Down"
 	Left string = "Left"
@@ -59,6 +61,7 @@ const (
 var multipleKeysBuffer bytes.Buffer
 var multipleKeysNumber int
 var keyboard *Keyboard
+var copiedTrack *sconsify.Track
 
 func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[PauseTrack] {
@@ -106,6 +109,12 @@ func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[PlaySelectedTrack] {
 		keyboard.addKey("<space>", PlaySelectedTrack)
 		keyboard.addKey("<enter>", PlaySelectedTrack)
+	}
+	if !keyboard.UsedFunctions[CopySelectedTrack] {
+		keyboard.addKey("yy", CopySelectedTrack)
+	}
+	if !keyboard.UsedFunctions[PasteSelectedTrack] {
+		keyboard.addKey("yp", PasteSelectedTrack)
 	}
 	if !keyboard.UsedFunctions[Up] {
 		keyboard.addKey("<up>", Up)
@@ -241,6 +250,8 @@ func keybindings() error {
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
 	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)
 	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
+	keyboard.configureKey(copySelectedTrack, CopySelectedTrack, VIEW_TRACKS)
+	keyboard.configureKey(pasteSelectedTrack, PasteSelectedTrack, VIEW_TRACKS)
 
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
 	keyboard.configureKey(mainNextViewLeft, Left, VIEW_TRACKS)
@@ -315,6 +326,24 @@ func multipleKeysNumberPressed(pressedNumber int) error {
 
 func playSelectedTrack(g *gocui.Gui, v *gocui.View) error {
 	player.Play()
+	return nil
+}
+
+func copySelectedTrack(g *gocui.Gui, v *gocui.View) error {
+	if playlist, index := gui.getSelectedPlaylistAndTrack(); index > -1 {
+		copiedTrack = playlist.Track(index)
+	}
+	return nil
+}
+
+func pasteSelectedTrack(g *gocui.Gui, v *gocui.View) error {
+	if playlist := gui.getSelectedPlaylist(); copiedTrack != nil && playlist != nil {
+		events.AddTrackToPlaylist(playlist, copiedTrack)
+
+		playlist.AddTrack(copiedTrack)
+		gui.updateTracksView()
+		copiedTrack = nil
+	}
 	return nil
 }
 

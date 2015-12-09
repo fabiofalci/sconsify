@@ -1,20 +1,26 @@
 package sconsify
 
 type Events struct {
-	shutdownEngine  chan bool
-	shutdownSpotify chan bool
+	shutdownEngine     chan bool
+	shutdownSpotify    chan bool
 
-	play   chan *Track
-	pause  chan bool
-	search chan string
-	replay chan bool
+	play               chan *Track
+	pause              chan bool
+	search             chan string
+	replay             chan bool
 
-	nextPlay          chan bool
-	playTokenLost     chan bool
-	playlists         chan Playlists
-	trackNotAvailable chan *Track
-	trackPlaying      chan *Track
-	trackPaused       chan *Track
+	nextPlay           chan bool
+	playTokenLost      chan bool
+	playlists          chan Playlists
+	trackNotAvailable  chan *Track
+	trackPlaying       chan *Track
+	trackPaused        chan *Track
+	addTrackToPlaylist chan AddTrackToPlaylist
+}
+
+type AddTrackToPlaylist struct {
+	Playlist Playlist
+	Track    Track
 }
 
 func InitialiseEvents() *Events {
@@ -27,12 +33,13 @@ func InitialiseEvents() *Events {
 		search: make(chan string),
 		replay: make(chan bool),
 
-		nextPlay:          make(chan bool),
-		playTokenLost:     make(chan bool),
-		playlists:         make(chan Playlists),
-		trackNotAvailable: make(chan *Track),
-		trackPlaying:      make(chan *Track),
-		trackPaused:       make(chan *Track)}
+		nextPlay:           make(chan bool),
+		playTokenLost:      make(chan bool),
+		playlists:          make(chan Playlists),
+		trackNotAvailable:  make(chan *Track),
+		trackPlaying:       make(chan *Track),
+		trackPaused:        make(chan *Track),
+		addTrackToPlaylist: make(chan AddTrackToPlaylist)}
 }
 
 func (events *Events) ShutdownEngine() {
@@ -136,3 +143,12 @@ func (events *Events) PlayTokenLost() {
 func (events *Events) PlayTokenLostUpdates() <-chan bool {
 	return events.playTokenLost
 }
+
+func (events *Events) AddTrackToPlaylist(playlist *Playlist, track *Track) {
+	events.addTrackToPlaylist <- AddTrackToPlaylist{Playlist: *playlist, Track: *track}
+}
+
+func (events *Events) AddTrackToPlaylistUpdates() <-chan AddTrackToPlaylist {
+	return events.addTrackToPlaylist
+}
+

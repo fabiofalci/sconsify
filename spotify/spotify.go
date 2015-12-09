@@ -159,6 +159,8 @@ func (spotify *Spotify) waitForEvents() {
 			spotify.shutdownSpotify()
 		case query := <-spotify.events.SearchUpdates():
 			spotify.search(query)
+		case addTrackToPlaylist := <-spotify.events.AddTrackToPlaylistUpdates():
+			spotify.addTrackToPlaylist(&addTrackToPlaylist)
 		}
 	}
 }

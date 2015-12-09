@@ -176,6 +176,10 @@ func (playlist *Playlist) RemoveAllTracks() {
 	playlist.tracks = make([]*Track, 0)
 }
 
+func (playlist *Playlist) AddTrack(track *Track) {
+	playlist.tracks = append(playlist.tracks, track)
+}
+
 // sort Interface
 func (p PlaylistByName) Len() int      { return len(p) }
 func (p PlaylistByName) Swap(i, j int) { p[i], p[j] = p[j], p[i] }

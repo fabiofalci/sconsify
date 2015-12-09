@@ -96,3 +96,26 @@ func (spotify *Spotify) pauseCurrentTrack() {
 func (spotify *Spotify) isPausedOrPlaying() bool {
 	return spotify.currentTrack != nil
 }
+
+func (spotify *Spotify) addTrackToPlaylist(addTrackToPlaylist *sconsify.AddTrackToPlaylist) {
+	allPlaylists, err := spotify.session.Playlists()
+	if err != nil {
+		return
+	}
+	allPlaylists.Wait()
+	for i := 0; i < allPlaylists.Playlists(); i++ {
+		if allPlaylists.PlaylistType(i) != sp.PlaylistTypePlaylist {
+			continue
+		}
+		playlist := allPlaylists.Playlist(i)
+		if playlist.Link().String() == addTrackToPlaylist.Playlist.Id() {
+			if link, err := spotify.session.ParseLink(addTrackToPlaylist.Track.Uri); err == nil {
+				if track, err := link.Track(); err == nil {
+					playlist.AddTrack(track)
+				}
+			}
+
+			break
+		}
+	}
+}
