@@ -21,14 +21,14 @@ type Spotify struct {
 	playlistFilter []string
 }
 
-func Initialise(username string, pass []byte, events *sconsify.Events, playlistFilter *string) {
-	if err := initialiseSpotify(username, pass, events, playlistFilter); err != nil {
+func Initialise(username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) {
+	if err := initialiseSpotify(username, pass, events, playlistFilter, preferredBitrate); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		events.ShutdownEngine()
 	}
 }
 
-func initialiseSpotify(username string, pass []byte, events *sconsify.Events, playlistFilter *string) error {
+func initialiseSpotify(username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) error {
 	spotify := &Spotify{events: events}
 	spotify.setPlaylistFilter(*playlistFilter)
 	if err := spotify.initKey(); err != nil {
@@ -38,7 +38,7 @@ func initialiseSpotify(username string, pass []byte, events *sconsify.Events, pl
 
 	cacheLocation, err := spotify.initCache()
 	if err == nil {
-		err = spotify.initSession(pa, cacheLocation)
+		err = spotify.initSession(pa, cacheLocation, preferredBitrate)
 		if err == nil {
 			err = spotify.login(username, pass)
 			if err == nil {
@@ -46,6 +46,7 @@ func initialiseSpotify(username string, pass []byte, events *sconsify.Events, pl
 			}
 		}
 	}
+
 
 	return err
 }
@@ -59,7 +60,7 @@ func (spotify *Spotify) login(username string, pass []byte) error {
 	return <-spotify.session.LoggedInUpdates()
 }
 
-func (spotify *Spotify) initSession(pa *portAudio, cacheLocation string) error {
+func (spotify *Spotify) initSession(pa *portAudio, cacheLocation string, preferredBitrate *string) error {
 	var err error
 	spotify.session, err = sp.NewSession(&sp.Config{
 		ApplicationKey:   spotify.appKey,
@@ -68,6 +69,15 @@ func (spotify *Spotify) initSession(pa *portAudio, cacheLocation string) error {
 		SettingsLocation: cacheLocation,
 		AudioConsumer:    pa,
 	})
+
+	switch *preferredBitrate {
+	case "96k":
+		spotify.session.PreferredBitrate(sp.Bitrate96k)
+	case "160k":
+		spotify.session.PreferredBitrate(sp.Bitrate160k)
+	default:
+		spotify.session.PreferredBitrate(sp.Bitrate320k)
+	}
 
 	return err
 }
