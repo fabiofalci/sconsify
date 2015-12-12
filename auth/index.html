@@ -1,0 +1,19 @@
+---
+layout: default
+title: Auth
+---
+<div id="show-code">
+</div>
+
+<script>
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    var code = getParameterByName('code');
+    document.getElementById("show-code").innerHTML = "Your code is " + code;
+
+</script>
