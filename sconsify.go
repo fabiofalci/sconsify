@@ -9,11 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/infrastructure"
+	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/fabiofalci/sconsify/ui"
+	"github.com/fabiofalci/sconsify/webapi"
 	"github.com/howeyc/gopass"
+	webspotify "github.com/zmb3/spotify"
 )
 
 var version string
@@ -28,6 +30,7 @@ func main() {
 	infrastructure.ProcessSconsifyrc()
 
 	providedUsername := flag.String("username", "", "Spotify username.")
+	providedWebApi := flag.Bool("web-api", false, "Use Spotify WEB API for more features. It requires web authentication.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll shuffle tracks.")
 	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
 	providedPreferredBitrate := flag.String("preferred-bitrate", "320k", "Preferred bitrate: 96k, 160k, 320k (default).")
@@ -54,7 +57,12 @@ func main() {
 	username, pass := credentials(providedUsername)
 	events := sconsify.InitialiseEvents()
 
-	go spotify.Initialise(username, pass, events, providedPlaylists, providedPreferredBitrate)
+	var client *webspotify.Client
+	if *providedWebApi {
+		client = webapi.Auth()
+	}
+
+	go spotify.Initialise(client, username, pass, events, providedPlaylists, providedPreferredBitrate)
 
 	if *providedUi {
 		ui := ui.InitialiseConsoleUserInterface(events, true)

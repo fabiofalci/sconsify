@@ -5,6 +5,7 @@ import (
 
 	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
+	webspotify "github.com/zmb3/spotify"
 	"strconv"
 )
 
@@ -48,8 +49,28 @@ func (spotify *Spotify) initPlaylist() error {
 		}
 	}
 
+	if spotify.client != nil {
+		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Albums", "*Albums", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
+			savedAlbumPage, err := spotify.client.CurrentUsersAlbumsOpt(createWebSpotifyOptions(50, playlist.Playlists()));
+			if err == nil {
+				for _, album := range savedAlbumPage.Albums {
+					tracks := make([]*sconsify.Track, len(album.Tracks.Tracks))
+					for i, track := range album.Tracks.Tracks {
+						tracks[i] = sconsify.InitWebApiTrack(string(track.URI), track.Artists[0].Name, track.Name, track.TimeDuration().String())
+					}
+					playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
+				}
+				playlist.OpenFolder()
+			}
+		}))
+	}
+
 	spotify.events.NewPlaylist(playlists)
 	return nil
+}
+
+func createWebSpotifyOptions(limit int, offset int) *webspotify.Options {
+	return &webspotify.Options{Limit: &limit, Offset: &offset}
 }
 
 func (spotify *Spotify) initTrack(playlistTrack *sp.PlaylistTrack) *sconsify.Track {

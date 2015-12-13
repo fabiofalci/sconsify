@@ -3,6 +3,7 @@ package spotify
 import (
 	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
+	"time"
 )
 
 func (spotify *Spotify) shutdownSpotify() {
@@ -27,6 +28,16 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 	}
 
 	if !spotify.isTrackAvailable(track) {
+		if trackUri.IsFromWebApi() {
+			retry := trackUri.RetryLoading()
+			if retry < 4 {
+				go func() {
+					time.Sleep(100 * time.Millisecond)
+					spotify.events.Play(trackUri)
+				}()
+				return
+			}
+		}
 		spotify.events.TrackNotAvailable(trackUri)
 		return
 	}

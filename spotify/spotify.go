@@ -9,6 +9,7 @@ import (
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/infrastructure"
 	sp "github.com/op/go-libspotify/spotify"
+	webspotify "github.com/zmb3/spotify"
 )
 
 type Spotify struct {
@@ -19,18 +20,20 @@ type Spotify struct {
 	session        *sp.Session
 	appKey         []byte
 	playlistFilter []string
+	client         *webspotify.Client
 }
 
-func Initialise(username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) {
-	if err := initialiseSpotify(username, pass, events, playlistFilter, preferredBitrate); err != nil {
+func Initialise(client *webspotify.Client, username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) {
+	if err := initialiseSpotify(client, username, pass, events, playlistFilter, preferredBitrate); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		events.ShutdownEngine()
 	}
 }
 
-func initialiseSpotify(username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) error {
+func initialiseSpotify(client *webspotify.Client, username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) error {
 	spotify := &Spotify{events: events}
 	spotify.setPlaylistFilter(*playlistFilter)
+	spotify.client = client
 	if err := spotify.initKey(); err != nil {
 		return err
 	}
