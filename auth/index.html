@@ -2,18 +2,18 @@
 layout: default
 title: Auth
 ---
-<div id="show-code">
+<div id="show-access-token">
 </div>
 
 <script>
     function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-                results = regex.exec(location.search);
+        var regex = new RegExp(name + "=([^&#]*)"),
+                results = regex.exec(location.hash.substr(1));
         return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-    var code = getParameterByName('code');
-    document.getElementById("show-code").innerHTML = "Your code is " + code;
+    var code = getParameterByName('access_token');
+    document.getElementById("show-access-token").innerHTML = "Your access token is " + code;
 
 </script>
