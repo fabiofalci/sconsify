@@ -2,6 +2,7 @@
 layout: default
 title: Auth
 ---
+<div>Your access token is:</div>
 <div id="show-access-token">
 </div>
 
@@ -13,7 +14,10 @@ title: Auth
         return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-    var code = getParameterByName('access_token');
-    document.getElementById("show-access-token").innerHTML = "Your access token is " + code;
+    var accessToken = getParameterByName('access_token');
+    var tokenType = getParameterByName('token_type');
+    var expiresIn = getParameterByName('expires_in');
+    document.getElementById("show-access-token").innerHTML =
+            "access_token:" + accessToken + " token_type:" + tokenType + " expiresIn:" + expiresIn;
 
 </script>
