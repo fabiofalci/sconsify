@@ -188,14 +188,16 @@ func (gui *Gui) replay() {
 }
 
 func (gui *Gui) getSelectedPlaylistAndTrack() (*sconsify.Playlist, int) {
-	currentPlaylist := gui.getSelectedPlaylist()
-	currentTrack, errTrack := gui.getSelectedTrackName()
-	if currentPlaylist != nil && errTrack == nil {
-		if currentPlaylist != nil {
-			currentTrack = currentTrack[0:strings.Index(currentTrack, ".")]
-			currentIndexTrack, _ := strconv.Atoi(currentTrack)
-			currentIndexTrack = currentIndexTrack - 1
-			return currentPlaylist, currentIndexTrack
+	if currentPlaylist := gui.getSelectedPlaylist(); currentPlaylist != nil {
+		if currentTrack, err := gui.getSelectedTrackName(); err == nil {
+			if indexSeparator := strings.Index(currentTrack, "."); indexSeparator > 0 {
+				if currentIndexTrack, err := strconv.Atoi(currentTrack[0:indexSeparator]); err == nil {
+					return currentPlaylist, currentIndexTrack - 1
+				}
+			}
+			if currentPlaylist.IsOnDemand() {
+				return currentPlaylist, -1
+			}
 		}
 	}
 	return nil, -1
@@ -210,6 +212,9 @@ func (gui *Gui) updateTracksView() {
 		for i := 0; i < currentPlaylist.Tracks(); i++ {
 			track := currentPlaylist.Track(i)
 			fmt.Fprintf(gui.tracksView, "%v. %v\n", (i + 1), track.GetTitle())
+		}
+		if currentPlaylist.IsOnDemand() {
+			fmt.Fprintf(gui.tracksView, "Press to load\n")
 		}
 	}
 }

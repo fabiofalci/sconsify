@@ -22,9 +22,17 @@ func (p *RegularPlayer) Pause() {
 
 func (p *RegularPlayer) Play() {
 	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
-		track := playlist.Track(trackIndex)
-		playlists.SetCurrents(playlist.Name(), trackIndex)
-		events.Play(track)
+		if trackIndex == -1 {
+			if playlist.IsOnDemand() {
+				playlist.ExecuteLoad()
+				gui.updatePlaylistsView()
+				gui.updateTracksView()
+			}
+		} else {
+			track := playlist.Track(trackIndex)
+			playlists.SetCurrents(playlist.Name(), trackIndex)
+			events.Play(track)
+		}
 	}
 }
 

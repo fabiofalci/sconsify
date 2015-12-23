@@ -13,6 +13,8 @@ type Playlist struct {
 	subPlaylist bool
 	open        bool
 	playlists   []*Playlist
+
+	loadCallback func(playlist *Playlist)
 }
 
 type PlaylistByName []Playlist
@@ -42,6 +44,16 @@ func InitFolder(id string, name string, playlists []*Playlist) *Playlist {
 	return folder
 }
 
+func InitOnDemandPlaylist(id string, name string, tracks []*Track, loadCallback func(playlist *Playlist)) *Playlist {
+	return &Playlist{id: id, name: name, tracks: tracks, loadCallback: loadCallback}
+}
+
+func InitOnDemandFolder(id string, name string, playlists []*Playlist, loadCallback func(playlist *Playlist)) *Playlist {
+	playlist := &Playlist{id: id, name: name, playlists: playlists, loadCallback: loadCallback, open: true, search: false}
+	playlist.InvertOpenClose()
+	return playlist
+}
+
 func (playlist *Playlist) GetNextTrack(currentIndexTrack int) (int, bool) {
 	if currentIndexTrack >= len(playlist.tracks)-1 {
 		return 0, true
@@ -54,6 +66,10 @@ func (playlist *Playlist) Track(index int) *Track {
 		return playlist.tracks[index]
 	}
 	return nil
+}
+
+func (playlist *Playlist) AddTrack(track *Track) {
+	playlist.tracks = append(playlist.tracks, track)
 }
 
 func (playlist *Playlist) Playlist(index int) *Playlist {
@@ -130,7 +146,10 @@ func (playlist *Playlist) OriginalName() string {
 }
 
 func (playlist *Playlist) removeClosedFolderName() string {
-	return playlist.name[1:len(playlist.name) - 1]
+	if strings.HasPrefix(playlist.name, "[") && strings.HasSuffix(playlist.name, "]") {
+		return playlist.name[1:len(playlist.name) - 1]
+	}
+	return playlist.name
 }
 
 func (playlist *Playlist) Id() string {
@@ -174,6 +193,14 @@ func (playlist *Playlist) RemoveTrack(index int) {
 
 func (playlist *Playlist) RemoveAllTracks() {
 	playlist.tracks = make([]*Track, 0)
+}
+
+func (playlist *Playlist) IsOnDemand() bool {
+	return playlist.loadCallback != nil
+}
+
+func (playlist *Playlist) ExecuteLoad() {
+	playlist.loadCallback(playlist)
 }
 
 // sort Interface

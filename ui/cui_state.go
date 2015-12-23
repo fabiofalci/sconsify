@@ -38,11 +38,13 @@ func persistState() {
 		Queue: make([]*sconsify.Track, 0)}
 	selectedPlaylist, index := gui.getSelectedPlaylistAndTrack()
 
-	if selectedPlaylist != nil {
+	if selectedPlaylist != nil && !selectedPlaylist.IsOnDemand() {
 		state.SelectedPlaylist = selectedPlaylist.Name()
-		selectedTrack := selectedPlaylist.Track(index)
-		if selectedTrack != nil {
-			state.SelectedTrack = selectedTrack.Uri
+		if index != -1 {
+			selectedTrack := selectedPlaylist.Track(index)
+			if selectedTrack != nil {
+				state.SelectedTrack = selectedTrack.Uri
+			}
 		}
 	}
 
@@ -56,7 +58,7 @@ func persistState() {
 
 	for _, playlistName := range playlists.Names() {
 		playlist := playlists.Get(playlistName)
-		if playlist.IsFolder() && !playlist.IsFolderOpen() {
+		if playlist.IsFolder() && !playlist.IsFolderOpen() && !playlist.IsOnDemand() {
 			state.ClosedFolders	= append(state.ClosedFolders, playlist.Id())
 		}
 	}
