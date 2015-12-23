@@ -172,7 +172,7 @@ func canGoToNewPosition(newPosition int) bool {
 	return true
 }
 
-func canGoToAbsolutNewPosition(v *gocui.View, newPosition int) bool {
+func canGoToAbsoluteNewPosition(v *gocui.View, newPosition int) bool {
 	switch v {
 	case gui.playlistsView:
 		return newPosition <= playlists.Playlists()
@@ -186,7 +186,7 @@ func canGoToAbsolutNewPosition(v *gocui.View, newPosition int) bool {
 }
 
 func goTo(g *gocui.Gui, v *gocui.View, position int) error {
-	if canGoToAbsolutNewPosition(v, position) {
+	if canGoToAbsoluteNewPosition(v, position) {
 		position--
 		ox, _ := v.Origin()
 		cx, _ := v.Cursor()
