@@ -63,6 +63,15 @@ func (spotify *Spotify) initPlaylist() error {
 				playlist.OpenFolder()
 			}
 		}))
+
+		playlists.AddPlaylist(sconsify.InitOnDemandPlaylist("Songs", "*Songs", make([]*sconsify.Track, 0), func(playlist *sconsify.Playlist) {
+			savedTrackPage, err := spotify.client.CurrentUsersTracksOpt(createWebSpotifyOptions(50, playlist.Tracks()));
+			if err == nil {
+				for _, track := range savedTrackPage.Tracks {
+					playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), track.Artists[0].Name, track.Name, track.TimeDuration().String()))
+				}
+			}
+		}))
 	}
 
 	spotify.events.NewPlaylist(playlists)
