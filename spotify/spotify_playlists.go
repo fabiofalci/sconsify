@@ -89,6 +89,19 @@ func (spotify *Spotify) initPlaylist() error {
 				}
 			}
 		}))
+
+		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Artists", "*Artists", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
+			fullArtistCursorPage, err := spotify.client.CurrentUsersFollowedArtists()
+			if err == nil {
+				for _, fullArtist := range fullArtistCursorPage.Artists {
+					tracks := make([]*sconsify.Track, 0)
+					playlist.AddPlaylist(sconsify.InitSubPlaylist(string(fullArtist.ID), fullArtist.Name, tracks))
+					playlist.OpenFolder()
+				}
+			}
+		}))
+
+
 	}
 
 	spotify.events.NewPlaylist(playlists)
