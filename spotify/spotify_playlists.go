@@ -72,6 +72,23 @@ func (spotify *Spotify) initPlaylist() error {
 				}
 			}
 		}))
+
+		playlists.AddPlaylist(sconsify.InitOnDemandFolder("New Releases", "*New Releases", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
+			_, simplePlaylistPage, err := spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())});
+			if err == nil {
+				for _, album := range simplePlaylistPage.Playlists {
+					fullPlaylist, err := spotify.client.GetPlaylist(album.Owner.ID, album.ID)
+					if err == nil {
+						tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
+						for i, track := range fullPlaylist.Tracks.Tracks {
+							tracks[i] = sconsify.InitWebApiTrack(string(track.Track.URI), track.Track.Artists[0].Name, track.Track.Name, track.Track.TimeDuration().String())
+						}
+						playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
+					}
+					playlist.OpenFolder()
+				}
+			}
+		}))
 	}
 
 	spotify.events.NewPlaylist(playlists)
