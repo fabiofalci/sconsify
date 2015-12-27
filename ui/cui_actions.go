@@ -54,6 +54,7 @@ const (
 	Left string = "Left"
 	Right string = "Right"
 	OpenCloseFolder string = "OpenCloseFolder"
+	OpenCloseInfoView string = "OpenCloseInfoView"
 )
 
 var multipleKeysBuffer bytes.Buffer
@@ -125,6 +126,9 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[OpenCloseFolder] {
 		keyboard.addKey("<space>", OpenCloseFolder)
+	}
+	if !keyboard.UsedFunctions[OpenCloseInfoView] {
+		keyboard.addKey("i", OpenCloseInfoView)
 	}
 }
 
@@ -237,6 +241,8 @@ func keybindings() error {
 		keyboard.configureKey(removeTrackCommand, RemoveTrack, view)
 		keyboard.configureKey(removeAllTracksCommand, RemoveAllTracks, view)
 	}
+	keyboard.configureKey(quit, Quit, VIEW_ARTIST_INFO)
+	keyboard.configureKey(quit, Quit, VIEW_TOP_TRACKS_INFO)
 
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
 	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)
@@ -248,6 +254,9 @@ func keybindings() error {
 	keyboard.configureKey(nextView, Right, VIEW_PLAYLISTS)
 	keyboard.configureKey(mainNextViewRight, Right, VIEW_TRACKS)
 	keyboard.configureKey(openCloseFolderCommand, OpenCloseFolder, VIEW_PLAYLISTS)
+	keyboard.configureKey(openInfoViewCommand, OpenCloseInfoView, VIEW_TRACKS)
+	keyboard.configureKey(closeInfoViewCommand, OpenCloseInfoView, VIEW_ARTIST_INFO)
+	keyboard.configureKey(closeInfoViewCommand, OpenCloseInfoView, VIEW_TOP_TRACKS_INFO)
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
 
 	// numbers
@@ -364,6 +373,21 @@ func openCloseFolderCommand(g *gocui.Gui, v *gocui.View) error {
 			gui.updatePlaylistsView()
 		}
 	}
+	return nil
+}
+
+func openInfoViewCommand(g *gocui.Gui, v *gocui.View) error {
+	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
+		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
+			track := playlist.Track(trackIndex)
+			gui.ShowInfoView(track)
+		}
+	}
+	return nil
+}
+
+func closeInfoViewCommand(g *gocui.Gui, v *gocui.View) error {
+	gui.CloseInfoView()
 	return nil
 }
 

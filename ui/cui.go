@@ -26,24 +26,32 @@ const (
 	VIEW_TRACKS    = "tracks"
 	VIEW_QUEUE     = "queue"
 	VIEW_STATUS    = "status"
+
+	VIEW_ARTIST_INFO     = "artistInfo"
+	VIEW_TOP_TRACKS_INFO = "topTracksInfo"
 )
 
 type ConsoleUserInterface struct{}
 
 type Gui struct {
-	g              *gocui.Gui
-	playlistsView  *gocui.View
-	tracksView     *gocui.View
-	statusView     *gocui.View
-	queueView      *gocui.View
+	g                 *gocui.Gui
+	playlistsView     *gocui.View
+	tracksView        *gocui.View
+	statusView        *gocui.View
+	queueView         *gocui.View
+	infoArtistView    *gocui.View
+	infoTopTracksView *gocui.View
+
 	currentMessage string
 	initialised    bool
 	PlayingTrack   *sconsify.Track
+	showInfo       bool
+	infoTrack      *sconsify.Track
 }
 
 func InitialiseConsoleUserInterface(ev *sconsify.Events, loadState bool) sconsify.UserInterface {
 	events = ev
-	gui = &Gui{}
+	gui = &Gui{showInfo: false}
 	consoleUserInterface = &ConsoleUserInterface{}
 	queue = InitQueue()
 	player = &RegularPlayer{}
@@ -280,12 +288,47 @@ func layout(g *gocui.Gui) error {
 		}
 		gui.statusView = v
 	}
+	if gui.showInfo {
+		if subView, err := g.SetView(VIEW_ARTIST_INFO, 10, 1, 10+20, 1+2); err != nil {
+			fmt.Fprintf(subView, "%v\n", gui.infoTrack.Artist)
+			gui.infoArtistView = subView
+		}
+		if subView, err := g.SetView(VIEW_TOP_TRACKS_INFO, 10, 1+2, 10+20, 1+2+10); err != nil {
+			fmt.Fprintf(subView, "Music 1\n")
+			fmt.Fprintf(subView, "Music 2\n")
+			gui.infoTopTracksView = subView
+		}
+		if err := g.SetCurrentView(VIEW_TOP_TRACKS_INFO); err != nil {
+			return err
+		}
+
+		gui.tracksView.Highlight = false
+		gui.infoTopTracksView.Highlight = true
+	} else if gui.infoArtistView != nil {
+		g.DeleteView(VIEW_ARTIST_INFO)
+		g.DeleteView(VIEW_TOP_TRACKS_INFO)
+		gui.infoArtistView = nil
+		gui.infoTopTracksView = nil
+		if err := g.SetCurrentView(VIEW_TRACKS); err != nil {
+			return err
+		}
+		gui.tracksView.Highlight = true
+	}
 
 	if !gui.initialised && loadStateWheInit {
 		loadInitialState()
 	}
 	gui.initialised = true
 	return nil
+}
+
+func (gui *Gui) ShowInfoView(track *sconsify.Track) {
+	gui.infoTrack = track
+	gui.showInfo = true
+}
+
+func (gui *Gui) CloseInfoView() {
+	gui.showInfo = false
 }
 
 func loadInitialState() {
