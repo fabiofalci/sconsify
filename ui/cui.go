@@ -290,7 +290,7 @@ func layout(g *gocui.Gui) error {
 	}
 	if gui.showInfo {
 		if subView, err := g.SetView(VIEW_ARTIST_INFO, 10, 1, 10+20, 1+2); err != nil {
-			fmt.Fprintf(subView, "%v\n", gui.infoTrack.Artist)
+			fmt.Fprintf(subView, "%v\n", gui.infoTrack.Artist.Name)
 			gui.infoArtistView = subView
 		}
 		if subView, err := g.SetView(VIEW_TOP_TRACKS_INFO, 10, 1+2, 10+20, 1+2+10); err != nil {

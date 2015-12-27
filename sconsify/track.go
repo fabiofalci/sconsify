@@ -8,7 +8,7 @@ import (
 
 type Track struct {
 	Uri        string
-	Artist     string
+	Artist     *Artist
 	Name       string
 	Duration   string
 	fromWebApi bool
@@ -21,7 +21,7 @@ func InitPartialTrack(uri string) *Track {
 	}
 }
 
-func InitTrack(uri string, artist string, name string, duration string) *Track {
+func InitTrack(uri string, artist *Artist, name string, duration string) *Track {
 	return &Track{
 		Uri:        uri,
 		Artist:     artist,
@@ -31,7 +31,7 @@ func InitTrack(uri string, artist string, name string, duration string) *Track {
 	}
 }
 
-func InitWebApiTrack(uri string, artist string, name string, duration string) *Track {
+func InitWebApiTrack(uri string, artist *Artist, name string, duration string) *Track {
 	return &Track{
 		Uri:        uri,
 		Artist:     artist,
@@ -43,20 +43,21 @@ func InitWebApiTrack(uri string, artist string, name string, duration string) *T
 }
 
 func ToSconsifyTrack(track *sp.Track) *Track {
-	artist := track.Artist(0)
-	return InitTrack(track.Link().String(), artist.Name(), track.Name(), track.Duration().String())
+	spArtist := track.Artist(0)
+	artist := InitArtist(spArtist.Link().String(), spArtist.Link().String(), spArtist.Name())
+	return InitTrack(track.Link().String(), artist, track.Name(), track.Duration().String())
 }
 
 func (track *Track) GetFullTitle() string {
-	return fmt.Sprintf("%v - %v [%v]", track.Artist, track.Name, track.Duration)
+	return fmt.Sprintf("%v - %v [%v]", track.Artist.Name, track.Name, track.Duration)
 }
 
 func (track *Track) GetTitle() string {
-	return fmt.Sprintf("%v - %v", track.Artist, track.Name)
+	return fmt.Sprintf("%v - %v", track.Artist.Name, track.Name)
 }
 
 func (track *Track) IsPartial() bool {
-	return track.Artist == "" && track.Name == "" && track.Duration == ""
+	return track.Artist == nil && track.Name == "" && track.Duration == ""
 }
 
 func (track *Track) IsFromWebApi() bool {
