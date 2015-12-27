@@ -4,6 +4,7 @@ import (
 	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
 	"time"
+	webspotify "github.com/zmb3/spotify"
 )
 
 func (spotify *Spotify) shutdownSpotify() {
@@ -106,4 +107,16 @@ func (spotify *Spotify) pauseCurrentTrack() {
 
 func (spotify *Spotify) isPausedOrPlaying() bool {
 	return spotify.currentTrack != nil
+}
+
+func (spotify *Spotify) artistTopTrack(artist *sconsify.Artist) {
+	if fullTracks, err := spotify.client.GetArtistsTopTracks(webspotify.ID(artist.Id), "GB"); err == nil {
+		tracks := make([]*sconsify.Track, len(fullTracks))
+		for i, track := range fullTracks {
+			tracks[i] = sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String())
+		}
+
+		topTracksPlaylist := sconsify.InitPlaylist(artist.Id, artist.Name, tracks)
+		spotify.events.ArtistTopTracks(topTracksPlaylist)
+	}
 }

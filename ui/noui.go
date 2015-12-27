@@ -94,6 +94,9 @@ func (noui *NoUi) listenForTermination() {
 	}
 }
 
+func (noui *NoUi) ArtistTopTracks(playlist *sconsify.Playlist) {
+}
+
 func (noui *NoUi) Shutdown() {
 	noui.events.ShutdownEngine()
 }

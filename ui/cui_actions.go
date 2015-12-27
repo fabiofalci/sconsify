@@ -380,6 +380,7 @@ func openInfoViewCommand(g *gocui.Gui, v *gocui.View) error {
 	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
 		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
 			track := playlist.Track(trackIndex)
+			events.GetArtistTopTracks(track.Artist)
 			gui.ShowInfoView(track)
 		}
 	}

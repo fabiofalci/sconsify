@@ -104,6 +104,16 @@ func (cui *ConsoleUserInterface) NewPlaylists(newPlaylist sconsify.Playlists) er
 	return nil
 }
 
+func (cui *ConsoleUserInterface) ArtistTopTracks(playlist *sconsify.Playlist) {
+	gui.infoTopTracksView.Clear()
+
+	fmt.Fprintf(gui.infoTopTracksView, "Top Tracks\n")
+	for i := 0; i < playlist.Tracks(); i++ {
+		track := playlist.Track(i)
+		fmt.Fprintf(gui.infoTopTracksView, "%v. %v\n", (i + 1), track.Name)
+	}
+}
+
 func (gui *Gui) startGui() {
 	gui.g = gocui.NewGui()
 	if err := gui.g.Init(); err != nil {
@@ -289,13 +299,11 @@ func layout(g *gocui.Gui) error {
 		gui.statusView = v
 	}
 	if gui.showInfo {
-		if subView, err := g.SetView(VIEW_ARTIST_INFO, 10, 1, 10+20, 1+2); err != nil {
+		if subView, err := g.SetView(VIEW_ARTIST_INFO, 10, 1, 10+40, 1+2); err != nil {
 			fmt.Fprintf(subView, "%v\n", gui.infoTrack.Artist.Name)
 			gui.infoArtistView = subView
 		}
-		if subView, err := g.SetView(VIEW_TOP_TRACKS_INFO, 10, 1+2, 10+20, 1+2+10); err != nil {
-			fmt.Fprintf(subView, "Music 1\n")
-			fmt.Fprintf(subView, "Music 2\n")
+		if subView, err := g.SetView(VIEW_TOP_TRACKS_INFO, 10, 1+2, 10+40, 1+2+12); err != nil {
 			gui.infoTopTracksView = subView
 		}
 		if err := g.SetCurrentView(VIEW_TOP_TRACKS_INFO); err != nil {

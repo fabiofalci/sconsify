@@ -9,6 +9,9 @@ type Events struct {
 	search chan string
 	replay chan bool
 
+	getArtistTopTracks chan *Artist
+	artistTopTracks    chan *Playlist
+
 	nextPlay          chan bool
 	playTokenLost     chan bool
 	playlists         chan Playlists
@@ -26,6 +29,9 @@ func InitialiseEvents() *Events {
 		pause:  make(chan bool),
 		search: make(chan string),
 		replay: make(chan bool),
+
+		getArtistTopTracks: make(chan *Artist),
+		artistTopTracks:    make(chan *Playlist),
 
 		nextPlay:          make(chan bool),
 		playTokenLost:     make(chan bool),
@@ -135,4 +141,20 @@ func (events *Events) PlayTokenLost() {
 
 func (events *Events) PlayTokenLostUpdates() <-chan bool {
 	return events.playTokenLost
+}
+
+func (events *Events) GetArtistTopTracks(artist *Artist) {
+	events.getArtistTopTracks <- artist
+}
+
+func (events *Events) GetArtistTopTracksUpdates() <-chan *Artist {
+	return events.getArtistTopTracks
+}
+
+func (events *Events) ArtistTopTracks(playlist *Playlist) {
+	events.artistTopTracks <- playlist
+}
+
+func (events *Events) ArtistTopTracksUpdates() <-chan *Playlist {
+	return events.artistTopTracks
 }

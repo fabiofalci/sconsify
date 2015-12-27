@@ -162,6 +162,8 @@ func (spotify *Spotify) waitForEvents() {
 			spotify.shutdownSpotify()
 		case query := <-spotify.events.SearchUpdates():
 			spotify.search(query)
+		case artist := <-spotify.events.GetArtistTopTracksUpdates():
+			spotify.artistTopTrack(artist)
 		}
 	}
 }
