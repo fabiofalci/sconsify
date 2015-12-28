@@ -49,9 +49,9 @@ func (playlists *Playlists) Get(name string) *Playlist {
 	return nil
 }
 
-func (playlists *Playlists) GetById(id string) *Playlist {
+func (playlists *Playlists) GetByURI(URI string) *Playlist {
 	for _, playlist := range playlists.playlists {
-		if playlist.Id() == id {
+		if playlist.URI == URI {
 			return playlist
 		}
 	}
@@ -64,7 +64,7 @@ func (playlists *Playlists) Playlists() int {
 
 func (playlists *Playlists) AddPlaylist(playlist *Playlist) {
 	playlists.checkDuplicatedNames(playlist, playlist.Name(), 1)
-	playlists.playlists[playlist.Id()] = playlist
+	playlists.playlists[playlist.URI] = playlist
 	playlists.buildPlaylistForNewMode()
 }
 
@@ -87,7 +87,7 @@ func (playlists *Playlists) checkDuplicatedNames(newPlaylist *Playlist, original
 func (playlists *Playlists) Merge(newPlaylists *Playlists) {
 	for key, newPlaylist := range newPlaylists.playlists {
 		if newPlaylist.IsSearch() {
-			searchPlaylist := playlists.GetById("Search")
+			searchPlaylist := playlists.GetByURI("Search")
 			if searchPlaylist == nil {
 				searchPlaylist = InitFolder("Search", "*Search", make([]*Playlist, 0))
 				playlists.AddPlaylist(searchPlaylist)

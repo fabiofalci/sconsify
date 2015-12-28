@@ -1,16 +1,19 @@
 package sconsify
 
 type Artist struct {
-	Id         string
-	Uri        string
+	ID     int
+	URI    string
+	SID    string
+
 	Name       string
+	Albums     []*Album
 }
 
-func InitArtist(id string, uri string, name string) *Artist {
+func InitArtist(SID string, URI string, name string) *Artist {
 	return &Artist{
-		Id:   id,
-		Uri:  uri,
+		URI:  URI,
 		Name: name,
+		SID: SID,
 	}
 }
 

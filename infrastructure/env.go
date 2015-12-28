@@ -46,6 +46,13 @@ func GetKeyFunctionsFileLocation() string {
 	return ""
 }
 
+func GetDatabaseFileLocation() string {
+	if basePath := getConfLocation(); basePath != "" {
+		return basePath + "/database.db"
+	}
+	return ""
+}
+
 func SaveFile(fileLocation string, content []byte) {
 	file, err := os.OpenFile(fileLocation, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err == nil {
