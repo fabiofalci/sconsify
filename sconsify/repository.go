@@ -6,13 +6,26 @@ import (
 	"github.com/fabiofalci/sconsify/infrastructure"
 )
 
-func InitRepository() {
-	db, _ := gorm.Open("sqlite3", infrastructure.GetDatabaseFileLocation())
-	db.DB()
-	db.DB().Ping()
-	db.DB().SetMaxIdleConns(1)
-	db.DB().SetMaxOpenConns(2)
+var DB gorm.DB
 
-	db.AutoMigrate(&Album{}, &Artist{}, &Playlist{}, &Track{})
+var Create chan interface{}
+
+func InitRepository() {
+	DB, _ = gorm.Open("sqlite3", infrastructure.GetDatabaseFileLocation())
+	DB.DB().SetMaxIdleConns(1)
+	DB.DB().SetMaxOpenConns(2)
+
+	DB.DropTable(&Album{}, &Artist{}, &Playlist{}, &Track{})
+	DB.CreateTable(&Album{}, &Artist{}, &Playlist{}, &Track{})
+
+	Create = make(chan interface{})
+	go func() {
+		for {
+			select {
+			case toCreate := <-Create:
+				DB.Create(toCreate)
+			}
+		}
+	}()
 }
 

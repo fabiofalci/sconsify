@@ -137,6 +137,7 @@ func (spotify *Spotify) finishInitialisation(pa *portAudio) error {
 	go pa.player()
 	defer portaudio.Terminate()
 
+	sconsify.InitRepository()
 	if err := spotify.initPlaylist(); err != nil {
 		return err
 	}

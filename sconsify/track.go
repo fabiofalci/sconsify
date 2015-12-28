@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	sp "github.com/op/go-libspotify/spotify"
+	"strings"
 )
 
 type Track struct {
@@ -47,7 +48,8 @@ func InitWebApiTrack(URI string, artist *Artist, name string, duration string) *
 
 func ToSconsifyTrack(track *sp.Track) *Track {
 	spArtist := track.Artist(0)
-	artist := InitArtist("", spArtist.Link().String(), spArtist.Name())
+	uri := spArtist.Link().String()
+	artist := InitArtist(uri[strings.LastIndex(uri, ":")+1:len(uri)], uri, spArtist.Name())
 	return InitTrack(track.Link().String(), artist, track.Name(), track.Duration().String())
 }
 
