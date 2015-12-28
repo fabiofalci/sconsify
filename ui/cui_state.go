@@ -43,14 +43,14 @@ func persistState() {
 		if index != -1 {
 			selectedTrack := selectedPlaylist.Track(index)
 			if selectedTrack != nil {
-				state.SelectedTrack = selectedTrack.Uri
+				state.SelectedTrack = selectedTrack.URI
 			}
 		}
 	}
 
 	if playingTrack := playlists.GetPlayingTrack(); playingTrack != nil {
-		if playingPlaylist := playlists.GetPlayingPlaylist().Id(); playingPlaylist != "premade" {
-			state.PlayingTrackUri = playingTrack.Uri
+		if playingPlaylist := playlists.GetPlayingPlaylist().URI; playingPlaylist != "premade" {
+			state.PlayingTrackUri = playingTrack.URI
 			state.PlayingTrackFullTitle = playingTrack.GetFullTitle()
 			state.PlayingPlaylist = playingPlaylist
 		}
@@ -59,7 +59,7 @@ func persistState() {
 	for _, playlistName := range playlists.Names() {
 		playlist := playlists.Get(playlistName)
 		if playlist.IsFolder() && !playlist.IsFolderOpen() && !playlist.IsOnDemand() {
-			state.ClosedFolders	= append(state.ClosedFolders, playlist.Id())
+			state.ClosedFolders	= append(state.ClosedFolders, playlist.URI)
 		}
 	}
 

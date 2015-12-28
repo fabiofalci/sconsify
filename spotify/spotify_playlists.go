@@ -57,7 +57,7 @@ func (spotify *Spotify) initPlaylist() error {
 					tracks := make([]*sconsify.Track, len(album.Tracks.Tracks))
 					for i, track := range album.Tracks.Tracks {
 						webArtist := track.Artists[0]
-						artist := sconsify.InitArtist(string(webArtist.ID), string(webArtist.URI), webArtist.Name)
+						artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
 						tracks[i] = sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String())
 					}
 					playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
@@ -71,7 +71,7 @@ func (spotify *Spotify) initPlaylist() error {
 			if err == nil {
 				for _, track := range savedTrackPage.Tracks {
 					webArtist := track.Artists[0]
-					artist := sconsify.InitArtist(string(webArtist.ID), string(webArtist.URI), webArtist.Name)
+					artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
 					playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String()))
 				}
 			}
@@ -86,7 +86,7 @@ func (spotify *Spotify) initPlaylist() error {
 						tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
 						for i, track := range fullPlaylist.Tracks.Tracks {
 							webArtist := track.Track.Artists[0]
-							artist := sconsify.InitArtist(string(webArtist.ID), string(webArtist.URI), webArtist.Name)
+							artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
 							tracks[i] = sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
 						}
 						playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))

@@ -5,8 +5,9 @@ import (
 )
 
 type Playlist struct {
+	URI    string
+
 	tracks []*Track
-	id     string
 	name   string
 	search bool
 
@@ -19,20 +20,20 @@ type Playlist struct {
 
 type PlaylistByName []Playlist
 
-func InitPlaylist(id string, name string, tracks []*Track) *Playlist {
-	return &Playlist{id: id, name: name, tracks: tracks}
+func InitPlaylist(URI string, name string, tracks []*Track) *Playlist {
+	return &Playlist{URI: URI, name: name, tracks: tracks}
 }
 
-func InitSubPlaylist(id string, name string, tracks []*Track) *Playlist {
-	return &Playlist{id: id, name: " " + name, tracks: tracks, subPlaylist: true}
+func InitSubPlaylist(URI string, name string, tracks []*Track) *Playlist {
+	return &Playlist{URI: URI, name: " " + name, tracks: tracks, subPlaylist: true}
 }
 
-func InitSearchPlaylist(id string, name string, tracks []*Track) *Playlist {
-	return &Playlist{id: id, name: name, tracks: tracks, search: true}
+func InitSearchPlaylist(URI string, name string, tracks []*Track) *Playlist {
+	return &Playlist{URI: URI, name: name, tracks: tracks, search: true}
 }
 
-func InitFolder(id string, name string, playlists []*Playlist) *Playlist {
-	folder := &Playlist{id: id, name: name, playlists: playlists, search: false, open: true}
+func InitFolder(URI string, name string, playlists []*Playlist) *Playlist {
+	folder := &Playlist{URI: URI, name: name, playlists: playlists, search: false, open: true}
 
 	folder.tracks = make([]*Track, 0)
 	for _, subPlaylist := range playlists {
@@ -44,12 +45,12 @@ func InitFolder(id string, name string, playlists []*Playlist) *Playlist {
 	return folder
 }
 
-func InitOnDemandPlaylist(id string, name string, tracks []*Track, loadCallback func(playlist *Playlist)) *Playlist {
-	return &Playlist{id: id, name: name, tracks: tracks, loadCallback: loadCallback}
+func InitOnDemandPlaylist(URI string, name string, tracks []*Track, loadCallback func(playlist *Playlist)) *Playlist {
+	return &Playlist{URI: URI, name: name, tracks: tracks, loadCallback: loadCallback}
 }
 
-func InitOnDemandFolder(id string, name string, playlists []*Playlist, loadCallback func(playlist *Playlist)) *Playlist {
-	playlist := &Playlist{id: id, name: name, playlists: playlists, loadCallback: loadCallback, open: true, search: false}
+func InitOnDemandFolder(URI string, name string, playlists []*Playlist, loadCallback func(playlist *Playlist)) *Playlist {
+	playlist := &Playlist{URI: URI, name: name, playlists: playlists, loadCallback: loadCallback, open: true, search: false}
 	playlist.InvertOpenClose()
 	return playlist
 }
@@ -101,9 +102,9 @@ func (playlist *Playlist) RemovePlaylist(playlistName string) bool {
 	return false
 }
 
-func (playlist *Playlist) IndexByUri(uri string) int {
+func (playlist *Playlist) IndexByUri(URI string) int {
 	for i, track := range playlist.tracks {
-		if track.Uri == uri {
+		if track.URI == URI {
 			return i
 		}
 	}
@@ -150,10 +151,6 @@ func (playlist *Playlist) removeClosedFolderName() string {
 		return playlist.name[1:len(playlist.name) - 1]
 	}
 	return playlist.name
-}
-
-func (playlist *Playlist) Id() string {
-	return playlist.id
 }
 
 func (playlist *Playlist) IsSearch() bool {

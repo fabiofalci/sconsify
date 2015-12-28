@@ -14,7 +14,7 @@ func (spotify *Spotify) shutdownSpotify() {
 }
 
 func (spotify *Spotify) play(trackUri *sconsify.Track) {
-	link, err := spotify.session.ParseLink(trackUri.Uri)
+	link, err := spotify.session.ParseLink(trackUri.URI)
 	if err != nil {
 		return
 	}
@@ -110,13 +110,13 @@ func (spotify *Spotify) isPausedOrPlaying() bool {
 }
 
 func (spotify *Spotify) artistTopTrack(artist *sconsify.Artist) {
-	if fullTracks, err := spotify.client.GetArtistsTopTracks(webspotify.ID(artist.Id), "GB"); err == nil {
+	if fullTracks, err := spotify.client.GetArtistsTopTracks(webspotify.ID(artist.GetSpotifyID()), "GB"); err == nil {
 		tracks := make([]*sconsify.Track, len(fullTracks))
 		for i, track := range fullTracks {
 			tracks[i] = sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String())
 		}
 
-		topTracksPlaylist := sconsify.InitPlaylist(artist.Id, artist.Name, tracks)
+		topTracksPlaylist := sconsify.InitPlaylist(artist.URI, artist.Name, tracks)
 		spotify.events.ArtistTopTracks(topTracksPlaylist)
 	}
 }

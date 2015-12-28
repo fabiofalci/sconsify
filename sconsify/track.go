@@ -7,23 +7,25 @@ import (
 )
 
 type Track struct {
-	Uri        string
+	URI    string
+
 	Artist     *Artist
 	Name       string
 	Duration   string
+	Album      *Album
 	fromWebApi bool
 	loadRetry  int
 }
 
-func InitPartialTrack(uri string) *Track {
+func InitPartialTrack(URI string) *Track {
 	return &Track{
-		Uri: uri,
+		URI: URI,
 	}
 }
 
-func InitTrack(uri string, artist *Artist, name string, duration string) *Track {
+func InitTrack(URI string, artist *Artist, name string, duration string) *Track {
 	return &Track{
-		Uri:        uri,
+		URI:        URI,
 		Artist:     artist,
 		Name:       name,
 		Duration:   duration,
@@ -31,9 +33,9 @@ func InitTrack(uri string, artist *Artist, name string, duration string) *Track 
 	}
 }
 
-func InitWebApiTrack(uri string, artist *Artist, name string, duration string) *Track {
+func InitWebApiTrack(URI string, artist *Artist, name string, duration string) *Track {
 	return &Track{
-		Uri:        uri,
+		URI:        URI,
 		Artist:     artist,
 		Name:       name,
 		Duration:   duration,
@@ -44,9 +46,10 @@ func InitWebApiTrack(uri string, artist *Artist, name string, duration string) *
 
 func ToSconsifyTrack(track *sp.Track) *Track {
 	spArtist := track.Artist(0)
-	artist := InitArtist(spArtist.Link().String(), spArtist.Link().String(), spArtist.Name())
+	artist := InitArtist(spArtist.Link().String(), spArtist.Name())
 	return InitTrack(track.Link().String(), artist, track.Name(), track.Duration().String())
 }
+
 
 func (track *Track) GetFullTitle() string {
 	return fmt.Sprintf("%v - %v [%v]", track.Artist.Name, track.Name, track.Duration)

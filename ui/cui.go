@@ -406,8 +406,8 @@ func loadTrackFromState(state *State) {
 func loadClosedFoldersFromState(state *State) {
 	if state.ClosedFolders != nil && len(state.ClosedFolders) > 0 {
 		updatePlaylist := false
-		for _, id := range state.ClosedFolders {
-			if playlist := playlists.GetById(id); playlist != nil {
+		for _, URI := range state.ClosedFolders {
+			if playlist := playlists.GetByURI(URI); playlist != nil {
 				playlist.InvertOpenClose()
 				updatePlaylist = true
 			}

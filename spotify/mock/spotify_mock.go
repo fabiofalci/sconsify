@@ -5,9 +5,9 @@ import (
 )
 
 var (
-	bobMarley = sconsify.InitArtist("Bob Marley", "Bob Marley", "Bob Marley")
-	theRamones = sconsify.InitArtist("The Ramones", "The Ramones", "The Ramones")
-	elvisPresley = sconsify.InitArtist("Elvis Presley", "Elvis Presley", "Elvis Presley")
+	bobMarley = sconsify.InitArtist("Bob Marley:1", "Bob Marley")
+	theRamones = sconsify.InitArtist("The Ramones:2", "The Ramones")
+	elvisPresley = sconsify.InitArtist("Elvis Presley:3", "Elvis Presley")
 )
 
 func Initialise(events *sconsify.Events) {

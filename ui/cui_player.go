@@ -37,8 +37,8 @@ func (p *RegularPlayer) Play() {
 }
 
 func (p *PersistStatePlayer) Pause() {
-	if playlist := playlists.GetById(p.previousPlayingPlaylist); playlist != nil {
-		if currentIndexTrack := playlist.IndexByUri(p.previousPlayingTrack.Uri); currentIndexTrack != -1 {
+	if playlist := playlists.GetByURI(p.previousPlayingPlaylist); playlist != nil {
+		if currentIndexTrack := playlist.IndexByUri(p.previousPlayingTrack.URI); currentIndexTrack != -1 {
 			playlists.SetCurrents(playlist.Name(), currentIndexTrack)
 			events.Play(p.previousPlayingTrack)
 		}
