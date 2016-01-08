@@ -308,7 +308,7 @@ func keyPressed(key rune, g *gocui.Gui, v *gocui.View) error {
 
 	if len(keyCombination) >= 2 {
 		multipleKeysBuffer.Reset()
-		return keyPressed(rune(keyCombination[1]), g, v)
+		//return keyPressed(rune(keyCombination[1]), g, v)
 	}
 	return nil
 }
