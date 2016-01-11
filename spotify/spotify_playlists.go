@@ -24,7 +24,9 @@ func (spotify *Spotify) initPlaylist() error {
 			folder, _ = allPlaylists.Folder(i)
 			folderPlaylists = make([]*sconsify.Playlist, 0)
 		} else if allPlaylists.PlaylistType(i) == sp.PlaylistTypeEndFolder {
-			playlists.AddPlaylist(sconsify.InitFolder(strconv.Itoa(int(folder.Id())), folder.Name(), folderPlaylists))
+			if folder != nil {
+				playlists.AddPlaylist(sconsify.InitFolder(strconv.Itoa(int(folder.Id())), folder.Name(), folderPlaylists))
+			}
 			folderPlaylists = nil
 			folder = nil
 		}
