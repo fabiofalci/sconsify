@@ -1,0 +1,13 @@
+---
+layout: post
+title:  "Release 0.2.1"
+date:   2016-01-17 00:51:00
+categories: release
+---
+Sconsify 0.2.1:
+
+* Fix error when arrow navigation after a search
+
+[Release page][release-page].
+
+[release-page]:      https://github.com/fabiofalci/sconsify/releases/tag/v0.2.1
