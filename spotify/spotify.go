@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"code.google.com/p/portaudio-go/portaudio"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/infrastructure"
 	sp "github.com/op/go-libspotify/spotify"
+	"github.com/gordonklaus/portaudio"
 )
 
 type Spotify struct {

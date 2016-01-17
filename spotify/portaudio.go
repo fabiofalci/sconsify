@@ -2,8 +2,8 @@
 package spotify
 
 import (
-	"code.google.com/p/portaudio-go/portaudio"
 	sp "github.com/op/go-libspotify/spotify"
+	"github.com/gordonklaus/portaudio"
 )
 
 type audio struct {
