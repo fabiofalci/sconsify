@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -57,7 +56,7 @@ const (
 	OpenCloseInfoView string = "OpenCloseInfoView"
 )
 
-var multipleKeysBuffer bytes.Buffer
+var multipleKeysBuffer []rune
 var multipleKeysNumber int
 var keyboard *Keyboard
 
@@ -190,6 +189,7 @@ func keybindings() error {
 		Keys: make([]*KeyMapping, 0),
 		SequentialKeys: make(map[string]gocui.KeybindingHandler)}
 
+	multipleKeysBuffer = make([]rune, 0, 0)
 	keyboard.loadKeyFunctions()
 	keyboard.defaultValues()
 
@@ -296,19 +296,25 @@ func newModifiedKeyMapping(mod gocui.Modifier, key interface{}, view string, h g
 }
 
 func keyPressed(key rune, g *gocui.Gui, v *gocui.View) error {
-	multipleKeysBuffer.WriteRune(key)
-	keyCombination := multipleKeysBuffer.String()
+	multipleKeysBuffer = append(multipleKeysBuffer, key)
+	var keyCombination string
+	if len(multipleKeysBuffer) == 1 {
+		keyCombination = string(multipleKeysBuffer[0])
+	} else {
+		keyCombination = string(multipleKeysBuffer[0]) + string(multipleKeysBuffer[1])
+	}
 
 	if handler := keyboard.SequentialKeys[v.Name() + " " + keyCombination]; handler != nil {
-		multipleKeysBuffer.Reset()
+		multipleKeysBuffer = make([]rune, 0, 0)
 		err := handler(g, v)
 		multipleKeysNumber = 0
 		return err
 	}
 
-	if len(keyCombination) >= 2 {
-		multipleKeysBuffer.Reset()
-		return keyPressed(rune(keyCombination[1]), g, v)
+	if len(multipleKeysBuffer) >= 2 {
+		key1 := multipleKeysBuffer[1]
+		multipleKeysBuffer = make([]rune, 0, 0)
+		return keyPressed(rune(key1), g, v)
 	}
 	return nil
 }
