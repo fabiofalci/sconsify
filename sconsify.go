@@ -21,6 +21,8 @@ import (
 var version string
 var commit string
 var buildDate string
+var spotifyClientId string
+var authRedirectUrl string
 
 func init() {
 	rand.Seed(time.Now().Unix())
@@ -59,7 +61,7 @@ func main() {
 
 	var client *webspotify.Client
 	if *providedWebApi {
-		client = webapi.Auth()
+		client = webapi.Auth(spotifyClientId, authRedirectUrl)
 	}
 
 	go spotify.Initialise(client, username, pass, events, providedPlaylists, providedPreferredBitrate)

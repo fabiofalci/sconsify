@@ -12,15 +12,17 @@ import (
 )
 
 
-func Auth() *spotify.Client {
-	auth := spotify.NewAuthenticator("https://fabiofalci.github.io/sconsify/auth/",
-		spotify.ScopeUserLibraryRead, spotify.ScopeUserFollowRead, spotify.ScopePlaylistReadCollaborative, spotify.ScopePlaylistReadPrivate)
-
-	clientId := os.Getenv("SPOTIFY_CLIENT_ID")
+func Auth(clientId string, authRedirectUrl string) *spotify.Client {
 	if clientId == "" {
 		fmt.Print("Spotify Client ID not set")
 		return nil
 	}
+
+	auth := spotify.NewAuthenticator(authRedirectUrl,
+		spotify.ScopeUserLibraryRead,
+		spotify.ScopeUserFollowRead,
+		spotify.ScopePlaylistReadCollaborative,
+		spotify.ScopePlaylistReadPrivate)
 
 	auth.SetAuthInfo(clientId, "")
 
