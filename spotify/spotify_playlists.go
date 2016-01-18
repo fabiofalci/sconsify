@@ -53,67 +53,86 @@ func (spotify *Spotify) initPlaylist() error {
 
 	if spotify.client != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Albums", "*Albums", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			savedAlbumPage, err := spotify.client.CurrentUsersAlbumsOpt(createWebSpotifyOptions(50, playlist.Playlists()));
-			if err == nil {
-				for _, album := range savedAlbumPage.Albums {
-					tracks := make([]*sconsify.Track, len(album.Tracks.Tracks))
-					for i, track := range album.Tracks.Tracks {
-						webArtist := track.Artists[0]
-						artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
-						tracks[i] = sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String())
-					}
-					playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
-				}
-				playlist.OpenFolder()
-			}
+			loadAlbums(spotify, playlist)
 		}))
 
 		playlists.AddPlaylist(sconsify.InitOnDemandPlaylist("Songs", "*Songs", make([]*sconsify.Track, 0), func(playlist *sconsify.Playlist) {
-			savedTrackPage, err := spotify.client.CurrentUsersTracksOpt(createWebSpotifyOptions(50, playlist.Tracks()));
-			if err == nil {
-				for _, track := range savedTrackPage.Tracks {
-					webArtist := track.Artists[0]
-					artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
-					playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String()))
-				}
-			}
+			loadSongs(spotify, playlist)
 		}))
 
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("New Releases", "*New Releases", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			_, simplePlaylistPage, err := spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())});
-			if err == nil {
-				for _, album := range simplePlaylistPage.Playlists {
-					fullPlaylist, err := spotify.client.GetPlaylist(album.Owner.ID, album.ID)
-					if err == nil {
-						tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
-						for i, track := range fullPlaylist.Tracks.Tracks {
-							webArtist := track.Track.Artists[0]
-							artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
-							tracks[i] = sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
-						}
-						playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
-					}
-					playlist.OpenFolder()
-				}
-			}
+			loadNewReleases(spotify, playlist)
 		}))
 
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Artists", "*Artists", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			fullArtistCursorPage, err := spotify.client.CurrentUsersFollowedArtists()
-			if err == nil {
-				for _, fullArtist := range fullArtistCursorPage.Artists {
-					tracks := make([]*sconsify.Track, 0)
-					playlist.AddPlaylist(sconsify.InitSubPlaylist(string(fullArtist.ID), fullArtist.Name, tracks))
-					playlist.OpenFolder()
-				}
-			}
+			loadArtists(spotify, playlist)
 		}))
-
-
 	}
 
 	spotify.events.NewPlaylist(playlists)
 	return nil
+}
+
+func loadAlbums(spotify *Spotify, playlist *sconsify.Playlist) {
+	savedAlbumPage, err := spotify.client.CurrentUsersAlbumsOpt(createWebSpotifyOptions(50, playlist.Playlists()));
+	if err != nil {
+		return
+	}
+
+	for _, album := range savedAlbumPage.Albums {
+		tracks := make([]*sconsify.Track, len(album.Tracks.Tracks))
+		for i, track := range album.Tracks.Tracks {
+			webArtist := track.Artists[0]
+			artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+			tracks[i] = sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String())
+		}
+		playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
+	}
+	playlist.OpenFolder()
+}
+
+func loadSongs(spotify *Spotify, playlist *sconsify.Playlist) {
+	savedTrackPage, err := spotify.client.CurrentUsersTracksOpt(createWebSpotifyOptions(50, playlist.Tracks()));
+	if err != nil {
+		return
+	}
+	for _, track := range savedTrackPage.Tracks {
+		webArtist := track.Artists[0]
+		artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+		playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String()))
+	}
+}
+func loadNewReleases(spotify *Spotify, playlist *sconsify.Playlist) {
+	_, simplePlaylistPage, err := spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())});
+	if err != nil {
+		return
+	}
+	for _, album := range simplePlaylistPage.Playlists {
+		fullPlaylist, err := spotify.client.GetPlaylist(album.Owner.ID, album.ID)
+		if err == nil {
+			tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
+			for i, track := range fullPlaylist.Tracks.Tracks {
+				webArtist := track.Track.Artists[0]
+				artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+				tracks[i] = sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
+			}
+			playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
+		}
+		playlist.OpenFolder()
+	}
+}
+
+func loadArtists(spotify *Spotify, playlist *sconsify.Playlist) {
+	fullArtistCursorPage, err := spotify.client.CurrentUsersFollowedArtists()
+	if err != nil {
+		return
+	}
+	for _, fullArtist := range fullArtistCursorPage.Artists {
+		tracks := make([]*sconsify.Track, 0)
+		playlist.AddPlaylist(sconsify.InitSubPlaylist(string(fullArtist.ID), fullArtist.Name, tracks))
+		playlist.OpenFolder()
+	}
+
 }
 
 func createWebSpotifyOptions(limit int, offset int) *webspotify.Options {
