@@ -28,7 +28,7 @@ func Auth(clientId string, authRedirectUrl string) *spotify.Client {
 
 	url := auth.AuthURL("")
 	url = strings.Replace(url, "response_type=code", "response_type=token", -1)
-	fmt.Printf("Go to url %v\n", url)
+	fmt.Printf("For web api authorization go to url:\n\n%v\n\n", url)
 
 	fmt.Print("And paste the access token here: ")
 	reader := bufio.NewReader(os.Stdin)
