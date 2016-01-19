@@ -39,6 +39,13 @@ func GetStateFileLocation() string {
 	return ""
 }
 
+func GetWebApiCacheFileLocation() string {
+	if basePath := getConfLocation(); basePath != "" {
+		return basePath + "/web-api-cache.json"
+	}
+	return ""
+}
+
 func GetKeyFunctionsFileLocation() string {
 	if basePath := getConfLocation(); basePath != "" {
 		return basePath + "/key-functions.json"

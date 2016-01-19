@@ -7,6 +7,9 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 	"strconv"
+	"github.com/fabiofalci/sconsify/infrastructure"
+	"encoding/json"
+	"io/ioutil"
 )
 
 func (spotify *Spotify) initPlaylist() error {
@@ -51,21 +54,32 @@ func (spotify *Spotify) initPlaylist() error {
 		}
 	}
 
-	if spotify.client != nil {
+	webApiCache := spotify.loadWebApiCache()
+	if spotify.client != nil || webApiCache.Albums != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Albums", "*Albums", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			spotify.loadAlbums(playlist)
+			spotify.loadAlbums(playlist, webApiCache)
+			spotify.persistWebApiCache(webApiCache)
 		}))
+	}
 
+	if spotify.client != nil || webApiCache.Songs != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandPlaylist("Songs", "*Songs", make([]*sconsify.Track, 0), func(playlist *sconsify.Playlist) {
-			spotify.loadSongs( playlist)
+			spotify.loadSongs(playlist, webApiCache)
+			spotify.persistWebApiCache(webApiCache)
 		}))
+	}
 
+	if spotify.client != nil || webApiCache.NewReleases != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("New Releases", "*New Releases", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			spotify.loadNewReleases(playlist)
+			spotify.loadNewReleases(playlist, webApiCache)
+			spotify.persistWebApiCache(webApiCache)
 		}))
+	}
 
+	if spotify.client != nil || webApiCache.Artists != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Artists", "*Artists", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			spotify.loadArtists(playlist)
+			spotify.loadArtists(playlist, webApiCache)
+			spotify.persistWebApiCache(webApiCache)
 		}))
 	}
 
@@ -73,13 +87,39 @@ func (spotify *Spotify) initPlaylist() error {
 	return nil
 }
 
-func (spotify *Spotify) loadAlbums(playlist *sconsify.Playlist) {
-	savedAlbumPage, err := spotify.client.CurrentUsersAlbumsOpt(createWebSpotifyOptions(50, playlist.Playlists()))
-	if err != nil {
+func (spotify *Spotify) loadWebApiCache() *WebApiCache {
+	if fileLocation := infrastructure.GetWebApiCacheFileLocation(); fileLocation != "" {
+		if b, err := ioutil.ReadFile(fileLocation); err == nil {
+			var webApiCache WebApiCache
+			if err := json.Unmarshal(b, &webApiCache); err == nil {
+				return &webApiCache
+			}
+		}
+	}
+	return &WebApiCache{}
+}
+
+func (spotify *Spotify) persistWebApiCache(webApiCache *WebApiCache) {
+	if b, err := json.Marshal(webApiCache); err == nil {
+		if fileLocation := infrastructure.GetWebApiCacheFileLocation(); fileLocation != "" {
+			infrastructure.SaveFile(fileLocation, b)
+		}
+	}
+}
+
+func (spotify *Spotify) loadAlbums(playlist *sconsify.Playlist, webApiCache *WebApiCache) {
+	var savedAlbumPage *webspotify.SavedAlbumPage
+	var err error
+	if spotify.client != nil {
+		if savedAlbumPage, err = spotify.client.CurrentUsersAlbumsOpt(createWebSpotifyOptions(50, playlist.Playlists())); err != nil {
+			return
+		}
+		webApiCache.Albums = savedAlbumPage.Albums
+	} else if webApiCache.Albums == nil {
 		return
 	}
 
-	for _, album := range savedAlbumPage.Albums {
+	for _, album := range webApiCache.Albums {
 		tracks := make([]*sconsify.Track, len(album.Tracks.Tracks))
 		for i, track := range album.Tracks.Tracks {
 			webArtist := track.Artists[0]
@@ -91,24 +131,38 @@ func (spotify *Spotify) loadAlbums(playlist *sconsify.Playlist) {
 	playlist.OpenFolder()
 }
 
-func (spotify *Spotify) loadSongs(playlist *sconsify.Playlist) {
-	savedTrackPage, err := spotify.client.CurrentUsersTracksOpt(createWebSpotifyOptions(50, playlist.Tracks()))
-	if err != nil {
+func (spotify *Spotify) loadSongs(playlist *sconsify.Playlist, webApiCache *WebApiCache) {
+	var savedTrackPage *webspotify.SavedTrackPage
+	var err error
+	if spotify.client != nil {
+		if savedTrackPage, err = spotify.client.CurrentUsersTracksOpt(createWebSpotifyOptions(50, playlist.Tracks())); err != nil {
+			return
+		}
+		webApiCache.Songs = savedTrackPage.Tracks
+	} else if webApiCache.Songs == nil {
 		return
 	}
-	for _, track := range savedTrackPage.Tracks {
+
+	for _, track := range webApiCache.Songs {
 		webArtist := track.Artists[0]
 		artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
 		playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String()))
 	}
 }
 
-func (spotify *Spotify) loadNewReleases(playlist *sconsify.Playlist) {
-	_, simplePlaylistPage, err := spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())})
-	if err != nil {
+func (spotify *Spotify) loadNewReleases(playlist *sconsify.Playlist, webApiCache *WebApiCache) {
+	var simplePlaylistPage *webspotify.SimplePlaylistPage
+	var err error
+	if spotify.client != nil {
+		if _, simplePlaylistPage, err = spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())}); err != nil {
+			return
+		}
+		webApiCache.NewReleases = simplePlaylistPage.Playlists
+	} else if webApiCache.NewReleases == nil {
 		return
 	}
-	for _, album := range simplePlaylistPage.Playlists {
+
+	for _, album := range webApiCache.NewReleases {
 		fullPlaylist, err := spotify.client.GetPlaylist(album.Owner.ID, album.ID)
 		if err == nil {
 			tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
@@ -123,12 +177,19 @@ func (spotify *Spotify) loadNewReleases(playlist *sconsify.Playlist) {
 	}
 }
 
-func (spotify *Spotify) loadArtists(playlist *sconsify.Playlist) {
-	fullArtistCursorPage, err := spotify.client.CurrentUsersFollowedArtists()
-	if err != nil {
+func (spotify *Spotify) loadArtists(playlist *sconsify.Playlist, webApiCache *WebApiCache) {
+	var fullArtistCursorPage *webspotify.FullArtistCursorPage
+	var err error
+	if spotify.client != nil {
+		if fullArtistCursorPage, err = spotify.client.CurrentUsersFollowedArtists(); err != nil {
+			return
+		}
+		webApiCache.Artists = fullArtistCursorPage.Artists
+	} else if webApiCache.Artists == nil {
 		return
 	}
-	for _, fullArtist := range fullArtistCursorPage.Artists {
+
+	for _, fullArtist := range webApiCache.Artists {
 		tracks := make([]*sconsify.Track, 0)
 		playlist.AddPlaylist(sconsify.InitSubPlaylist(string(fullArtist.ID), fullArtist.Name, tracks))
 		playlist.OpenFolder()
