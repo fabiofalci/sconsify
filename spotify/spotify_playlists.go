@@ -53,19 +53,19 @@ func (spotify *Spotify) initPlaylist() error {
 
 	if spotify.client != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Albums", "*Albums", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			loadAlbums(spotify, playlist)
+			spotify.loadAlbums(playlist)
 		}))
 
 		playlists.AddPlaylist(sconsify.InitOnDemandPlaylist("Songs", "*Songs", make([]*sconsify.Track, 0), func(playlist *sconsify.Playlist) {
-			loadSongs(spotify, playlist)
+			spotify.loadSongs( playlist)
 		}))
 
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("New Releases", "*New Releases", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			loadNewReleases(spotify, playlist)
+			spotify.loadNewReleases(playlist)
 		}))
 
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Artists", "*Artists", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			loadArtists(spotify, playlist)
+			spotify.loadArtists(playlist)
 		}))
 	}
 
@@ -73,7 +73,7 @@ func (spotify *Spotify) initPlaylist() error {
 	return nil
 }
 
-func loadAlbums(spotify *Spotify, playlist *sconsify.Playlist) {
+func (spotify *Spotify) loadAlbums(playlist *sconsify.Playlist) {
 	savedAlbumPage, err := spotify.client.CurrentUsersAlbumsOpt(createWebSpotifyOptions(50, playlist.Playlists()))
 	if err != nil {
 		return
@@ -91,7 +91,7 @@ func loadAlbums(spotify *Spotify, playlist *sconsify.Playlist) {
 	playlist.OpenFolder()
 }
 
-func loadSongs(spotify *Spotify, playlist *sconsify.Playlist) {
+func (spotify *Spotify) loadSongs(playlist *sconsify.Playlist) {
 	savedTrackPage, err := spotify.client.CurrentUsersTracksOpt(createWebSpotifyOptions(50, playlist.Tracks()))
 	if err != nil {
 		return
@@ -103,7 +103,7 @@ func loadSongs(spotify *Spotify, playlist *sconsify.Playlist) {
 	}
 }
 
-func loadNewReleases(spotify *Spotify, playlist *sconsify.Playlist) {
+func (spotify *Spotify) loadNewReleases(playlist *sconsify.Playlist) {
 	_, simplePlaylistPage, err := spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())})
 	if err != nil {
 		return
@@ -123,7 +123,7 @@ func loadNewReleases(spotify *Spotify, playlist *sconsify.Playlist) {
 	}
 }
 
-func loadArtists(spotify *Spotify, playlist *sconsify.Playlist) {
+func (spotify *Spotify) loadArtists(playlist *sconsify.Playlist) {
 	fullArtistCursorPage, err := spotify.client.CurrentUsersFollowedArtists()
 	if err != nil {
 		return
