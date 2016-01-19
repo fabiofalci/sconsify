@@ -7,7 +7,7 @@ import (
 )
 
 type Track struct {
-	URI    string
+	URI string
 
 	Artist     *Artist
 	Name       string
@@ -49,7 +49,6 @@ func ToSconsifyTrack(track *sp.Track) *Track {
 	artist := InitArtist(spArtist.Link().String(), spArtist.Name())
 	return InitTrack(track.Link().String(), artist, track.Name(), track.Duration().String())
 }
-
 
 func (track *Track) GetFullTitle() string {
 	return fmt.Sprintf("%v - %v [%v]", track.Artist.Name, track.Name, track.Duration)

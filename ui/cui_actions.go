@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/infrastructure"
+	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/jroimartin/gocui"
 )
 
@@ -33,27 +33,27 @@ type KeyEntry struct {
 }
 
 const (
-	PauseTrack string = "PauseTrack"
-	ShuffleMode string = "ShuffleMode"
-	ShuffleAllMode string = "ShuffleAllMode"
-	NextTrack string = "NextTrack"
-	ReplayTrack string = "ReplayTrack"
-	Search string = "Search"
-	Quit string = "Quit"
-	QueueTrack string = "QueueTrack"
-	QueuePlaylist string = "QueuePlaylist"
+	PauseTrack         string = "PauseTrack"
+	ShuffleMode        string = "ShuffleMode"
+	ShuffleAllMode     string = "ShuffleAllMode"
+	NextTrack          string = "NextTrack"
+	ReplayTrack        string = "ReplayTrack"
+	Search             string = "Search"
+	Quit               string = "Quit"
+	QueueTrack         string = "QueueTrack"
+	QueuePlaylist      string = "QueuePlaylist"
 	RepeatPlayingTrack string = "RepeatPlayingTrack"
-	RemoveTrack string = "RemoveTrack"
-	RemoveAllTracks string = "RemoveAllTracks"
-	GoToFirstLine string = "GoToFirstLine"
-	GoToLastLine string = "GoToLastLine"
-	PlaySelectedTrack string = "PlaySelectedTrack"
-	Up string = "Up"
-	Down string = "Down"
-	Left string = "Left"
-	Right string = "Right"
-	OpenCloseFolder string = "OpenCloseFolder"
-	OpenCloseInfoView string = "OpenCloseInfoView"
+	RemoveTrack        string = "RemoveTrack"
+	RemoveAllTracks    string = "RemoveAllTracks"
+	GoToFirstLine      string = "GoToFirstLine"
+	GoToLastLine       string = "GoToLastLine"
+	PlaySelectedTrack  string = "PlaySelectedTrack"
+	Up                 string = "Up"
+	Down               string = "Down"
+	Left               string = "Left"
+	Right              string = "Right"
+	OpenCloseFolder    string = "OpenCloseFolder"
+	OpenCloseInfoView  string = "OpenCloseInfoView"
 )
 
 var multipleKeysBuffer []rune
@@ -171,11 +171,11 @@ func (keyboard *Keyboard) configureKey(handler gocui.KeybindingHandler, command 
 		for _, c := range commands {
 			if c == command {
 				if view == "" {
-					keyboard.SequentialKeys[VIEW_PLAYLISTS + " " + key] = handler
-					keyboard.SequentialKeys[VIEW_QUEUE + " " + key] = handler
-					keyboard.SequentialKeys[VIEW_TRACKS + " " + key] = handler
+					keyboard.SequentialKeys[VIEW_PLAYLISTS+" "+key] = handler
+					keyboard.SequentialKeys[VIEW_QUEUE+" "+key] = handler
+					keyboard.SequentialKeys[VIEW_TRACKS+" "+key] = handler
 				} else {
-					keyboard.SequentialKeys[view + " " + key] = handler
+					keyboard.SequentialKeys[view+" "+key] = handler
 				}
 			}
 		}
@@ -185,8 +185,8 @@ func (keyboard *Keyboard) configureKey(handler gocui.KeybindingHandler, command 
 func keybindings() error {
 	keyboard = &Keyboard{
 		ConfiguredKeys: make(map[string][]string),
-		UsedFunctions: make(map[string]bool),
-		Keys: make([]*KeyMapping, 0),
+		UsedFunctions:  make(map[string]bool),
+		Keys:           make([]*KeyMapping, 0),
 		SequentialKeys: make(map[string]gocui.KeybindingHandler)}
 
 	multipleKeysBuffer = make([]rune, 0, 0)
@@ -304,7 +304,7 @@ func keyPressed(key rune, g *gocui.Gui, v *gocui.View) error {
 		keyCombination = string(multipleKeysBuffer[0]) + string(multipleKeysBuffer[1])
 	}
 
-	if handler := keyboard.SequentialKeys[v.Name() + " " + keyCombination]; handler != nil {
+	if handler := keyboard.SequentialKeys[v.Name()+" "+keyCombination]; handler != nil {
 		multipleKeysBuffer = make([]rune, 0, 0)
 		err := handler(g, v)
 		multipleKeysNumber = 0

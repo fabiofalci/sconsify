@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gordonklaus/portaudio"
-	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/infrastructure"
+	"github.com/fabiofalci/sconsify/sconsify"
+	"github.com/gordonklaus/portaudio"
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 )
@@ -49,7 +49,6 @@ func initialiseSpotify(client *webspotify.Client, username string, pass []byte, 
 			}
 		}
 	}
-
 
 	return err
 }

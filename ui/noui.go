@@ -89,7 +89,7 @@ func (noui *NoUi) NewPlaylists(playlists sconsify.Playlists) error {
 func (noui *NoUi) listenForTermination() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	for _ = range c {
+	for range c {
 		noui.Shutdown()
 	}
 }

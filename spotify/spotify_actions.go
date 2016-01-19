@@ -3,8 +3,8 @@ package spotify
 import (
 	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
-	"time"
 	webspotify "github.com/zmb3/spotify"
+	"time"
 )
 
 func (spotify *Spotify) shutdownSpotify() {

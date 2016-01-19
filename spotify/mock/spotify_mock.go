@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	bobMarley = sconsify.InitArtist("Bob Marley:1", "Bob Marley")
-	theRamones = sconsify.InitArtist("The Ramones:2", "The Ramones")
+	bobMarley    = sconsify.InitArtist("Bob Marley:1", "Bob Marley")
+	theRamones   = sconsify.InitArtist("The Ramones:2", "The Ramones")
 	elvisPresley = sconsify.InitArtist("Elvis Presley:3", "Elvis Presley")
 )
 
@@ -67,4 +67,3 @@ func waitForMockEvents(events *sconsify.Events) {
 		}
 	}
 }
-

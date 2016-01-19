@@ -5,7 +5,7 @@ import (
 )
 
 type Playlist struct {
-	URI    string
+	URI string
 
 	tracks []*Track
 	name   string
@@ -125,8 +125,6 @@ func (playlist *Playlist) HasSameNameIncludingSubPlaylists(otherPlaylist *Playli
 	return false
 }
 
-
-
 func (playlist *Playlist) Tracks() int {
 	return len(playlist.tracks)
 }
@@ -148,7 +146,7 @@ func (playlist *Playlist) OriginalName() string {
 
 func (playlist *Playlist) removeClosedFolderName() string {
 	if strings.HasPrefix(playlist.name, "[") && strings.HasSuffix(playlist.name, "]") {
-		return playlist.name[1:len(playlist.name) - 1]
+		return playlist.name[1 : len(playlist.name)-1]
 	}
 	return playlist.name
 }
@@ -179,7 +177,6 @@ func (playlist *Playlist) InvertOpenClose() {
 		playlist.name = "[" + playlist.name + "]"
 	}
 }
-
 
 func (playlist *Playlist) RemoveTrack(index int) {
 	if len(playlist.tracks) == 0 || index < 0 || index >= len(playlist.tracks) {

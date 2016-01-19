@@ -77,7 +77,7 @@ func (playlists *Playlists) checkDuplicatedNames(newPlaylist *Playlist, original
 			break
 		}
 	}
-	if (newPlaylist.IsFolder()) {
+	if newPlaylist.IsFolder() {
 		for _, subPlaylist := range newPlaylist.playlists {
 			playlists.checkDuplicatedNames(subPlaylist, subPlaylist.Name(), 1)
 		}

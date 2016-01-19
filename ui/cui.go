@@ -378,7 +378,7 @@ func loadPlaylistFromState(state *State) {
 			}
 			position++
 			playlist := playlists.Get(name)
-			if  playlist.IsFolder() && playlist.IsFolderOpen() {
+			if playlist.IsFolder() && playlist.IsFolderOpen() {
 				for i := 0; i < playlist.Playlists(); i++ {
 					subPlaylist := playlist.Playlist(i)
 					if subPlaylist.Name() == state.SelectedPlaylist {

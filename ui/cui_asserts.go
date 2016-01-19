@@ -1,4 +1,5 @@
 package ui
+
 import "github.com/fabiofalci/sconsify/sconsify"
 
 func CuiAssertSelectedPlaylist(playlist string) (bool, string) {

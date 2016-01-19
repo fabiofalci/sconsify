@@ -1,16 +1,15 @@
 package webapi
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/zmb3/spotify"
-	"os"
-	"bufio"
-	"strings"
 	"golang.org/x/oauth2"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 )
-
 
 func Auth(clientId string, authRedirectUrl string) *spotify.Client {
 	if clientId == "" {
@@ -44,12 +43,11 @@ func Auth(clientId string, authRedirectUrl string) *spotify.Client {
 	}
 	expiry := time.Now().Add(time.Duration(seconds) * time.Second)
 	token := &oauth2.Token{
-		AccessToken:  strings.Split(result[0], ":")[1],
-		TokenType:    strings.Split(result[1], ":")[1],
-		Expiry:       expiry,
+		AccessToken: strings.Split(result[0], ":")[1],
+		TokenType:   strings.Split(result[1], ":")[1],
+		Expiry:      expiry,
 	}
 
 	client := auth.NewClient(token)
 	return &client
 }
-

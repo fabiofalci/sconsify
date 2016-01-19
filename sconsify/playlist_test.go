@@ -1,8 +1,8 @@
 package sconsify
 
 import (
-	"testing"
 	"strconv"
+	"testing"
 )
 
 func TestPlaylistTracks(t *testing.T) {
@@ -113,7 +113,7 @@ func TestFolderPlaylist(t *testing.T) {
 
 	tracks := 0
 	for i := 0; i < folder.Playlists(); i++ {
-		if folder.Playlist(i).Name() != " subPlaylist" + strconv.Itoa(i) {
+		if folder.Playlist(i).Name() != " subPlaylist"+strconv.Itoa(i) {
 			t.Errorf("Playlist order is not correct: %v", folder.Playlist(i).Name())
 		}
 		tracks += folder.Playlist(i).Tracks()

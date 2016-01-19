@@ -1,11 +1,12 @@
 package sconsify
+
 import "strings"
 
 type Artist struct {
-	URI    string
+	URI string
 
-	Name       string
-	Albums     []*Album
+	Name   string
+	Albums []*Album
 }
 
 func InitArtist(URI string, name string) *Artist {
@@ -16,5 +17,5 @@ func InitArtist(URI string, name string) *Artist {
 }
 
 func (artist *Artist) GetSpotifyID() string {
-	return artist.URI[strings.LastIndex(artist.URI, ":")+1:len(artist.URI)]
+	return artist.URI[strings.LastIndex(artist.URI, ":")+1 : len(artist.URI)]
 }

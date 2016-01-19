@@ -35,7 +35,7 @@ func loadState() *State {
 func persistState() {
 	state := State{
 		ClosedFolders: make([]string, 0),
-		Queue: make([]*sconsify.Track, 0)}
+		Queue:         make([]*sconsify.Track, 0)}
 	selectedPlaylist, index := gui.getSelectedPlaylistAndTrack()
 
 	if selectedPlaylist != nil && !selectedPlaylist.IsOnDemand() {
@@ -59,7 +59,7 @@ func persistState() {
 	for _, playlistName := range playlists.Names() {
 		playlist := playlists.Get(playlistName)
 		if playlist.IsFolder() && !playlist.IsFolderOpen() && !playlist.IsOnDemand() {
-			state.ClosedFolders	= append(state.ClosedFolders, playlist.URI)
+			state.ClosedFolders = append(state.ClosedFolders, playlist.URI)
 		}
 	}
 

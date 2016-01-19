@@ -74,7 +74,7 @@ func (spotify *Spotify) initPlaylist() error {
 }
 
 func loadAlbums(spotify *Spotify, playlist *sconsify.Playlist) {
-	savedAlbumPage, err := spotify.client.CurrentUsersAlbumsOpt(createWebSpotifyOptions(50, playlist.Playlists()));
+	savedAlbumPage, err := spotify.client.CurrentUsersAlbumsOpt(createWebSpotifyOptions(50, playlist.Playlists()))
 	if err != nil {
 		return
 	}
@@ -92,7 +92,7 @@ func loadAlbums(spotify *Spotify, playlist *sconsify.Playlist) {
 }
 
 func loadSongs(spotify *Spotify, playlist *sconsify.Playlist) {
-	savedTrackPage, err := spotify.client.CurrentUsersTracksOpt(createWebSpotifyOptions(50, playlist.Tracks()));
+	savedTrackPage, err := spotify.client.CurrentUsersTracksOpt(createWebSpotifyOptions(50, playlist.Tracks()))
 	if err != nil {
 		return
 	}
@@ -102,8 +102,9 @@ func loadSongs(spotify *Spotify, playlist *sconsify.Playlist) {
 		playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String()))
 	}
 }
+
 func loadNewReleases(spotify *Spotify, playlist *sconsify.Playlist) {
-	_, simplePlaylistPage, err := spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())});
+	_, simplePlaylistPage, err := spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())})
 	if err != nil {
 		return
 	}
@@ -132,7 +133,6 @@ func loadArtists(spotify *Spotify, playlist *sconsify.Playlist) {
 		playlist.AddPlaylist(sconsify.InitSubPlaylist(string(fullArtist.ID), fullArtist.Name, tracks))
 		playlist.OpenFolder()
 	}
-
 }
 
 func createWebSpotifyOptions(limit int, offset int) *webspotify.Options {

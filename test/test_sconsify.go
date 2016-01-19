@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fabiofalci/sconsify/sconsify"
-	"github.com/fabiofalci/sconsify/infrastructure"
-	"github.com/fabiofalci/sconsify/ui"
-	"github.com/fabiofalci/sconsify/spotify/mock"
-	"os/exec"
 	"bytes"
 	"flag"
+	"github.com/fabiofalci/sconsify/infrastructure"
+	"github.com/fabiofalci/sconsify/sconsify"
+	"github.com/fabiofalci/sconsify/spotify/mock"
+	"github.com/fabiofalci/sconsify/ui"
+	"os/exec"
 )
 
 var output bytes.Buffer
@@ -145,7 +145,7 @@ func searching() {
 	goToFirstPlaylist()
 	assert("*Search", "")
 	openClose()
-	assert( "[*Search]", "")
+	assert("[*Search]", "")
 	openClose()
 	assert("*Search", "")
 }
@@ -250,7 +250,7 @@ func assert(expectedPlaylist string, expectedTrack string) {
 		cmd("q")
 		panic("Boom!")
 	}
-	if (expectedTrack != "") {
+	if expectedTrack != "" {
 		if valid, actualTrack := ui.CuiAssertSelectedTrack(expectedTrack); !valid {
 			output.WriteString(fmt.Sprintf("Track '%v' not found but '%v'", expectedTrack, actualTrack))
 			cmd("q")
@@ -288,4 +288,3 @@ func enter() {
 func sleep() {
 	time.Sleep(500 * time.Millisecond)
 }
-
