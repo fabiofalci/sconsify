@@ -51,7 +51,7 @@ func (spotify *Spotify) initPlaylist() error {
 		}
 	}
 
-	webApiCache := spotify.loadWebApiCache()
+	webApiCache := spotify.loadWebApiCacheIfNecessary()
 	if spotify.client != nil || webApiCache.Albums != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Albums", "*Albums", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
 			spotify.loadAlbums(playlist, webApiCache)
@@ -75,6 +75,13 @@ func (spotify *Spotify) initPlaylist() error {
 
 	spotify.events.NewPlaylist(playlists)
 	return nil
+}
+
+func (spotify *Spotify) loadWebApiCacheIfNecessary() *WebApiCache {
+	if spotify.client != nil {
+		return &WebApiCache{}
+	}
+	return spotify.loadWebApiCache()
 }
 
 func (spotify *Spotify) loadAlbums(playlist *sconsify.Playlist, webApiCache *WebApiCache) {
@@ -131,7 +138,7 @@ func (spotify *Spotify) loadSongs(playlist *sconsify.Playlist, webApiCache *WebA
 		}
 
 		if webApiCache.Songs == nil {
-			webApiCache.Songs = make([]CachedTrack, len(savedTrackPage.Tracks))
+			webApiCache.Songs = make([]CachedTrack, 0)
 		}
 		for _, track := range savedTrackPage.Tracks {
 			webArtist := track.Artists[0]
