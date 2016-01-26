@@ -52,25 +52,41 @@ func (spotify *Spotify) initPlaylist() error {
 	}
 
 	webApiCache := spotify.loadWebApiCacheIfNecessary()
-	if spotify.client != nil || webApiCache.Albums != nil {
+	if spotify.client != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Albums", "*Albums", make([]*sconsify.Playlist, 0), true, func(playlist *sconsify.Playlist) {
 			spotify.loadAlbums(playlist, webApiCache)
 			spotify.persistWebApiCache(webApiCache)
 		}))
-	}
-
-	if spotify.client != nil || webApiCache.Songs != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandPlaylist("Songs", "*Songs", make([]*sconsify.Track, 0), false, func(playlist *sconsify.Playlist) {
 			spotify.loadSongs(playlist, webApiCache)
 			spotify.persistWebApiCache(webApiCache)
 		}))
-	}
-
-	if spotify.client != nil || webApiCache.NewReleases != nil {
 		playlists.AddPlaylist(sconsify.InitOnDemandFolder("New Releases", "*New Releases", make([]*sconsify.Playlist, 0), true, func(playlist *sconsify.Playlist) {
 			spotify.loadNewReleases(playlist, webApiCache)
 			spotify.persistWebApiCache(webApiCache)
 		}))
+	} else {
+		if webApiCache.Albums != nil {
+			playlist := sconsify.InitOnDemandFolder("Albums", "*Albums", make([]*sconsify.Playlist, 0), true, func(playlist *sconsify.Playlist) {
+				spotify.loadAlbums(playlist, webApiCache)
+			})
+			playlist.ExecuteLoad()
+			playlists.AddPlaylist(playlist)
+		}
+		if webApiCache.Songs != nil {
+			playlist := sconsify.InitOnDemandPlaylist("Songs", "*Songs", make([]*sconsify.Track, 0), true, func(playlist *sconsify.Playlist) {
+				spotify.loadSongs(playlist, webApiCache)
+			})
+			playlist.ExecuteLoad()
+			playlists.AddPlaylist(playlist)
+		}
+		if webApiCache.NewReleases != nil {
+			playlist := sconsify.InitOnDemandFolder("New Releases", "*New Releases", make([]*sconsify.Playlist, 0), true, func(playlist *sconsify.Playlist) {
+				spotify.loadNewReleases(playlist, webApiCache)
+			})
+			playlist.ExecuteLoad()
+			playlists.AddPlaylist(playlist)
+		}
 	}
 
 	spotify.events.NewPlaylist(playlists)
