@@ -1,7 +1,6 @@
 package spotify
 
 import (
-	webspotify "github.com/zmb3/spotify"
 	"github.com/fabiofalci/sconsify/infrastructure"
 	"io/ioutil"
 	"encoding/json"
@@ -10,7 +9,7 @@ import (
 type WebApiCache struct {
 	Albums      []CachedAlbum
 	Songs       []CachedTrack
-	NewReleases []webspotify.SimplePlaylist
+	NewReleases []CachedPlaylist
 
 	SharedArtists []CachedArtist
 }
@@ -31,6 +30,13 @@ type CachedTrack struct {
 type CachedArtist struct {
 	URI  string
 	Name string
+}
+
+type CachedPlaylist struct {
+	URI        string
+	Name       string
+	Tracks     []CachedTrack
+	ArtistsURI []string
 }
 
 func (webApiCache *WebApiCache) findSharedArtist(URI string) *CachedArtist {

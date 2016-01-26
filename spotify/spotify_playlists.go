@@ -159,30 +159,52 @@ func (spotify *Spotify) loadSongs(playlist *sconsify.Playlist, webApiCache *WebA
 }
 
 func (spotify *Spotify) loadNewReleases(playlist *sconsify.Playlist, webApiCache *WebApiCache) {
-	var simplePlaylistPage *webspotify.SimplePlaylistPage
-	var err error
 	if spotify.client != nil {
+		var simplePlaylistPage *webspotify.SimplePlaylistPage
+		var err error
 		if _, simplePlaylistPage, err = spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())}); err != nil {
 			return
 		}
-		webApiCache.NewReleases = simplePlaylistPage.Playlists
-	} else if webApiCache.NewReleases == nil {
-		return
+
+		webApiCache.NewReleases = make([]CachedPlaylist, len(simplePlaylistPage.Playlists))
+		for i, webPlaylist := range simplePlaylistPage.Playlists {
+			fullPlaylist, err := spotify.client.GetPlaylist(webPlaylist.Owner.ID, webPlaylist.ID)
+			if err == nil {
+				tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
+				webApiCache.NewReleases[i] = CachedPlaylist{}
+				webApiCache.NewReleases[i].URI = string(webPlaylist.URI)
+				webApiCache.NewReleases[i].Name = webPlaylist.Name
+				webApiCache.NewReleases[i].Tracks = make([]CachedTrack, len(fullPlaylist.Tracks.Tracks))
+				for j, track := range fullPlaylist.Tracks.Tracks {
+					webArtist := track.Track.Artists[0]
+					artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+					tracks[j] = sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
+					webApiCache.NewReleases[i].Tracks[j] = CachedTrack{URI: tracks[j].URI, Name: tracks[j].Name, TimeDuration: tracks[j].Duration}
+					webApiCache.NewReleases[i].Tracks[j].ArtistsURI = make([]string, 1)
+					webApiCache.NewReleases[i].Tracks[j].ArtistsURI[0] = string(webArtist.URI)
+
+					cachedArtist := webApiCache.findSharedArtist(string(webArtist.URI))
+					if cachedArtist == nil {
+						webApiCache.addSharedArtist(CachedArtist{URI: string(webArtist.URI), Name: webArtist.Name})
+					}
+				}
+				playlist.AddPlaylist(sconsify.InitSubPlaylist(string(webPlaylist.URI), webPlaylist.Name, tracks))
+			}
+			playlist.OpenFolder()
+		}
+	} else if webApiCache.NewReleases != nil {
+		for _, webPlaylist := range webApiCache.NewReleases {
+			tracks := make([]*sconsify.Track, len(webPlaylist.Tracks))
+			for i, track := range webPlaylist.Tracks {
+				webArtist := webApiCache.findSharedArtist(track.ArtistsURI[0])
+				artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+				tracks[i] = sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration)
+			}
+			playlist.AddPlaylist(sconsify.InitSubPlaylist(webPlaylist.URI, webPlaylist.Name, tracks))
+			playlist.OpenFolder()
+		}
 	}
 
-	for _, album := range webApiCache.NewReleases {
-		fullPlaylist, err := spotify.client.GetPlaylist(album.Owner.ID, album.ID)
-		if err == nil {
-			tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
-			for i, track := range fullPlaylist.Tracks.Tracks {
-				webArtist := track.Track.Artists[0]
-				artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
-				tracks[i] = sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
-			}
-			playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
-		}
-		playlist.OpenFolder()
-	}
 }
 
 func createWebSpotifyOptions(limit int, offset int) *webspotify.Options {
