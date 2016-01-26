@@ -11,7 +11,6 @@ type WebApiCache struct {
 	Albums      []CachedAlbum
 	Songs       []CachedTrack
 	NewReleases []webspotify.SimplePlaylist
-	Artists     []webspotify.FullArtist
 
 	SharedArtists []CachedArtist
 }

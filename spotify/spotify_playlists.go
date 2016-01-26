@@ -73,13 +73,6 @@ func (spotify *Spotify) initPlaylist() error {
 		}))
 	}
 
-	if spotify.client != nil || webApiCache.Artists != nil {
-		playlists.AddPlaylist(sconsify.InitOnDemandFolder("Artists", "*Artists", make([]*sconsify.Playlist, 0), func(playlist *sconsify.Playlist) {
-			spotify.loadArtists(playlist, webApiCache)
-			spotify.persistWebApiCache(webApiCache)
-		}))
-	}
-
 	spotify.events.NewPlaylist(playlists)
 	return nil
 }
@@ -188,25 +181,6 @@ func (spotify *Spotify) loadNewReleases(playlist *sconsify.Playlist, webApiCache
 			}
 			playlist.AddPlaylist(sconsify.InitSubPlaylist(string(album.ID), album.Name, tracks))
 		}
-		playlist.OpenFolder()
-	}
-}
-
-func (spotify *Spotify) loadArtists(playlist *sconsify.Playlist, webApiCache *WebApiCache) {
-	var fullArtistCursorPage *webspotify.FullArtistCursorPage
-	var err error
-	if spotify.client != nil {
-		if fullArtistCursorPage, err = spotify.client.CurrentUsersFollowedArtists(); err != nil {
-			return
-		}
-		webApiCache.Artists = fullArtistCursorPage.Artists
-	} else if webApiCache.Artists == nil {
-		return
-	}
-
-	for _, fullArtist := range webApiCache.Artists {
-		tracks := make([]*sconsify.Track, 0)
-		playlist.AddPlaylist(sconsify.InitSubPlaylist(string(fullArtist.ID), fullArtist.Name, tracks))
 		playlist.OpenFolder()
 	}
 }
