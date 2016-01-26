@@ -35,14 +35,7 @@ func InitSearchPlaylist(URI string, name string, tracks []*Track) *Playlist {
 
 func InitFolder(URI string, name string, playlists []*Playlist) *Playlist {
 	folder := &Playlist{URI: URI, name: name, playlists: playlists, search: false, open: true}
-
-	folder.tracks = make([]*Track, 0)
-	for _, subPlaylist := range playlists {
-		for _, track := range subPlaylist.tracks {
-			folder.tracks = append(folder.tracks, track)
-		}
-	}
-
+	folder.LoadFolderTracks()
 	return folder
 }
 
@@ -199,6 +192,19 @@ func (playlist *Playlist) ExecuteLoad() {
 	if playlist.oneTimeLoad {
 		playlist.loadCallback = nil
 	}
+	if playlist.playlists != nil {
+		playlist.LoadFolderTracks()
+	}
+}
+
+func (playlist *Playlist) LoadFolderTracks() {
+	playlist.tracks = make([]*Track, 0)
+	for _, subPlaylist := range playlist.playlists {
+		for _, track := range subPlaylist.tracks {
+			playlist.tracks = append(playlist.tracks, track)
+		}
+	}
+
 }
 
 // sort Interface
