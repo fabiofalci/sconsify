@@ -5,6 +5,9 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	webspotify "github.com/zmb3/spotify"
+	"bytes"
+	"compress/gzip"
+	"io"
 )
 
 type WebApiCache struct {
@@ -16,9 +19,15 @@ type WebApiCache struct {
 func (spotify *Spotify) loadWebApiCache() *WebApiCache {
 	if fileLocation := infrastructure.GetWebApiCacheFileLocation(); fileLocation != "" {
 		if b, err := ioutil.ReadFile(fileLocation); err == nil {
-			var webApiCache WebApiCache
-			if err := json.Unmarshal(b, &webApiCache); err == nil {
-				return &webApiCache
+			compressed := bytes.NewBuffer(b)
+			if r, err := gzip.NewReader(compressed); err == nil {
+				var uncompressed bytes.Buffer
+				io.Copy(&uncompressed, r)
+				r.Close()
+				var webApiCache WebApiCache
+				if err := json.Unmarshal(uncompressed.Bytes(), &webApiCache); err == nil {
+					return &webApiCache
+				}
 			}
 		}
 	}
@@ -27,8 +36,12 @@ func (spotify *Spotify) loadWebApiCache() *WebApiCache {
 
 func (spotify *Spotify) persistWebApiCache(webApiCache *WebApiCache) {
 	if b, err := json.Marshal(webApiCache); err == nil {
+		var compressed bytes.Buffer
+		w := gzip.NewWriter(&compressed)
+		w.Write([]byte(b))
+		w.Close()
 		if fileLocation := infrastructure.GetWebApiCacheFileLocation(); fileLocation != "" {
-			infrastructure.SaveFile(fileLocation, b)
+			infrastructure.SaveFile(fileLocation, compressed.Bytes())
 		}
 	}
 }
