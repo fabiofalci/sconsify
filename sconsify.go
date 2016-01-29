@@ -99,5 +99,6 @@ func getPassword() []byte {
 		return []byte(passFromEnv)
 	}
 	fmt.Print("Password: ")
-	return gopass.GetPasswdMasked()
+	b, _ := gopass.GetPasswdMasked()
+	return b
 }
