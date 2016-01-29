@@ -61,7 +61,7 @@ func GetKeyFunctionsFileLocation() string {
 }
 
 func SaveFile(fileLocation string, content []byte) {
-	file, err := os.OpenFile(fileLocation, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(fileLocation, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err == nil {
 		defer file.Close()
 		file.Write(content)
