@@ -4,55 +4,13 @@ import (
 	"github.com/fabiofalci/sconsify/infrastructure"
 	"io/ioutil"
 	"encoding/json"
+	webspotify "github.com/zmb3/spotify"
 )
 
 type WebApiCache struct {
-	Albums      []CachedAlbum
-	Songs       []CachedTrack
-	NewReleases []CachedPlaylist
-
-	SharedArtists []CachedArtist
-}
-
-type CachedAlbum struct {
-	URI    string
-	Name   string
-	Tracks []CachedTrack
-}
-
-type CachedTrack struct {
-	URI          string
-	Name         string
-	TimeDuration string
-	ArtistsURI   []string
-}
-
-type CachedArtist struct {
-	URI  string
-	Name string
-}
-
-type CachedPlaylist struct {
-	URI        string
-	Name       string
-	Tracks     []CachedTrack
-	ArtistsURI []string
-}
-
-func (webApiCache *WebApiCache) findSharedArtist(URI string) *CachedArtist {
-	for _, cachedArtist := range webApiCache.SharedArtists {
-		if cachedArtist.URI == URI {
-			return &cachedArtist
-		}
-	}
-	return nil
-}
-
-func (webApiCache *WebApiCache) addSharedArtist(artist CachedArtist) {
-	if webApiCache.SharedArtists == nil {
-		webApiCache.SharedArtists = make([]CachedArtist, 0)
-	}
-	webApiCache.SharedArtists = append(webApiCache.SharedArtists, artist)
+	Albums      []webspotify.SavedAlbum
+	Songs       []webspotify.SavedTrack
+	NewReleases []webspotify.FullPlaylist
 }
 
 func (spotify *Spotify) loadWebApiCache() *WebApiCache {
