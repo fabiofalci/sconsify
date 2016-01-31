@@ -96,9 +96,12 @@ func (cui *ConsoleUserInterface) NewPlaylists(newPlaylist sconsify.Playlists) er
 		playlists = &newPlaylist
 		go gui.startGui()
 	} else {
-		playlists.Merge(&newPlaylist)
-		gui.updatePlaylistsView()
-		gui.updateTracksView()
+		gui.g.Execute(func(g *gocui.Gui) error {
+			playlists.Merge(&newPlaylist)
+			gui.updatePlaylistsView()
+			gui.updateTracksView()
+			return nil
+		})
 	}
 	return nil
 }
@@ -151,9 +154,11 @@ func (gui *Gui) updateCurrentStatus() {
 }
 
 func (gui *Gui) updateStatus(message string) {
-	gui.clearStatusView()
-	fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v\n", message)
-	// otherwise the update will appear only in the next keyboard move
+	gui.g.Execute(func(g *gocui.Gui) error {
+		gui.clearStatusView()
+		fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v\n", message)
+		return nil
+	})
 }
 
 func (gui *Gui) getSelectedPlaylist() *sconsify.Playlist {
