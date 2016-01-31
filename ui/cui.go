@@ -99,7 +99,6 @@ func (cui *ConsoleUserInterface) NewPlaylists(newPlaylist sconsify.Playlists) er
 		playlists.Merge(&newPlaylist)
 		gui.updatePlaylistsView()
 		gui.updateTracksView()
-		gui.g.Flush()
 	}
 	return nil
 }
@@ -127,9 +126,9 @@ func (gui *Gui) startGui() {
 	}
 	gui.g.SelBgColor = gocui.ColorGreen
 	gui.g.SelFgColor = gocui.ColorBlack
-	gui.g.ShowCursor = true
+	gui.g.Cursor = true
 
-	if err := gui.g.MainLoop(); err != nil && err != gocui.Quit {
+	if err := gui.g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
 }
@@ -155,7 +154,6 @@ func (gui *Gui) updateStatus(message string) {
 	gui.clearStatusView()
 	fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v\n", message)
 	// otherwise the update will appear only in the next keyboard move
-	gui.g.Flush()
 }
 
 func (gui *Gui) getSelectedPlaylist() *sconsify.Playlist {
@@ -266,7 +264,7 @@ func layout(g *gocui.Gui) error {
 	playlistSize := max * 0.15
 	trackSize := max * 0.60
 	if v, err := g.SetView(VIEW_PLAYLISTS, -1, -1, int(playlistSize), maxY-2); err != nil {
-		if err != gocui.ErrorUnkView {
+		if err != gocui.ErrUnknownView {
 			return err
 		}
 		gui.playlistsView = v
@@ -279,7 +277,7 @@ func layout(g *gocui.Gui) error {
 		}
 	}
 	if v, err := g.SetView(VIEW_TRACKS, int(playlistSize), -1, int(playlistSize+trackSize), maxY-2); err != nil {
-		if err != gocui.ErrorUnkView {
+		if err != gocui.ErrUnknownView {
 			return err
 		}
 		gui.tracksView = v
@@ -287,13 +285,13 @@ func layout(g *gocui.Gui) error {
 		gui.updateTracksView()
 	}
 	if v, err := g.SetView(VIEW_QUEUE, int(playlistSize+trackSize), -1, maxX, maxY-2); err != nil {
-		if err != gocui.ErrorUnkView {
+		if err != gocui.ErrUnknownView {
 			return err
 		}
 		gui.queueView = v
 	}
 	if v, err := g.SetView(VIEW_STATUS, -1, maxY-2, maxX, maxY); err != nil {
-		if err != gocui.ErrorUnkView {
+		if err != gocui.ErrUnknownView {
 			return err
 		}
 		gui.statusView = v
