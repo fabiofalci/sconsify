@@ -7,7 +7,7 @@ endif
 
 VERSION := 0.3.0-local
 COMMIT := $(shell git rev-parse --short HEAD)
-BUILD_DATE := $(shell date -u)
+BUILD_DATE := $(shell date +"%s")
 SPOTIFY_CLIENT_ID := 4e1fa8c468ce42c2a45c7c9e40e6d9d0
 AUTH_REDIRECT_URL := https://fabiofalci.github.io/sconsify/auth/
 
@@ -41,7 +41,8 @@ build:
 	$(SED) spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go \
 		&& go build -ldflags "\
 		 -X main.version=$(VERSION) \
-		 -X main.commit=$(COMMIT) -X main.buildDate '$(BUILD_DATE)' \
+		 -X main.commit=$(COMMIT) \
+		 -X main.buildDate=$(BUILD_DATE) \
 		 -X main.spotifyClientId=$(SPOTIFY_CLIENT_ID) \
 		 -X main.authRedirectUrl=$(AUTH_REDIRECT_URL)" \
 		 -o bundles/sconsify \

@@ -15,6 +15,7 @@ import (
 	"github.com/fabiofalci/sconsify/ui"
 	"github.com/fabiofalci/sconsify/webapi"
 	"github.com/howeyc/gopass"
+	"strconv"
 )
 
 var version string
@@ -45,7 +46,9 @@ func main() {
 	if *askingVersion {
 		fmt.Println("Version: " + version)
 		fmt.Println("Git commit: " + commit)
-		fmt.Println("Build date: " + buildDate)
+		if i, err := strconv.ParseInt(buildDate, 10, 64); err == nil {
+			fmt.Println("Build date: " + time.Unix(i, 0).UTC().String())
+		}
 		os.Exit(0)
 	}
 
