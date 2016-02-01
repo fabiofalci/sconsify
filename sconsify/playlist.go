@@ -2,6 +2,7 @@ package sconsify
 
 import (
 	"strings"
+	"sync"
 )
 
 type Playlist struct {
@@ -15,8 +16,9 @@ type Playlist struct {
 	open        bool
 	playlists   []*Playlist
 
-	oneTimeLoad  bool
-	loadCallback func(playlist *Playlist)
+	oneTimeLoad      bool
+	loadCallback     func(playlist *Playlist)
+	loadCallbackOnce sync.Once
 }
 
 type PlaylistByName []Playlist
@@ -188,6 +190,14 @@ func (playlist *Playlist) IsOnDemand() bool {
 }
 
 func (playlist *Playlist) ExecuteLoad() {
+	if playlist.oneTimeLoad {
+		playlist.loadCallbackOnce.Do(playlist.executeLoad)
+	} else {
+		playlist.executeLoad()
+	}
+}
+
+func (playlist *Playlist) executeLoad() {
 	playlist.loadCallback(playlist)
 	if playlist.oneTimeLoad {
 		playlist.loadCallback = nil
