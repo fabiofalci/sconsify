@@ -15,7 +15,6 @@ import (
 	"github.com/fabiofalci/sconsify/ui"
 	"github.com/fabiofalci/sconsify/webapi"
 	"github.com/howeyc/gopass"
-	webspotify "github.com/zmb3/spotify"
 )
 
 var version string
@@ -59,12 +58,9 @@ func main() {
 	username, pass := credentials(providedUsername)
 	events := sconsify.InitialiseEvents()
 
-	var client *webspotify.Client
-	if *providedWebApi {
-		client = webapi.Auth(spotifyClientId, authRedirectUrl)
-	}
-
-	go spotify.Initialise(client, username, pass, events, providedPlaylists, providedPreferredBitrate)
+	webapi.SpotifyClientId = spotifyClientId
+	webapi.AuthRedirectUrl = authRedirectUrl
+	go spotify.Initialise(*providedWebApi, username, pass, events, providedPlaylists, providedPreferredBitrate)
 
 	if *providedUi {
 		ui := ui.InitialiseConsoleUserInterface(events, true)

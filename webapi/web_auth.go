@@ -14,19 +14,22 @@ import (
 	"github.com/fabiofalci/sconsify/infrastructure"
 )
 
-func Auth(clientId string, authRedirectUrl string) *spotify.Client {
-	if clientId == "" {
+var SpotifyClientId string
+var AuthRedirectUrl string
+
+func Auth() *spotify.Client {
+	if SpotifyClientId == "" {
 		fmt.Print("Spotify Client ID not set")
 		return nil
 	}
 
-	auth := spotify.NewAuthenticator(authRedirectUrl,
+	auth := spotify.NewAuthenticator(AuthRedirectUrl,
 		spotify.ScopeUserLibraryRead,
 		spotify.ScopeUserFollowRead,
 		spotify.ScopePlaylistReadCollaborative,
 		spotify.ScopePlaylistReadPrivate)
 
-	auth.SetAuthInfo(clientId, "")
+	auth.SetAuthInfo(SpotifyClientId, "")
 
 	token := loadToken()
 	if token == nil || hasExpired(token.Expiry) {

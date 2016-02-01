@@ -10,6 +10,7 @@ import (
 	"github.com/gordonklaus/portaudio"
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
+	"github.com/fabiofalci/sconsify/webapi"
 )
 
 type Spotify struct {
@@ -23,17 +24,16 @@ type Spotify struct {
 	client         *webspotify.Client
 }
 
-func Initialise(client *webspotify.Client, username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) {
-	if err := initialiseSpotify(client, username, pass, events, playlistFilter, preferredBitrate); err != nil {
+func Initialise(webApiAuth bool, username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) {
+	if err := initialiseSpotify(webApiAuth, username, pass, events, playlistFilter, preferredBitrate); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		events.ShutdownEngine()
 	}
 }
 
-func initialiseSpotify(client *webspotify.Client, username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) error {
+func initialiseSpotify(webApiAuth bool, username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) error {
 	spotify := &Spotify{events: events}
 	spotify.setPlaylistFilter(*playlistFilter)
-	spotify.client = client
 	if err := spotify.initKey(); err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func initialiseSpotify(client *webspotify.Client, username string, pass []byte, 
 		if err == nil {
 			err = spotify.login(username, pass)
 			if err == nil {
-				err = spotify.checkIfLoggedIn(pa)
+				err = spotify.checkIfLoggedIn(webApiAuth, pa)
 			}
 		}
 	}
@@ -101,11 +101,11 @@ func (spotify *Spotify) initCache() (string, error) {
 	return cacheLocation, nil
 }
 
-func (spotify *Spotify) checkIfLoggedIn(pa *portAudio) error {
+func (spotify *Spotify) checkIfLoggedIn(webApiAuth bool, pa *portAudio) error {
 	if !spotify.waitForSuccessfulConnectionStateUpdates() {
 		return errors.New("Could not login")
 	}
-	return spotify.finishInitialisation(pa)
+	return spotify.finishInitialisation(webApiAuth, pa)
 }
 
 func (spotify *Spotify) waitForSuccessfulConnectionStateUpdates() bool {
@@ -129,7 +129,18 @@ func (spotify *Spotify) isLoggedIn() bool {
 	return spotify.session.ConnectionState() == sp.ConnectionStateLoggedIn
 }
 
-func (spotify *Spotify) finishInitialisation(pa *portAudio) error {
+func (spotify *Spotify) finishInitialisation(webApiAuth bool, pa *portAudio) error {
+	if webApiAuth {
+		if spotify.client = webapi.Auth(); spotify.client != nil {
+			if privateUser, err := spotify.client.CurrentUser(); err == nil {
+				if privateUser.ID != spotify.session.LoginUsername() {
+					return errors.New("Username doesn't match with web-api authorization")
+				}
+			} else {
+				spotify.client = nil
+			}
+		}
+	}
 	// init audio could happen after initPlaylist but this logs to output therefore
 	// the screen isn't built properly
 	portaudio.Initialize()
