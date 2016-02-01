@@ -1,13 +1,13 @@
 package spotify
 
 import (
-	"github.com/fabiofalci/sconsify/infrastructure"
-	"io/ioutil"
-	"encoding/json"
-	webspotify "github.com/zmb3/spotify"
 	"bytes"
 	"compress/gzip"
+	"encoding/json"
+	"github.com/fabiofalci/sconsify/infrastructure"
+	webspotify "github.com/zmb3/spotify"
 	"io"
+	"io/ioutil"
 )
 
 type WebApiCache struct {
@@ -45,4 +45,3 @@ func (spotify *Spotify) persistWebApiCache(webApiCache *WebApiCache) {
 		}
 	}
 }
-

@@ -204,7 +204,6 @@ func (playlist *Playlist) LoadFolderTracks() {
 			playlist.tracks = append(playlist.tracks, track)
 		}
 	}
-
 }
 
 // sort Interface
