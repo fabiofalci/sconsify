@@ -2,6 +2,7 @@ package ui
 
 import (
 	"github.com/fabiofalci/sconsify/sconsify"
+	"github.com/jroimartin/gocui"
 )
 
 type Player interface {
@@ -24,9 +25,14 @@ func (p *RegularPlayer) Play() {
 	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
 		if trackIndex == -1 {
 			if playlist.IsOnDemand() {
-				playlist.ExecuteLoad()
-				gui.updatePlaylistsView()
-				gui.updateTracksView()
+				go func() {
+					playlist.ExecuteLoad()
+					gui.g.Execute(func(g *gocui.Gui) error {
+						gui.updatePlaylistsView()
+						gui.updateTracksView()
+						return nil
+					})
+				}()
 			}
 		} else {
 			track := playlist.Track(trackIndex)
