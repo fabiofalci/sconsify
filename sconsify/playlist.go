@@ -41,12 +41,12 @@ func InitFolder(URI string, name string, playlists []*Playlist) *Playlist {
 	return folder
 }
 
-func InitOnDemandPlaylist(URI string, name string, tracks []*Track, oneTimeLoad bool, loadCallback func(playlist *Playlist)) *Playlist {
-	return &Playlist{URI: URI, name: name, tracks: tracks, oneTimeLoad: oneTimeLoad, loadCallback: loadCallback}
+func InitOnDemandPlaylist(URI string, name string, oneTimeLoad bool, loadCallback func(playlist *Playlist)) *Playlist {
+	return &Playlist{URI: URI, name: name, tracks: make([]*Track, 0), oneTimeLoad: oneTimeLoad, loadCallback: loadCallback}
 }
 
-func InitOnDemandFolder(URI string, name string, playlists []*Playlist, oneTimeLoad bool, loadCallback func(playlist *Playlist)) *Playlist {
-	playlist := &Playlist{URI: URI, name: name, playlists: playlists, oneTimeLoad: oneTimeLoad, loadCallback: loadCallback, open: true, search: false}
+func InitOnDemandFolder(URI string, name string, oneTimeLoad bool, loadCallback func(playlist *Playlist)) *Playlist {
+	playlist := &Playlist{URI: URI, name: name, playlists: make([]*Playlist, 0), oneTimeLoad: oneTimeLoad, loadCallback: loadCallback, open: true, search: false}
 	playlist.InvertOpenClose()
 	return playlist
 }
