@@ -101,6 +101,9 @@ func getCurrentViewSize(v *gocui.View) int {
 
 func getTracksViewSize(v *gocui.View) int {
 	if selectedPlaylist := gui.getSelectedPlaylist(); selectedPlaylist != nil {
+		if selectedPlaylist.IsOnDemand() {
+			return selectedPlaylist.Tracks()
+		}
 		return selectedPlaylist.Tracks() - 1
 	}
 	return -1
