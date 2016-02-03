@@ -16,6 +16,7 @@ import (
 	"github.com/fabiofalci/sconsify/webapi"
 	"github.com/howeyc/gopass"
 	"strconv"
+	"runtime"
 )
 
 var version string
@@ -49,6 +50,7 @@ func main() {
 		if i, err := strconv.ParseInt(buildDate, 10, 64); err == nil {
 			fmt.Println("Build date: " + time.Unix(i, 0).UTC().String())
 		}
+		fmt.Println("Go version: " + runtime.Version())
 		os.Exit(0)
 	}
 
