@@ -29,7 +29,11 @@ func (p *RegularPlayer) Play() {
 					playlist.ExecuteLoad()
 					gui.g.Execute(func(g *gocui.Gui) error {
 						gui.updatePlaylistsView()
+						cx, cy := gui.tracksView.Cursor()
+						ox, oy := gui.tracksView.Origin()
 						gui.updateTracksView()
+						gui.tracksView.SetCursor(cx, cy)
+						gui.tracksView.SetOrigin(ox, oy)
 						return nil
 					})
 				}()
