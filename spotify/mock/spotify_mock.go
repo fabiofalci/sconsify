@@ -45,11 +45,11 @@ func Initialise(events *sconsify.Events) {
 
 func getSearchedPlaylist() *sconsify.Playlists {
 	playlists := sconsify.InitPlaylists()
-	tracks := make([]*sconsify.Track, 3)
-	tracks[0] = sconsify.InitTrack("elvispreley0", elvisPresley, "Burning Love", "2m3s")
-	tracks[1] = sconsify.InitTrack("elvispreley1", elvisPresley, "Love me tender", "2m4s")
-	tracks[2] = sconsify.InitTrack("elvispreley2", elvisPresley, "It's now or never", "2m5s")
-	playlists.AddPlaylist(sconsify.InitSearchPlaylist("elvispresley1", " Elvis Presley", tracks))
+	playlists.AddPlaylist(sconsify.InitSearchPlaylist("elvispresley1", " Elvis Presley", func(playlist *sconsify.Playlist) {
+		playlist.AddTrack(sconsify.InitTrack("elvispreley0", elvisPresley, "Burning Love", "2m3s"))
+		playlist.AddTrack(sconsify.InitTrack("elvispreley1", elvisPresley, "Love me tender", "2m4s"))
+		playlist.AddTrack(sconsify.InitTrack("elvispreley2", elvisPresley, "It's now or never", "2m5s"))
+	}))
 
 	return playlists
 }

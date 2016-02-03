@@ -31,8 +31,8 @@ func InitSubPlaylist(URI string, name string, tracks []*Track) *Playlist {
 	return &Playlist{URI: URI, name: " " + name, tracks: tracks, subPlaylist: true}
 }
 
-func InitSearchPlaylist(URI string, name string, tracks []*Track) *Playlist {
-	return &Playlist{URI: URI, name: name, tracks: tracks, search: true}
+func InitSearchPlaylist(URI string, name string, loadCallback func(playlist *Playlist)) *Playlist {
+	return &Playlist{URI: URI, name: name, tracks: make([]*Track, 0), search: true, loadCallback: loadCallback}
 }
 
 func InitFolder(URI string, name string, playlists []*Playlist) *Playlist {

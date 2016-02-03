@@ -58,31 +58,35 @@ func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {
 }
 
 func (spotify *Spotify) search(query string) {
-	searchOptions := &sp.SearchOptions{
-		Tracks:    sp.SearchSpec{Offset: 0, Count: 100},
-		Albums:    sp.SearchSpec{Offset: 0, Count: 100},
-		Artists:   sp.SearchSpec{Offset: 0, Count: 100},
-		Playlists: sp.SearchSpec{Offset: 0, Count: 100},
-		Type:      sp.SearchStandard,
-	}
-	search, err := spotify.session.Search(query, searchOptions)
-	if err != nil {
-		infrastructure.Debugf("Spotify search returning error: %v", err)
-		return
-	}
-	search.Wait()
-
-	numberOfTracks := search.Tracks()
-	infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)
-	tracks := make([]*sconsify.Track, numberOfTracks)
-	for i := 0; i < numberOfTracks; i++ {
-		tracks[i] = sconsify.ToSconsifyTrack(search.Track(i))
-		infrastructure.Debugf("\tTrack '%v' (%v)", tracks[i].URI, tracks[i].Name)
-	}
-
 	playlists := sconsify.InitPlaylists()
 	name := " " + query
-	playlists.AddPlaylist(sconsify.InitSearchPlaylist(name, name, tracks))
+
+	playlist := sconsify.InitSearchPlaylist(name, name, func(playlist *sconsify.Playlist) {
+		offset := playlist.Tracks()
+		searchOptions := &sp.SearchOptions{
+			Tracks:    sp.SearchSpec{Offset: offset, Count: 100},
+			Albums:    sp.SearchSpec{Offset: offset, Count: 100},
+			Artists:   sp.SearchSpec{Offset: offset, Count: 100},
+			Playlists: sp.SearchSpec{Offset: offset, Count: 100},
+			Type:      sp.SearchStandard,
+		}
+		search, err := spotify.session.Search(query, searchOptions)
+		if err != nil {
+			infrastructure.Debugf("Spotify search returning error: %v", err)
+			return
+		}
+		search.Wait()
+
+		numberOfTracks := search.Tracks()
+		infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)
+		for i := 0; i < numberOfTracks; i++ {
+			track := sconsify.ToSconsifyTrack(search.Track(i))
+			infrastructure.Debugf("\tTrack '%v' (%v)", track.URI, track.Name)
+			playlist.AddTrack(track)
+		}
+	})
+	playlist.ExecuteLoad()
+	playlists.AddPlaylist(playlist)
 
 	spotify.events.NewPlaylist(playlists)
 }
