@@ -7,6 +7,7 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 	"strconv"
+	"github.com/fabiofalci/sconsify/infrastructure"
 )
 
 func (spotify *Spotify) initPlaylist() error {
@@ -19,13 +20,18 @@ func (spotify *Spotify) initPlaylist() error {
 	allPlaylists.Wait()
 	var folderPlaylists []*sconsify.Playlist
 	var folder *sp.PlaylistFolder
+	infrastructure.Debugf("# of playlists %v", allPlaylists.Playlists())
 	for i := 0; i < allPlaylists.Playlists(); i++ {
 		if allPlaylists.PlaylistType(i) == sp.PlaylistTypeStartFolder {
 			folder, _ = allPlaylists.Folder(i)
 			folderPlaylists = make([]*sconsify.Playlist, 0)
+			infrastructure.Debugf("Opening folder '%v' (%v)", folder.Id(), folder.Name())
 		} else if allPlaylists.PlaylistType(i) == sp.PlaylistTypeEndFolder {
 			if folder != nil {
 				playlists.AddPlaylist(sconsify.InitFolder(strconv.Itoa(int(folder.Id())), folder.Name(), folderPlaylists))
+				infrastructure.Debugf("Closing folder '%v' (%v)", folder.Id(), folder.Name())
+			} else {
+				infrastructure.Debug("Closing a null folder, this doesn't look right ")
 			}
 			folderPlaylists = nil
 			folder = nil
@@ -38,11 +44,13 @@ func (spotify *Spotify) initPlaylist() error {
 		playlist := allPlaylists.Playlist(i)
 		playlist.Wait()
 		if spotify.canAddPlaylist(playlist, allPlaylists.PlaylistType(i)) {
+			id := playlist.Link().String()
+			infrastructure.Debugf("Playlist '%v' (%v)", id, playlist.Name())
 			tracks := make([]*sconsify.Track, playlist.Tracks())
+			infrastructure.Debugf("\t# of tracks %v", playlist.Tracks())
 			for i := 0; i < playlist.Tracks(); i++ {
 				tracks[i] = spotify.initTrack(playlist.Track(i))
 			}
-			id := playlist.Link().String()
 			if folderPlaylists == nil {
 				playlists.AddPlaylist(sconsify.InitPlaylist(id, playlist.Name(), tracks))
 			} else {
@@ -183,6 +191,7 @@ func (spotify *Spotify) initTrack(playlistTrack *sp.PlaylistTrack) *sconsify.Tra
 	for i := 0; i < track.Artists(); i++ {
 		track.Artist(i).Wait()
 	}
+	infrastructure.Debugf("\tTrack '%v' (%v)", track.Link().String(), track.Name())
 	return sconsify.ToSconsifyTrack(track)
 }
 

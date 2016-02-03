@@ -5,6 +5,7 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 	"time"
+	"github.com/fabiofalci/sconsify/infrastructure"
 )
 
 func (spotify *Spotify) shutdownSpotify() {
@@ -66,14 +67,17 @@ func (spotify *Spotify) search(query string) {
 	}
 	search, err := spotify.session.Search(query, searchOptions)
 	if err != nil {
+		infrastructure.Debugf("Spotify search returning error: %v", err)
 		return
 	}
 	search.Wait()
 
 	numberOfTracks := search.Tracks()
+	infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)
 	tracks := make([]*sconsify.Track, numberOfTracks)
 	for i := 0; i < numberOfTracks; i++ {
 		tracks[i] = sconsify.ToSconsifyTrack(search.Track(i))
+		infrastructure.Debugf("\tTrack '%v' (%v)", tracks[i].URI, tracks[i].Name)
 	}
 
 	playlists := sconsify.InitPlaylists()
