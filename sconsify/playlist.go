@@ -216,6 +216,10 @@ func (playlist *Playlist) LoadFolderTracks() {
 	}
 }
 
+func (playlist *Playlist) ToSpotifyID() string {
+	return playlist.URI[strings.LastIndex(playlist.URI, ":")+1:]
+}
+
 // sort Interface
 func (p PlaylistByName) Len() int      { return len(p) }
 func (p PlaylistByName) Swap(i, j int) { p[i], p[j] = p[j], p[i] }

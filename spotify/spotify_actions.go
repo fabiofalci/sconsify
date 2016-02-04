@@ -117,14 +117,34 @@ func (spotify *Spotify) isPausedOrPlaying() bool {
 	return spotify.currentTrack != nil
 }
 
-func (spotify *Spotify) artistTopTrack(artist *sconsify.Artist) {
-	if fullTracks, err := spotify.client.GetArtistsTopTracks(webspotify.ID(artist.GetSpotifyID()), "GB"); err == nil {
-		tracks := make([]*sconsify.Track, len(fullTracks))
-		for i, track := range fullTracks {
-			tracks[i] = sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String())
+func (spotify *Spotify) artistAlbums(artist *sconsify.Artist) {
+	if simpleAlbumPage, err := spotify.client.GetArtistAlbums(webspotify.ID(artist.GetSpotifyID())); err == nil {
+		folder := sconsify.InitFolder(artist.URI, "*" + artist.Name, make([]*sconsify.Playlist, 0))
+
+		if fullTracks, err := spotify.client.GetArtistsTopTracks(webspotify.ID(artist.GetSpotifyID()), "GB"); err == nil {
+			tracks := make([]*sconsify.Track, len(fullTracks))
+			for i, track := range fullTracks {
+				tracks[i] = sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String())
+			}
+
+			folder.AddPlaylist(sconsify.InitPlaylist(artist.URI, " " + artist.Name + " Top Tracks", tracks))
 		}
 
-		topTracksPlaylist := sconsify.InitPlaylist(artist.URI, artist.Name, tracks)
-		spotify.events.ArtistTopTracks(topTracksPlaylist)
+		infrastructure.Debugf("# of albums %v", len(simpleAlbumPage.Albums))
+		for _, simpleAlbum := range simpleAlbumPage.Albums {
+			infrastructure.Debugf("AlbumsID %v = %v", simpleAlbum.URI, simpleAlbum.Name)
+			playlist := sconsify.InitOnDemandPlaylist(string(simpleAlbum.URI), " " + simpleAlbum.Name, true, func(playlist *sconsify.Playlist) {
+				infrastructure.Debugf("Album id %v", playlist.ToSpotifyID())
+				if simpleTrackPage, err := spotify.client.GetAlbumTracks(webspotify.ID(playlist.ToSpotifyID())); err == nil {
+					infrastructure.Debugf("# of tracks %v", len(simpleTrackPage.Tracks))
+					for _, track := range simpleTrackPage.Tracks {
+						playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String()))
+					}
+				}
+			})
+			folder.AddPlaylist(playlist)
+		}
+
+		spotify.events.ArtistAlbums(folder)
 	}
 }

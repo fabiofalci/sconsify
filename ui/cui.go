@@ -106,14 +106,13 @@ func (cui *ConsoleUserInterface) NewPlaylists(newPlaylist sconsify.Playlists) er
 	return nil
 }
 
-func (cui *ConsoleUserInterface) ArtistTopTracks(playlist *sconsify.Playlist) {
-	gui.infoTopTracksView.Clear()
-
-	fmt.Fprintf(gui.infoTopTracksView, "Top Tracks\n")
-	for i := 0; i < playlist.Tracks(); i++ {
-		track := playlist.Track(i)
-		fmt.Fprintf(gui.infoTopTracksView, "%v. %v\n", (i + 1), track.Name)
-	}
+func (cui *ConsoleUserInterface) ArtistAlbums(folder *sconsify.Playlist) {
+	gui.g.Execute(func(g *gocui.Gui) error {
+		playlists.AddPlaylist(folder)
+		gui.updatePlaylistsView()
+		gui.updateTracksView()
+		return nil
+	})
 }
 
 func (gui *Gui) startGui() {

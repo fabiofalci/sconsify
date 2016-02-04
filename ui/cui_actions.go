@@ -53,7 +53,7 @@ const (
 	Left               string = "Left"
 	Right              string = "Right"
 	OpenCloseFolder    string = "OpenCloseFolder"
-	OpenCloseInfoView  string = "OpenCloseInfoView"
+	ArtistAlbums       string = "ArtistAlbums"
 )
 
 var multipleKeysBuffer []rune
@@ -126,8 +126,8 @@ func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[OpenCloseFolder] {
 		keyboard.addKey("<space>", OpenCloseFolder)
 	}
-	if !keyboard.UsedFunctions[OpenCloseInfoView] {
-		keyboard.addKey("i", OpenCloseInfoView)
+	if !keyboard.UsedFunctions[ArtistAlbums] {
+		keyboard.addKey("i", ArtistAlbums)
 	}
 }
 
@@ -254,9 +254,7 @@ func keybindings() error {
 	keyboard.configureKey(nextView, Right, VIEW_PLAYLISTS)
 	keyboard.configureKey(mainNextViewRight, Right, VIEW_TRACKS)
 	keyboard.configureKey(openCloseFolderCommand, OpenCloseFolder, VIEW_PLAYLISTS)
-	keyboard.configureKey(openInfoViewCommand, OpenCloseInfoView, VIEW_TRACKS)
-	keyboard.configureKey(closeInfoViewCommand, OpenCloseInfoView, VIEW_ARTIST_INFO)
-	keyboard.configureKey(closeInfoViewCommand, OpenCloseInfoView, VIEW_TOP_TRACKS_INFO)
+	keyboard.configureKey(artistAlbums, ArtistAlbums, VIEW_TRACKS)
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
 
 	// numbers
@@ -382,19 +380,11 @@ func openCloseFolderCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func openInfoViewCommand(g *gocui.Gui, v *gocui.View) error {
+func artistAlbums(g *gocui.Gui, v *gocui.View) error {
 	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
-		for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
-			track := playlist.Track(trackIndex)
-			events.GetArtistTopTracks(track.Artist)
-			gui.ShowInfoView(track)
-		}
+		track := playlist.Track(trackIndex)
+		events.GetArtistAlbums(track.Artist)
 	}
-	return nil
-}
-
-func closeInfoViewCommand(g *gocui.Gui, v *gocui.View) error {
-	gui.CloseInfoView()
 	return nil
 }
 

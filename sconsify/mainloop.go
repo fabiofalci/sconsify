@@ -44,8 +44,8 @@ func StartMainLoop(events *Events, ui UserInterface, askForFirstTrack bool) erro
 			getNextToPlay()
 		case newPlaylist := <-events.PlaylistsUpdates():
 			ui.NewPlaylists(newPlaylist)
-		case artistTopTrack := <-events.ArtistTopTracksUpdates():
-			ui.ArtistTopTracks(artistTopTrack)
+		case playlist := <-events.ArtistAlbumsUpdates():
+			ui.ArtistAlbums(playlist)
 		case <-events.ShutdownEngineUpdates():
 			return nil
 		}

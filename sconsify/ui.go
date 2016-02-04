@@ -7,6 +7,6 @@ type UserInterface interface {
 	PlayTokenLost() error
 	GetNextToPlay() *Track
 	NewPlaylists(playlists Playlists) error
-	ArtistTopTracks(playlist *Playlist)
+	ArtistAlbums(folder *Playlist)
 	Shutdown()
 }
