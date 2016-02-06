@@ -39,8 +39,6 @@ type Gui struct {
 	tracksView        *gocui.View
 	statusView        *gocui.View
 	queueView         *gocui.View
-	infoArtistView    *gocui.View
-	infoTopTracksView *gocui.View
 
 	currentMessage string
 	initialised    bool
@@ -299,30 +297,6 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		gui.statusView = v
-	}
-	if gui.showInfo {
-		if subView, err := g.SetView(VIEW_ARTIST_INFO, 10, 1, 10+40, 1+2); err != nil {
-			fmt.Fprintf(subView, "%v\n", gui.infoTrack.Artist.Name)
-			gui.infoArtistView = subView
-		}
-		if subView, err := g.SetView(VIEW_TOP_TRACKS_INFO, 10, 1+2, 10+40, 1+2+12); err != nil {
-			gui.infoTopTracksView = subView
-		}
-		if err := g.SetCurrentView(VIEW_TOP_TRACKS_INFO); err != nil {
-			return err
-		}
-
-		gui.tracksView.Highlight = false
-		gui.infoTopTracksView.Highlight = true
-	} else if gui.infoArtistView != nil {
-		g.DeleteView(VIEW_ARTIST_INFO)
-		g.DeleteView(VIEW_TOP_TRACKS_INFO)
-		gui.infoArtistView = nil
-		gui.infoTopTracksView = nil
-		if err := g.SetCurrentView(VIEW_TRACKS); err != nil {
-			return err
-		}
-		gui.tracksView.Highlight = true
 	}
 
 	if !gui.initialised && loadStateWheInit {
