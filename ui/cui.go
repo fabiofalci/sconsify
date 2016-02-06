@@ -40,13 +40,11 @@ type Gui struct {
 	currentMessage string
 	initialised    bool
 	PlayingTrack   *sconsify.Track
-	showInfo       bool
-	infoTrack      *sconsify.Track
 }
 
 func InitialiseConsoleUserInterface(ev *sconsify.Events, loadState bool) sconsify.UserInterface {
 	events = ev
-	gui = &Gui{showInfo: false}
+	gui = &Gui{}
 	consoleUserInterface = &ConsoleUserInterface{}
 	queue = InitQueue()
 	player = &RegularPlayer{}
@@ -301,15 +299,6 @@ func layout(g *gocui.Gui) error {
 	}
 	gui.initialised = true
 	return nil
-}
-
-func (gui *Gui) ShowInfoView(track *sconsify.Track) {
-	gui.infoTrack = track
-	gui.showInfo = true
-}
-
-func (gui *Gui) CloseInfoView() {
-	gui.showInfo = false
 }
 
 func loadInitialState() {
