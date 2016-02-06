@@ -241,8 +241,6 @@ func keybindings() error {
 		keyboard.configureKey(removeTrackCommand, RemoveTrack, view)
 		keyboard.configureKey(removeAllTracksCommand, RemoveAllTracks, view)
 	}
-	keyboard.configureKey(quit, Quit, VIEW_ARTIST_INFO)
-	keyboard.configureKey(quit, Quit, VIEW_TOP_TRACKS_INFO)
 
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
 	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)

@@ -26,9 +26,6 @@ const (
 	VIEW_TRACKS    = "tracks"
 	VIEW_QUEUE     = "queue"
 	VIEW_STATUS    = "status"
-
-	VIEW_ARTIST_INFO     = "artistInfo"
-	VIEW_TOP_TRACKS_INFO = "topTracksInfo"
 )
 
 type ConsoleUserInterface struct{}
