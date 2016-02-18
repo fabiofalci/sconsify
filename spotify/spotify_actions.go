@@ -62,33 +62,31 @@ func (spotify *Spotify) search(query string) {
 	name := " " + query
 
 	playlist := sconsify.InitSearchPlaylist(name, name, func(playlist *sconsify.Playlist) {
-		offset := playlist.Tracks()
-		searchOptions := &sp.SearchOptions{
-			Tracks:    sp.SearchSpec{Offset: offset, Count: 100},
-			Albums:    sp.SearchSpec{Offset: offset, Count: 100},
-			Artists:   sp.SearchSpec{Offset: offset, Count: 100},
-			Playlists: sp.SearchSpec{Offset: offset, Count: 100},
-			Type:      sp.SearchStandard,
-		}
-		search, err := spotify.session.Search(query, searchOptions)
-		if err != nil {
+		options := createWebSpotifyOptions(50, playlist.Tracks())
+		if searchResult, err := spotify.getWebApiClient().SearchOpt(query, webspotify.SearchTypeTrack, options); err == nil {
+			numberOfTracks := len(searchResult.Tracks.Tracks)
+			infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)
+			for _, track := range searchResult.Tracks.Tracks {
+				webArtist := track.Artists[0]
+				artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+				playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), artist, track.Name, track.TimeDuration().String()))
+				infrastructure.Debugf("\tTrack '%v' (%v)", track.URI, track.Name)
+			}
+		} else {
 			infrastructure.Debugf("Spotify search returning error: %v", err)
-			return
-		}
-		search.Wait()
-
-		numberOfTracks := search.Tracks()
-		infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)
-		for i := 0; i < numberOfTracks; i++ {
-			track := sconsify.ToSconsifyTrack(search.Track(i))
-			infrastructure.Debugf("\tTrack '%v' (%v)", track.URI, track.Name)
-			playlist.AddTrack(track)
 		}
 	})
 	playlist.ExecuteLoad()
 	playlists.AddPlaylist(playlist)
 
 	spotify.events.NewPlaylist(playlists)
+}
+
+func (spotify *Spotify) getWebApiClient() *webspotify.Client {
+	if spotify.client != nil {
+		return spotify.client
+	}
+	return webspotify.DefaultClient
 }
 
 func (spotify *Spotify) pause() {
