@@ -63,7 +63,7 @@ func (spotify *Spotify) search(query string) {
 
 	playlist := sconsify.InitSearchPlaylist(name, name, func(playlist *sconsify.Playlist) {
 		options := createWebSpotifyOptions(50, playlist.Tracks())
-		if searchResult, err := spotify.getWebApiClient().SearchOpt(query, webspotify.SearchTypeTrack, options); err == nil {
+		if searchResult, err := spotify.getWebApiClient().SearchOpt(query, webspotify.SearchTypeTrack|webspotify.SearchTypeAlbum|webspotify.SearchTypeArtist|webspotify.SearchTypePlaylist, options); err == nil {
 			numberOfTracks := len(searchResult.Tracks.Tracks)
 			infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)
 			for _, track := range searchResult.Tracks.Tracks {
