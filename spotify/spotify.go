@@ -14,23 +14,25 @@ import (
 )
 
 type Spotify struct {
-	currentTrack   *sconsify.Track
-	paused         bool
-	events         *sconsify.Events
-	pa             *portAudio
-	session        *sp.Session
-	appKey         []byte
-	playlistFilter []string
-	client         *webspotify.Client
+	currentTrack       *sconsify.Track
+	paused             bool
+	events             *sconsify.Events
+	pa                 *portAudio
+	session            *sp.Session
+	appKey             []byte
+	playlistFilter     []string
+	client             *webspotify.Client
+	cacheWebApiContent bool
 }
 
 type SpotifyInitConf struct {
-	WebApiAuth       bool
-	PlaylistFilter   string
-	PreferredBitrate string
-	CacheWebApiToken bool
-	SpotifyClientId  string
-	AuthRedirectUrl  string
+	WebApiAuth         bool
+	PlaylistFilter     string
+	PreferredBitrate   string
+	CacheWebApiToken   bool
+	CacheWebApiContent bool
+	SpotifyClientId    string
+	AuthRedirectUrl    string
 }
 
 func Initialise(initConf *SpotifyInitConf, username string, pass []byte, events *sconsify.Events) {
@@ -43,6 +45,7 @@ func Initialise(initConf *SpotifyInitConf, username string, pass []byte, events 
 func initialiseSpotify(initConf *SpotifyInitConf, username string, pass []byte, events *sconsify.Events) error {
 	spotify := &Spotify{events: events}
 	spotify.setPlaylistFilter(initConf.PlaylistFilter)
+	spotify.cacheWebApiContent = initConf.CacheWebApiContent
 	if err := spotify.initKey(); err != nil {
 		return err
 	}
