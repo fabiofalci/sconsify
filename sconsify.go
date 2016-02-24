@@ -39,6 +39,7 @@ func main() {
 	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no UI is used.")
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
 	providedNoUiShuffle := flag.Bool("noui-shuffle", true, "Shuffle tracks or follow playlist order.")
+	providedWebApiCacheToken := flag.Bool("web-api-cache-token", true, "Cache the web-api token as plain text in ~/.sconsify until its expiration.")
 	providedDebug := flag.Bool("debug", false, "Enable debug mode.")
 	askingVersion := flag.Bool("version", false, "Print version.")
 	flag.Parse()
@@ -66,6 +67,7 @@ func main() {
 		WebApiAuth: *providedWebApi,
 		PlaylistFilter: *providedPlaylists,
 		PreferredBitrate: *providedPreferredBitrate,
+		CacheWebApiToken: *providedWebApiCacheToken,
 		SpotifyClientId: spotifyClientId,
 		AuthRedirectUrl: authRedirectUrl,
 	}

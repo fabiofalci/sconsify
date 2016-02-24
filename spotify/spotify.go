@@ -28,6 +28,7 @@ type SpotifyInitConf struct {
 	WebApiAuth       bool
 	PlaylistFilter   string
 	PreferredBitrate string
+	CacheWebApiToken bool
 	SpotifyClientId  string
 	AuthRedirectUrl  string
 }
@@ -139,7 +140,7 @@ func (spotify *Spotify) isLoggedIn() bool {
 
 func (spotify *Spotify) finishInitialisation(initConf *SpotifyInitConf, pa *portAudio) error {
 	if initConf.WebApiAuth {
-		if spotify.client = webapi.Auth(initConf.SpotifyClientId, initConf.AuthRedirectUrl); spotify.client != nil {
+		if spotify.client = webapi.Auth(initConf.SpotifyClientId, initConf.AuthRedirectUrl, initConf.CacheWebApiToken); spotify.client != nil {
 			if privateUser, err := spotify.client.CurrentUser(); err == nil {
 				if privateUser.ID != spotify.session.LoginUsername() {
 					return errors.New("Username doesn't match with web-api authorization")

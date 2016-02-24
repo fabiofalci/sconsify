@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func Auth(spotifyClientId string, authRedirectUrl string) *spotify.Client {
+func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool) *spotify.Client {
 	if spotifyClientId == "" {
 		fmt.Print("Spotify Client ID not set")
 		return nil
@@ -52,7 +52,9 @@ func Auth(spotifyClientId string, authRedirectUrl string) *spotify.Client {
 			TokenType:   strings.Split(result[1], ":")[1],
 			Expiry:      expiry,
 		}
-		persistToken(token)
+		if cacheWebApiToken {
+			persistToken(token)
+		}
 	}
 
 	client := auth.NewClient(token)
