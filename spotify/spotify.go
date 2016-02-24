@@ -24,16 +24,24 @@ type Spotify struct {
 	client         *webspotify.Client
 }
 
-func Initialise(webApiAuth bool, username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) {
-	if err := initialiseSpotify(webApiAuth, username, pass, events, playlistFilter, preferredBitrate); err != nil {
+type SpotifyInitConf struct {
+	WebApiAuth       bool
+	PlaylistFilter   string
+	PreferredBitrate string
+	SpotifyClientId  string
+	AuthRedirectUrl  string
+}
+
+func Initialise(initConf *SpotifyInitConf, username string, pass []byte, events *sconsify.Events) {
+	if err := initialiseSpotify(initConf, username, pass, events); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		events.ShutdownEngine()
 	}
 }
 
-func initialiseSpotify(webApiAuth bool, username string, pass []byte, events *sconsify.Events, playlistFilter *string, preferredBitrate *string) error {
+func initialiseSpotify(initConf *SpotifyInitConf, username string, pass []byte, events *sconsify.Events) error {
 	spotify := &Spotify{events: events}
-	spotify.setPlaylistFilter(*playlistFilter)
+	spotify.setPlaylistFilter(initConf.PlaylistFilter)
 	if err := spotify.initKey(); err != nil {
 		return err
 	}
@@ -41,11 +49,11 @@ func initialiseSpotify(webApiAuth bool, username string, pass []byte, events *sc
 
 	cacheLocation, err := spotify.initCache()
 	if err == nil {
-		err = spotify.initSession(pa, cacheLocation, preferredBitrate)
+		err = spotify.initSession(pa, cacheLocation, initConf.PreferredBitrate)
 		if err == nil {
 			err = spotify.login(username, pass)
 			if err == nil {
-				err = spotify.checkIfLoggedIn(webApiAuth, pa)
+				err = spotify.checkIfLoggedIn(initConf, pa)
 			}
 		}
 	}
@@ -62,7 +70,7 @@ func (spotify *Spotify) login(username string, pass []byte) error {
 	return <-spotify.session.LoggedInUpdates()
 }
 
-func (spotify *Spotify) initSession(pa *portAudio, cacheLocation string, preferredBitrate *string) error {
+func (spotify *Spotify) initSession(pa *portAudio, cacheLocation string, preferredBitrate string) error {
 	var err error
 	spotify.session, err = sp.NewSession(&sp.Config{
 		ApplicationKey:   spotify.appKey,
@@ -72,7 +80,7 @@ func (spotify *Spotify) initSession(pa *portAudio, cacheLocation string, preferr
 		AudioConsumer:    pa,
 	})
 
-	switch *preferredBitrate {
+	switch preferredBitrate {
 	case "96k":
 		spotify.session.PreferredBitrate(sp.Bitrate96k)
 	case "160k":
@@ -101,11 +109,11 @@ func (spotify *Spotify) initCache() (string, error) {
 	return cacheLocation, nil
 }
 
-func (spotify *Spotify) checkIfLoggedIn(webApiAuth bool, pa *portAudio) error {
+func (spotify *Spotify) checkIfLoggedIn(initConf *SpotifyInitConf, pa *portAudio) error {
 	if !spotify.waitForSuccessfulConnectionStateUpdates() {
 		return errors.New("Could not login")
 	}
-	return spotify.finishInitialisation(webApiAuth, pa)
+	return spotify.finishInitialisation(initConf, pa)
 }
 
 func (spotify *Spotify) waitForSuccessfulConnectionStateUpdates() bool {
@@ -129,9 +137,9 @@ func (spotify *Spotify) isLoggedIn() bool {
 	return spotify.session.ConnectionState() == sp.ConnectionStateLoggedIn
 }
 
-func (spotify *Spotify) finishInitialisation(webApiAuth bool, pa *portAudio) error {
-	if webApiAuth {
-		if spotify.client = webapi.Auth(); spotify.client != nil {
+func (spotify *Spotify) finishInitialisation(initConf *SpotifyInitConf, pa *portAudio) error {
+	if initConf.WebApiAuth {
+		if spotify.client = webapi.Auth(initConf.SpotifyClientId, initConf.AuthRedirectUrl); spotify.client != nil {
 			if privateUser, err := spotify.client.CurrentUser(); err == nil {
 				if privateUser.ID != spotify.session.LoginUsername() {
 					return errors.New("Username doesn't match with web-api authorization")

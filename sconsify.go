@@ -13,7 +13,6 @@ import (
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/fabiofalci/sconsify/ui"
-	"github.com/fabiofalci/sconsify/webapi"
 	"github.com/howeyc/gopass"
 	"strconv"
 	"runtime"
@@ -63,9 +62,14 @@ func main() {
 	username, pass := credentials(providedUsername)
 	events := sconsify.InitialiseEvents()
 
-	webapi.SpotifyClientId = spotifyClientId
-	webapi.AuthRedirectUrl = authRedirectUrl
-	go spotify.Initialise(*providedWebApi, username, pass, events, providedPlaylists, providedPreferredBitrate)
+	initConf := &spotify.SpotifyInitConf{
+		WebApiAuth: *providedWebApi,
+		PlaylistFilter: *providedPlaylists,
+		PreferredBitrate: *providedPreferredBitrate,
+		SpotifyClientId: spotifyClientId,
+		AuthRedirectUrl: authRedirectUrl,
+	}
+	go spotify.Initialise(initConf, username, pass, events)
 
 	if *providedUi {
 		ui := ui.InitialiseConsoleUserInterface(events, true)

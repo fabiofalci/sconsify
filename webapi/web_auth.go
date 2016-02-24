@@ -14,22 +14,19 @@ import (
 	"time"
 )
 
-var SpotifyClientId string
-var AuthRedirectUrl string
-
-func Auth() *spotify.Client {
-	if SpotifyClientId == "" {
+func Auth(spotifyClientId string, authRedirectUrl string) *spotify.Client {
+	if spotifyClientId == "" {
 		fmt.Print("Spotify Client ID not set")
 		return nil
 	}
 
-	auth := spotify.NewAuthenticator(AuthRedirectUrl,
+	auth := spotify.NewAuthenticator(authRedirectUrl,
 		spotify.ScopeUserLibraryRead,
 		spotify.ScopeUserFollowRead,
 		spotify.ScopePlaylistReadCollaborative,
 		spotify.ScopePlaylistReadPrivate)
 
-	auth.SetAuthInfo(SpotifyClientId, "")
+	auth.SetAuthInfo(spotifyClientId, "")
 
 	token := loadToken()
 	if token == nil || hasExpired(token.Expiry) {
