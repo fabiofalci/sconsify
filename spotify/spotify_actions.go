@@ -90,7 +90,7 @@ func (spotify *Spotify) getWebApiClient() *webspotify.Client {
 }
 
 func (spotify *Spotify) pause() {
-	if spotify.isPausedOrPlaying() {
+	if spotify.currentTrack != nil {
 		if spotify.paused {
 			spotify.playCurrentTrack()
 		} else {
@@ -109,10 +109,6 @@ func (spotify *Spotify) pauseCurrentTrack() {
 	player.Pause()
 	spotify.events.TrackPaused(spotify.currentTrack)
 	spotify.paused = true
-}
-
-func (spotify *Spotify) isPausedOrPlaying() bool {
-	return spotify.currentTrack != nil
 }
 
 func (spotify *Spotify) artistAlbums(artist *sconsify.Artist) {
