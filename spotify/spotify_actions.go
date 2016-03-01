@@ -51,6 +51,8 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 
 	spotify.events.TrackPlaying(trackUri)
 	spotify.currentTrack = trackUri
+	spotify.paused = false
+	return
 }
 
 func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {
@@ -92,16 +94,11 @@ func (spotify *Spotify) getWebApiClient() *webspotify.Client {
 func (spotify *Spotify) pause() {
 	if spotify.currentTrack != nil {
 		if spotify.paused {
-			spotify.playCurrentTrack()
+			spotify.play(spotify.currentTrack)
 		} else {
 			spotify.pauseCurrentTrack()
 		}
 	}
-}
-
-func (spotify *Spotify) playCurrentTrack() {
-	spotify.play(spotify.currentTrack)
-	spotify.paused = false
 }
 
 func (spotify *Spotify) pauseCurrentTrack() {
