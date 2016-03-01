@@ -37,9 +37,8 @@ run: container-build
 #        0xA1}
 #
 build:
-	go get ./...
 	$(SED) spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go \
-		&& go build -ldflags "\
+		&& GO15VENDOREXPERIMENT=1 go build -ldflags "\
 		 -X main.version=$(VERSION) \
 		 -X main.commit=$(COMMIT) \
 		 -X main.buildDate=$(BUILD_DATE) \

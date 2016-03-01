@@ -1,0 +1,57 @@
+hash: 1b3276a7661d5708e45cdb325e7f9a62ca8305510160fc174f967c6091b9c505
+updated: 2016-03-01T22:26:23.257781298Z
+imports:
+- name: github.com/fabiofalci/flagrc
+  version: 748e1426fdbd210e5ff8caf145546de70b559f28
+- name: github.com/golang/protobuf
+  version: 552c7b9542c194800fd493123b3798ef0a832032
+  subpackages:
+  - proto
+- name: github.com/gordonklaus/portaudio
+  version: c41f752f1e3fa5225a513d761c723f45bfe07b89
+- name: github.com/howeyc/gopass
+  version: c89a32868e47b1b7ef388b4d94318b359506400a
+- name: github.com/jroimartin/gocui
+  version: a8eba6db38c8459e1bbccfe38359b0405084a4f2
+- name: github.com/mattn/go-runewidth
+  version: d037b52ae5c0338c2bb18da01fb7ddf0e8be9aa1
+- name: github.com/mitchellh/go-homedir
+  version: 981ab348d865cf048eb7d17e78ac7192632d8415
+- name: github.com/nsf/termbox-go
+  version: 362329b0aa6447eadd52edd8d660ec1dff470295
+- name: github.com/op/go-libspotify
+  version: 12dd11fb33ecf760c356b65dc1116bc92589dea4
+  subpackages:
+  - spotify
+- name: github.com/zmb3/spotify
+  version: 6de95a1b7a3de7283fc9343bba5b495d7a383b85
+- name: golang.org/x/crypto
+  version: 5dc8cb4b8a8eb076cbb5a06bc3b8682c15bdbbd3
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/net
+  version: 6acef71eb69611914f7a30939ea9f6e194c78172
+  subpackages:
+  - context
+- name: golang.org/x/oauth2
+  version: 2cd4472c321b6cba78e029d99f0e7fe51032fd21
+  subpackages:
+  - internal
+- name: google.golang.org/appengine
+  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
+  subpackages:
+  - datastore
+  - urlfetch
+  - internal
+  - internal/datastore
+  - internal/urlfetch
+  - internal/app_identity
+  - internal/modules
+  - internal/base
+  - internal/log
+  - internal/remote_api
+- name: gopkg.in/vmihailenco/msgpack.v2
+  version: 775d4b0cf44d799d42a1f6fded02252340f4e33d
+  subpackages:
+  - codes
+devImports: []

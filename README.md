@@ -129,16 +129,18 @@ Similar to [.ackrc](http://beyondgrep.com/documentation/) you can define default
 	-noui-repeat-on=false
 
 
-How to build and run using docker
+How to build
 ---------------------------------
 
-Get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
+Install [glide](https://glide.sh/) and get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
 
 	var key = []byte{
 	    0x02, 0xA2, ...
 	    ...
 	    0xA1}
 
-* `make run`
+* `glide install`
 
-When building for OSX you may face an issue where it doesn't get you application key. Just retry the build that eventually it will get the key.
+* `make build`
+
+When building for OSX you may face an issue where it doesn't get your application key. Just retry the build that eventually it will get the key.
