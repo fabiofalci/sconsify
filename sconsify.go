@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/fabiofalci/sconsify/infrastructure"
+	"github.com/fabiofalci/sconsify/rpc"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/fabiofalci/sconsify/ui"
@@ -43,6 +44,8 @@ func main() {
 	providedWebApiCacheContent := flag.Bool("web-api-cache-content", true, "Cache some of the web-api content as plain text in ~/.sconsify.")
 	providedDebug := flag.Bool("debug", false, "Enable debug mode.")
 	askingVersion := flag.Bool("version", false, "Print version.")
+	providedCommand := flag.String("command", "", "Execute a command in the server: replay, play_pause, next")
+	providedServer := flag.Bool("server", true, "Start a background server to accept commands.")
 	flag.Parse()
 
 	if *askingVersion {
@@ -60,6 +63,11 @@ func main() {
 		defer infrastructure.CloseLogger()
 	}
 
+	if *providedCommand != "" {
+		rpc.Client(*providedCommand)
+		return
+	}
+
 	fmt.Println("Sconsify - your awesome Spotify music service in a text-mode interface.")
 	username, pass := credentials(providedUsername)
 	events := sconsify.InitialiseEvents()
@@ -74,6 +82,10 @@ func main() {
 		AuthRedirectUrl: authRedirectUrl,
 	}
 	go spotify.Initialise(initConf, username, pass, events)
+
+	if *providedServer {
+		go rpc.StartServer(events)
+	}
 
 	if *providedUi {
 		ui := ui.InitialiseConsoleUserInterface(events, true)
