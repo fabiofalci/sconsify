@@ -179,7 +179,7 @@ func (spotify *Spotify) waitForEvents() {
 		case <-spotify.events.PauseUpdates():
 			spotify.pause()
 		case <-spotify.events.ReplayUpdates():
-			spotify.playCurrentTrack()
+			spotify.play(spotify.currentTrack)
 		case <-spotify.events.ShutdownSpotifyUpdates():
 			spotify.shutdownSpotify()
 		case query := <-spotify.events.SearchUpdates():
