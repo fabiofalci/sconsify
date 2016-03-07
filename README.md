@@ -20,7 +20,7 @@ Installation
 	$ pacman -S portaudio
 	$ yaourt -S libspotify
 
-`Ubuntu` & `debian` - please ubuntu/debian users we need your confirmation on this
+`Ubuntu` & `debian`
 
 	$ curl http://apt.mopidy.com/mopidy.gpg | apt-key add - && curl -o /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
 	$ apt-get update && apt-get install -y libportaudio2 libspotify12 --no-install-recommends 
