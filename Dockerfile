@@ -11,6 +11,9 @@ RUN curl -sSL https://storage.googleapis.com/golang/go1.5.1.linux-amd64.tar.gz |
 ENV PATH /usr/local/go/bin:$PATH
 ENV GOPATH /go
 
+# Install glide for Go	
+RUN go get github.com/Masterminds/glide
+
 WORKDIR /go/src/github.com/fabiofalci/sconsify
 
 # Upload sconsify source
