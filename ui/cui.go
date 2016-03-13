@@ -306,7 +306,6 @@ func loadInitialState() {
 	loadClosedFoldersFromState(state)
 	loadPlaylistFromState(state)
 	loadTrackFromState(state)
-	loadPlayingTrackFromState(state)
 	loadQueueFromState(state)
 }
 
@@ -322,12 +321,6 @@ func addToQueue(track *sconsify.Track) bool {
 	}
 	fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
 	return true
-}
-
-func loadPlayingTrackFromState(state *State) {
-	if state.PlayingTrackUri != "" {
-		enablePreviousPlayingTrackToBePlayed(state)
-	}
 }
 
 func loadPlaylistFromState(state *State) {
@@ -378,14 +371,6 @@ func loadClosedFoldersFromState(state *State) {
 			gui.updatePlaylistsView()
 		}
 	}
-}
-
-func enablePreviousPlayingTrackToBePlayed(state *State) {
-	player = &PersistStatePlayer{
-		previousPlayingTrack:    sconsify.InitPartialTrack(state.PlayingTrackUri),
-		previousPlayingPlaylist: state.PlayingPlaylist,
-	}
-	fmt.Fprintf(gui.statusView, "Paused: %v\n", state.PlayingTrackFullTitle)
 }
 
 func (gui *Gui) enableTracksView() error {
