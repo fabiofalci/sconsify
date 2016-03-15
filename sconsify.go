@@ -14,6 +14,7 @@ import (
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
 	"github.com/fabiofalci/sconsify/ui"
+	"github.com/fabiofalci/sconsify/ui/noui"
 	"github.com/howeyc/gopass"
 	"strconv"
 	"runtime"
@@ -91,11 +92,11 @@ func main() {
 		ui := ui.InitialiseConsoleUserInterface(events, true)
 		sconsify.StartMainLoop(events, ui, false)
 	} else {
-		var output ui.Printer
+		var output noui.Printer
 		if *providedNoUiSilent {
-			output = new(ui.SilentPrinter)
+			output = new(noui.SilentPrinter)
 		}
-		ui := ui.InitialiseNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiShuffle)
+		ui := noui.InitialiseNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiShuffle)
 		sconsify.StartMainLoop(events, ui, true)
 	}
 }
