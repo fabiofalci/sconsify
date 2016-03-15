@@ -68,6 +68,6 @@ func (queue *Queue) Contents() []*sconsify.Track {
 	return queue.queue
 }
 
-func (queue *Queue) isEmpty() bool {
+func (queue *Queue) IsEmpty() bool {
 	return len(queue.queue) == 0
 }

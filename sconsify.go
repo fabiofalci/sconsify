@@ -13,8 +13,8 @@ import (
 	"github.com/fabiofalci/sconsify/rpc"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
-	"github.com/fabiofalci/sconsify/ui"
 	"github.com/fabiofalci/sconsify/ui/noui"
+	"github.com/fabiofalci/sconsify/ui/simple"
 	"github.com/howeyc/gopass"
 	"strconv"
 	"runtime"
@@ -89,7 +89,7 @@ func main() {
 	}
 
 	if *providedUi {
-		ui := ui.InitialiseConsoleUserInterface(events, true)
+		ui := simple.InitialiseConsoleUserInterface(events, true)
 		sconsify.StartMainLoop(events, ui, false)
 	} else {
 		var output noui.Printer

@@ -1,4 +1,4 @@
-package ui
+package simple
 
 import (
 	"fmt"
@@ -9,12 +9,13 @@ import (
 
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/jroimartin/gocui"
+	"github.com/fabiofalci/sconsify/ui"
 )
 
 var (
 	gui                  *Gui
 	events               *sconsify.Events
-	queue                *Queue
+	queue                *ui.Queue
 	playlists            *sconsify.Playlists
 	consoleUserInterface sconsify.UserInterface
 	player               Player
@@ -46,7 +47,7 @@ func InitialiseConsoleUserInterface(ev *sconsify.Events, loadState bool) sconsif
 	events = ev
 	gui = &Gui{}
 	consoleUserInterface = &ConsoleUserInterface{}
-	queue = InitQueue()
+	queue = ui.InitQueue()
 	player = &RegularPlayer{}
 	loadStateWheInit = loadState
 	return consoleUserInterface
@@ -76,7 +77,7 @@ func (cui *ConsoleUserInterface) PlayTokenLost() error {
 }
 
 func (cui *ConsoleUserInterface) GetNextToPlay() *sconsify.Track {
-	if !queue.isEmpty() {
+	if !queue.IsEmpty() {
 		return gui.getNextFromQueue()
 	} else if playlists.HasPlaylistSelected() {
 		return gui.getNextFromPlaylist()
@@ -248,7 +249,7 @@ func (gui *Gui) updatePlaylistsView() {
 
 func (gui *Gui) updateQueueView() {
 	gui.queueView.Clear()
-	if !queue.isEmpty() {
+	if !queue.IsEmpty() {
 		for _, track := range queue.Contents() {
 			fmt.Fprintf(gui.queueView, "%v\n", track.GetTitle())
 		}
