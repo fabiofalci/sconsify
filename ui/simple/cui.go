@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/fabiofalci/sconsify/sconsify"
-	"github.com/jroimartin/gocui"
 	"github.com/fabiofalci/sconsify/ui"
+	"github.com/jroimartin/gocui"
 )
 
 var (
@@ -32,11 +32,11 @@ const (
 type ConsoleUserInterface struct{}
 
 type Gui struct {
-	g                 *gocui.Gui
-	playlistsView     *gocui.View
-	tracksView        *gocui.View
-	statusView        *gocui.View
-	queueView         *gocui.View
+	g             *gocui.Gui
+	playlistsView *gocui.View
+	tracksView    *gocui.View
+	statusView    *gocui.View
+	queueView     *gocui.View
 
 	currentMessage string
 	initialised    bool

@@ -1,11 +1,11 @@
 package rpc
 
 import (
-	"net/rpc"
-	"net"
-	"net/http"
 	"fmt"
 	"github.com/fabiofalci/sconsify/sconsify"
+	"net"
+	"net/http"
+	"net/rpc"
 )
 
 type NoArgs struct {
@@ -47,7 +47,7 @@ func Client(command string) {
 		return
 	}
 	var reply string
-	if err := client.Call("Server." + method, &NoArgs{}, &reply); err != nil {
+	if err := client.Call("Server."+method, &NoArgs{}, &reply); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}

@@ -16,8 +16,8 @@ import (
 	"github.com/fabiofalci/sconsify/ui/noui"
 	"github.com/fabiofalci/sconsify/ui/simple"
 	"github.com/howeyc/gopass"
-	"strconv"
 	"runtime"
+	"strconv"
 )
 
 var version string
@@ -74,13 +74,13 @@ func main() {
 	events := sconsify.InitialiseEvents()
 
 	initConf := &spotify.SpotifyInitConf{
-		WebApiAuth: *providedWebApi,
-		PlaylistFilter: *providedPlaylists,
-		PreferredBitrate: *providedPreferredBitrate,
-		CacheWebApiToken: *providedWebApiCacheToken,
+		WebApiAuth:         *providedWebApi,
+		PlaylistFilter:     *providedPlaylists,
+		PreferredBitrate:   *providedPreferredBitrate,
+		CacheWebApiToken:   *providedWebApiCacheToken,
 		CacheWebApiContent: *providedWebApiCacheContent,
-		SpotifyClientId: spotifyClientId,
-		AuthRedirectUrl: authRedirectUrl,
+		SpotifyClientId:    spotifyClientId,
+		AuthRedirectUrl:    authRedirectUrl,
 	}
 	go spotify.Initialise(initConf, username, pass, events)
 

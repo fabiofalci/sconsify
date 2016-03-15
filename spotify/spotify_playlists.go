@@ -3,11 +3,11 @@ package spotify
 import (
 	"strings"
 
+	"github.com/fabiofalci/sconsify/infrastructure"
 	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 	"strconv"
-	"github.com/fabiofalci/sconsify/infrastructure"
 )
 
 func (spotify *Spotify) initPlaylist() error {
