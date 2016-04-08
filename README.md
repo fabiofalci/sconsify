@@ -17,13 +17,13 @@ Installation
 
 `Archlinux`
 
-	$ pacman -S portaudio
-	$ yaourt -S libspotify
+	$ sudo pacman -S portaudio
+	$ sudo yaourt -S libspotify
 
 `Ubuntu` & `debian`
 
-	$ curl http://apt.mopidy.com/mopidy.gpg | apt-key add - && curl -o /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
-	$ apt-get update && apt-get install -y libportaudio2 libspotify12 --no-install-recommends 
+	$ curl http://apt.mopidy.com/mopidy.gpg | sudo apt-key add - && sudo curl -o /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
+	$ sudo apt-get update && sudo apt-get install -y libportaudio2 libspotify12 --no-install-recommends 
 
 `OSX`
 
