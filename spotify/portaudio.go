@@ -11,11 +11,6 @@ type audio struct {
 	frames []byte
 }
 
-type audio2 struct {
-	format sp.AudioFormat
-	frames []int16
-}
-
 type portAudio struct {
 	buffer chan *audio
 }
