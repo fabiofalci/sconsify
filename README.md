@@ -132,7 +132,7 @@ Similar to [.ackrc](http://beyondgrep.com/documentation/) you can define default
 How to build
 ---------------------------------
 
-Install [glide](https://glide.sh/) and get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
+Install go 1.5 ([1.6](https://github.com/op/go-libspotify/issues/18) doesn't work because of new gco pointer rules), [glide](https://glide.sh/) and get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
 
 	var key = []byte{
 	    0x02, 0xA2, ...
