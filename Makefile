@@ -58,7 +58,7 @@ container-build: bundles
 	docker build -t sconsify-build .
 
 binary: container-build
-	docker run --rm -it -v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" sconsify-build make build
+	docker run --rm -v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" sconsify-build make build
 
 shell: container-build
 	docker run --rm -it \
