@@ -37,7 +37,7 @@ func main() {
 	providedWebApi := flag.Bool("web-api", false, "Use Spotify WEB API for more features. It requires web authorization.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll shuffle tracks.")
 	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
-	providedPreferredBitrate := flag.String("preferred-bitrate", "320k", "Preferred bitrate: 96k, 160k, 320k (default).")
+	providedPreferredBitrate := flag.String("preferred-bitrate", "320k", "Preferred bitrate: 96k, 160k, 320k.")
 	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no UI is used.")
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
 	providedNoUiShuffle := flag.Bool("noui-shuffle", true, "Shuffle tracks or follow playlist order.")
