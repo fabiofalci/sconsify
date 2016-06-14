@@ -1,0 +1,42 @@
+---
+layout: post
+title:  "Release 0.3.0-rc1"
+date:   2016-06-13 17:18:00
+categories: release
+---
+Sconsify 0.3.0 release candidate 1:
+
+* Remove track from playlist: `dd` (it doesn't save the change to spotify playlist).
+
+* Remove playlist from playlists view: `dd`  (it doesn't save the change to spotify playlist).
+
+* Remove all tracks from playlist: `D` (it doesn't save the change to spotify playlist).
+
+* Preferred bitrate `-preferred-bitrate=96k, 160k, 320k`.
+
+* Search function using spotify web-api instead of libspotify sdk. 
+
+* `Press to load` option in the search to load more results.
+
+* Search fields: `album, artist or track`. Examples:
+
+```
+    album:help
+    artist:the beatles
+    track:let it be
+```
+
+* Interprocess commands using `sconsify -command <command>`. Available commands: `replay, play_pause, next`. For instance my [i3](http://i3wm.org/) config file has this configuration so I can use keyboard buttons to replay, play/pause and go to the next track:
+
+```
+    bindsym XF86AudioPrev exec sconsify -command replay
+    bindsym XF86AudioPlay exec sconsify -command play_pause
+    bindsym XF86AudioNext exec sconsify -command next
+```
+
+* Experimental use of spotify web-api to have access to saved albums, saved songs and new releases. It needs a web autentication to get an access token valid for 1 hour. After 1 hour it won't be able to access the web-api anymore and there's no way to refresh the token, only quiting and opening the application again. Pass `-web-api` flag to use it.
+
+
+[Release page][release-page].
+
+[release-page]:      https://github.com/fabiofalci/sconsify/releases/tag/v0.3.0-rc1
