@@ -139,7 +139,7 @@ Install go 1.5 ([1.6](https://github.com/op/go-libspotify/issues/18) doesn't wor
 	    ...
 	    0xA1}
 
-* `glide install`
+* osx only: `brew install pkgconfig`
 
 * `make build`
 
