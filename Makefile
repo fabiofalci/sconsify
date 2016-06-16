@@ -37,7 +37,7 @@ run: container-build
 #        0xA1}
 #
 build:
-	$(GOPATH)/bin/glide -q install
+	glide -q install
 	$(SED) spotify/key.go && cat spotify/spotify_key_array.key >> spotify/key.go \
 		&& GO15VENDOREXPERIMENT=1 go build -ldflags "\
 		 -X main.version=$(VERSION) \
