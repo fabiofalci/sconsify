@@ -18,3 +18,5 @@ WORKDIR /go/src/github.com/fabiofalci/sconsify
 
 # Upload sconsify source
 COPY . /go/src/github.com/fabiofalci/sconsify
+
+ENV PATH=$PATH:$GOPATH/bin
