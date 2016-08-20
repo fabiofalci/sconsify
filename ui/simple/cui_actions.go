@@ -213,8 +213,12 @@ func keybindings() error {
 			return keyPressed(key, g, v)
 		}))
 	}
+	var specialKeys = []gocui.Key{
+		gocui.KeySpace, gocui.KeyArrowUp,
+		gocui.KeyArrowDown, gocui.KeyArrowLeft,
+		gocui.KeyArrowRight, gocui.KeyEnter}
 
-	for _, value := range []gocui.Key{gocui.KeySpace, gocui.KeyArrowUp, gocui.KeyArrowDown, gocui.KeyArrowLeft, gocui.KeyArrowRight} {
+	for _, value := range specialKeys {
 		key := value
 		addKeyBinding(&keyboard.Keys, newKeyMapping(key, "", func(g *gocui.Gui, v *gocui.View) error {
 			return keyPressed(rune(key), g, v)
