@@ -60,6 +60,7 @@ func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 	gui.PlayingTrack = track
 	gui.setStatus("Playing: " + track.GetFullTitle())
+	gui.updateTracksView()
 }
 
 func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
@@ -219,17 +220,29 @@ func (gui *Gui) getSelectedPlaylistAndTrack() (*sconsify.Playlist, int) {
 
 func (gui *Gui) updateTracksView() {
 	gui.tracksView.Clear()
+	cx, cy := gui.tracksView.Cursor()
+	ox, oy := gui.tracksView.Origin()
 	gui.tracksView.SetCursor(0, 0)
 	gui.tracksView.SetOrigin(0, 0)
 
+	PlayingTrackOnView := false
 	if currentPlaylist := gui.getSelectedPlaylist(); currentPlaylist != nil {
 		for i := 0; i < currentPlaylist.Tracks(); i++ {
 			track := currentPlaylist.Track(i)
-			fmt.Fprintf(gui.tracksView, "%v. %v\n", (i + 1), track.GetTitle())
+			if track == gui.PlayingTrack {
+				PlayingTrackOnView = true
+				fmt.Fprintf(gui.tracksView, "%v. <<%v>>\n", (i + 1), track.GetTitle())
+			} else {
+				fmt.Fprintf(gui.tracksView, "%v. %v\n", (i + 1), track.GetTitle())
+			}
 		}
 		if currentPlaylist.IsOnDemand() {
 			fmt.Fprintf(gui.tracksView, "Press to load\n")
 		}
+	}
+	if PlayingTrackOnView {
+		gui.tracksView.SetCursor(cx, cy)
+		gui.tracksView.SetOrigin(ox, oy)
 	}
 }
 
