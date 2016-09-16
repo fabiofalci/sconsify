@@ -22,6 +22,6 @@ To shuffle selected playlist type `s` or to shuffle all playlists type `S`.
 
 ### Queue
 
-To queue a track type `q`.
+To queue a track type `u`.
 
 ![alt tag](https://raw.githubusercontent.com/wiki/fabiofalci/sconsify/queue.gif)
