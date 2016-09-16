@@ -5,7 +5,7 @@ A spotify console app
 
 A very early stage of a spotify console application.
 
-Requirements: [Libspotify SDK](https://developer.spotify.com/technologies/libspotify/) & [PortAudio](http://www.portaudio.com/).
+Requirements: [Libspotify SDK](https://developer.spotify.com/technologies/libspotify/) & [PortAudio](http://www.portaudio.com/) & Spotify user subscribed to the Premium tier of the Spotify Service ([Libspotify SDK terms of use](https://developer.spotify.com/developer-terms-of-use/)).
 
 
 Installation
