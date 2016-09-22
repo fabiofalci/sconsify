@@ -16,37 +16,40 @@ func (spotify *Spotify) shutdownSpotify() {
 }
 
 func (spotify *Spotify) play(trackUri *sconsify.Track) {
-	link, err := spotify.session.ParseLink(trackUri.URI)
-	if err != nil {
-		return
-	}
-
-	track, err := link.Track()
-	if err != nil {
-		return
-	}
-
-	if trackUri.IsPartial() {
-		trackUri = sconsify.ToSconsifyTrack(track)
-	}
-
-	if !spotify.isTrackAvailable(track) {
-		if trackUri.IsFromWebApi() {
-			retry := trackUri.RetryLoading()
-			if retry < 4 {
-				go func() {
-					time.Sleep(100 * time.Millisecond)
-					spotify.events.Play(trackUri)
-				}()
-				return
-			}
-		}
-		spotify.events.TrackNotAvailable(trackUri)
-		return
-	}
 	player := spotify.session.Player()
-	if err := player.Load(track); err != nil {
-		return
+	if (!spotify.paused) {
+		link, err := spotify.session.ParseLink(trackUri.URI)
+		if err != nil {
+			return
+		}
+
+		track, err := link.Track()
+		if err != nil {
+			return
+		}
+
+		if trackUri.IsPartial() {
+			trackUri = sconsify.ToSconsifyTrack(track)
+		}
+
+		if !spotify.isTrackAvailable(track) {
+			if trackUri.IsFromWebApi() {
+				retry := trackUri.RetryLoading()
+				if retry < 4 {
+					go func() {
+						time.Sleep(100 * time.Millisecond)
+						spotify.events.Play(trackUri)
+					}()
+					return
+				}
+			}
+			spotify.events.TrackNotAvailable(trackUri)
+			return
+		}
+		if err := player.Load(track); err != nil {
+			return
+		}
+
 	}
 	player.Play()
 
