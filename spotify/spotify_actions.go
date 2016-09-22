@@ -6,6 +6,7 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 	"time"
+	"strings"
 )
 
 func (spotify *Spotify) shutdownSpotify() {
@@ -61,6 +62,8 @@ func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {
 
 func (spotify *Spotify) search(query string) {
 	playlists := sconsify.InitPlaylists()
+
+	query = checkAlias(query)
 	name := " " + query
 
 	playlist := sconsify.InitSearchPlaylist(name, name, func(playlist *sconsify.Playlist) {
@@ -82,6 +85,17 @@ func (spotify *Spotify) search(query string) {
 	playlists.AddPlaylist(playlist)
 
 	spotify.events.NewPlaylist(playlists)
+}
+
+func checkAlias(query string) string {
+	if strings.HasPrefix(query, "ar:") {
+		return strings.Replace(query, "ar:", "artist:", 1)
+	} else if strings.HasPrefix(query, "al:") {
+		return strings.Replace(query, "al:", "album:", 1)
+	} else if strings.HasPrefix(query, "tr:") {
+		return strings.Replace(query, "tr:", "track:", 1)
+	}
+	return query
 }
 
 func (spotify *Spotify) getWebApiClient() *webspotify.Client {
