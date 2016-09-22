@@ -9,8 +9,8 @@ import (
 	"github.com/fabiofalci/sconsify/infrastructure"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify/mock"
-	"github.com/fabiofalci/sconsify/ui"
 	"os/exec"
+	"github.com/fabiofalci/sconsify/ui/simple"
 )
 
 var output bytes.Buffer
@@ -42,7 +42,7 @@ func main() {
 		go runTests()
 	}
 
-	ui := ui.InitialiseConsoleUserInterface(events, false)
+	ui := simple.InitialiseConsoleUserInterface(events, false)
 	sconsify.StartMainLoop(events, ui, false)
 	println(output.String())
 	sleep() // otherwise gocui eventually fails to quit properly
@@ -245,13 +245,13 @@ func cmdAndAssert(key string, expectedPlaylist string, expectedTrack string) {
 }
 
 func assert(expectedPlaylist string, expectedTrack string) {
-	if valid, actualPlaylist := ui.CuiAssertSelectedPlaylist(expectedPlaylist); !valid {
+	if valid, actualPlaylist := simple.CuiAssertSelectedPlaylist(expectedPlaylist); !valid {
 		output.WriteString(fmt.Sprintf("Playlist '%v' not found on position but '%v'", expectedPlaylist, actualPlaylist))
 		cmd("q")
 		panic("Boom!")
 	}
 	if expectedTrack != "" {
-		if valid, actualTrack := ui.CuiAssertSelectedTrack(expectedTrack); !valid {
+		if valid, actualTrack := simple.CuiAssertSelectedTrack(expectedTrack); !valid {
 			output.WriteString(fmt.Sprintf("Track '%v' not found but '%v'", expectedTrack, actualTrack))
 			cmd("q")
 			panic("Boom!")
@@ -260,7 +260,7 @@ func assert(expectedPlaylist string, expectedTrack string) {
 }
 
 func assertNextTrackFromQueue(expectedNextTrackFromQueue string) {
-	if valid, actualTrack := ui.CuiAssertQueueNextTrack(expectedNextTrackFromQueue); !valid {
+	if valid, actualTrack := simple.CuiAssertQueueNextTrack(expectedNextTrackFromQueue); !valid {
 		output.WriteString(fmt.Sprintf("Track '%v' is not the next in the queue but '%v'", expectedNextTrackFromQueue, actualTrack))
 		cmd("q")
 		panic("Boom!")
