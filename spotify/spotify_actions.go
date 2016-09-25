@@ -5,8 +5,8 @@ import (
 	"github.com/fabiofalci/sconsify/sconsify"
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
-	"time"
 	"strings"
+	"time"
 )
 
 func (spotify *Spotify) shutdownSpotify() {
@@ -17,7 +17,7 @@ func (spotify *Spotify) shutdownSpotify() {
 
 func (spotify *Spotify) play(trackUri *sconsify.Track) {
 	player := spotify.session.Player()
-	if (!spotify.paused) {
+	if !spotify.paused || spotify.currentTrack != trackUri {
 		link, err := spotify.session.ParseLink(trackUri.URI)
 		if err != nil {
 			return
