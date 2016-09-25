@@ -54,6 +54,7 @@ const (
 	Right              string = "Right"
 	OpenCloseFolder    string = "OpenCloseFolder"
 	ArtistAlbums       string = "ArtistAlbums"
+	Help               string = "Help"
 )
 
 var multipleKeysBuffer []rune
@@ -128,6 +129,9 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[ArtistAlbums] {
 		keyboard.addKey("i", ArtistAlbums)
+	}
+	if !keyboard.UsedFunctions[Help] {
+		keyboard.addKey("H", Help)
 	}
 }
 
@@ -251,6 +255,10 @@ func keybindings() error {
 	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
 
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
+
+	// Help Keybinding
+	keyboard.configureKey(showHelp, Help, "")
+
 	keyboard.configureKey(mainNextViewLeft, Left, VIEW_TRACKS)
 	keyboard.configureKey(nextView, Left, VIEW_QUEUE)
 	keyboard.configureKey(nextView, Right, VIEW_PLAYLISTS)
@@ -464,6 +472,38 @@ func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.clearStatusView()
 	gui.statusView.Editable = true
 	gui.g.SetCurrentView(VIEW_STATUS)
+	return nil
+}
+
+func showHelp(g *gocui.Gui, v *gocui.View) error {
+	maxX, maxY := g.Size()
+	v2, _ := g.SetView("help_view", maxX/2-maxX/3, maxY/2-maxY/3,
+		maxX/2+maxX/3, maxY/2+maxY/3)
+	keyboard.configureKey(cursorUp, Up, v2.Name())
+	keyboard.configureKey(cursorDown, Down, v2.Name())
+
+	fmt.Fprintln(v2, "Shortcuts")
+	fmt.Fprintln(v2, "---------")
+	currentView := g.CurrentView()
+	g.SetCurrentView("help_view")
+
+	for k, v := range keyboard.ConfiguredKeys {
+		fmt.Fprintln(v2, k, ":", v)
+	}
+
+	/*for k,v := range keyboard.SequentialKeys {
+		fmt.Fprintln(v2, k,":", v)
+	}*/
+
+	if err := g.SetKeybinding("help_view", rune('q'), gocui.ModNone,
+		func(g *gocui.Gui, v3 *gocui.View) error {
+			g.DeleteView(v3.Name())
+			g.SetCurrentView(currentView.Name())
+			return nil
+		}); err != nil {
+		fmt.Println(err)
+		// handle error
+	}
 	return nil
 }
 
