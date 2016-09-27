@@ -39,10 +39,8 @@ func (playlists *Playlists) Get(name string) *Playlist {
 			return playlist
 		}
 		if playlist.IsFolder() {
-			for _, subPlaylist := range playlist.playlists {
-				if subPlaylist.Name() == name {
-					return subPlaylist
-				}
+			if p := playlist.GetPlaylist(name); p != nil {
+				return p
 			}
 		}
 	}

@@ -54,11 +54,13 @@ const (
 	Right              string = "Right"
 	OpenCloseFolder    string = "OpenCloseFolder"
 	ArtistAlbums       string = "ArtistAlbums"
+	CreatePlaylist     string = "CreatePlaylist"
 )
 
 var multipleKeysBuffer []rune
 var multipleKeysNumber int
 var keyboard *Keyboard
+var actionBeingExecuted string
 
 func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[PauseTrack] {
@@ -128,6 +130,9 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[ArtistAlbums] {
 		keyboard.addKey("i", ArtistAlbums)
+	}
+	if !keyboard.UsedFunctions[CreatePlaylist] {
+		keyboard.addKey("c", CreatePlaylist)
 	}
 }
 
@@ -250,7 +255,7 @@ func keybindings() error {
 	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)
 	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
 
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, searchCommand))
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, executeAction))
 	keyboard.configureKey(mainNextViewLeft, Left, VIEW_TRACKS)
 	keyboard.configureKey(nextView, Left, VIEW_QUEUE)
 	keyboard.configureKey(nextView, Right, VIEW_PLAYLISTS)
@@ -258,6 +263,7 @@ func keybindings() error {
 	keyboard.configureKey(openCloseFolderCommand, OpenCloseFolder, VIEW_PLAYLISTS)
 	keyboard.configureKey(artistAlbums, ArtistAlbums, VIEW_TRACKS)
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
+	keyboard.configureKey(enableCreatePlaylistCommand, CreatePlaylist, VIEW_QUEUE)
 
 	// numbers
 	for i := 0; i < 10; i++ {
@@ -424,8 +430,7 @@ func removeAllTracksCommand(g *gocui.Gui, v *gocui.View) error {
 			return gui.enableSideView()
 		}
 	case VIEW_QUEUE:
-		queue.RemoveAll()
-		gui.updateQueueView()
+		gui.clearQueueView()
 		return gui.enableTracksView()
 	}
 	return nil
@@ -464,14 +469,12 @@ func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.clearStatusView()
 	gui.statusView.Editable = true
 	gui.g.SetCurrentView(VIEW_STATUS)
+	actionBeingExecuted = Search
 	return nil
 }
 
 func searchCommand(g *gocui.Gui, v *gocui.View) error {
-	// after user hit Enter, the typed command is at position -1
-	query, _ := gui.statusView.Line(-1)
-	query = strings.Trim(query, " ")
-	if query != "" {
+	if query := getTypedCommand(); query != "" {
 		events.Search(query)
 	}
 	gui.enableSideView()
@@ -479,6 +482,40 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.statusView.Editable = false
 	gui.updateCurrentStatus()
 	return nil
+}
+
+func enableCreatePlaylistCommand(g *gocui.Gui, v *gocui.View) error {
+	gui.clearStatusView()
+	gui.statusView.Editable = true
+	gui.g.SetCurrentView(VIEW_STATUS)
+	actionBeingExecuted = CreatePlaylist
+	return nil
+}
+
+func createPlaylistCommand(g *gocui.Gui, v *gocui.View) error {
+	if playlistName := getTypedCommand(); playlistName != "" {
+		gui.createPlaylistFromQueue(playlistName)
+	}
+	gui.enableSideView()
+	gui.clearStatusView()
+	gui.statusView.Editable = false
+	gui.updateCurrentStatus()
+	return nil
+}
+
+func getTypedCommand() string {
+	// after user hit Enter, the typed command is at position -1
+	typed, _ := gui.statusView.Line(-1)
+	return strings.Trim(typed, " ")
+}
+
+func executeAction(g *gocui.Gui, v *gocui.View) error {
+	if (actionBeingExecuted == Search) {
+		return searchCommand(g, v)
+	} else if (actionBeingExecuted == CreatePlaylist) {
+		return createPlaylistCommand(g, v)
+	}
+	return nil;
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {

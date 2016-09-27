@@ -159,6 +159,15 @@ func (playlist *Playlist) IsFolderOpen() bool {
 	return playlist.open
 }
 
+func (playlist *Playlist) GetPlaylist(name string) *Playlist {
+	for _, subPlaylist := range playlist.playlists {
+		if subPlaylist.Name() == name {
+			return subPlaylist
+		}
+	}
+	return nil
+}
+
 func (playlist *Playlist) OpenFolder() {
 	if !playlist.IsFolderOpen() {
 		playlist.InvertOpenClose()

@@ -202,6 +202,32 @@ func (gui *Gui) replay() {
 	events.Replay()
 }
 
+func (gui *Gui) createPlaylistFromQueue(playlistName string) {
+	gui.g.Execute(func(g *gocui.Gui) error {
+		unsavedFolder := playlists.Get("*Unsaved")
+		if (unsavedFolder == nil) {
+			unsavedFolder = sconsify.InitFolder("*Unsaved", "*Unsaved", make([]*sconsify.Playlist, 0))
+			playlists.AddPlaylist(unsavedFolder)
+		}
+
+		playlist := unsavedFolder.GetPlaylist(" "+playlistName)
+		if (playlist == nil) {
+			playlist = sconsify.InitPlaylist(playlistName, " "+playlistName, make([]*sconsify.Track, 0))
+			unsavedFolder.AddPlaylist(playlist)
+		}
+
+		for _, track := range queue.Contents() {
+			playlist.AddTrack(sconsify.InitWebApiTrack(string(track.URI), track.Artist, track.Name, track.Duration))
+		}
+
+		gui.clearQueueView()
+		gui.updatePlaylistsView()
+		gui.updateTracksView()
+		return nil
+	})
+
+}
+
 func (gui *Gui) getSelectedPlaylistAndTrack() (*sconsify.Playlist, int) {
 	if currentPlaylist := gui.getSelectedPlaylist(); currentPlaylist != nil {
 		if currentTrack, err := gui.getSelectedTrackName(); err == nil {
@@ -258,6 +284,11 @@ func (gui *Gui) updatePlaylistsView() {
 			}
 		}
 	}
+}
+
+func (gui *Gui) clearQueueView() {
+	queue.RemoveAll()
+	gui.updateQueueView()
 }
 
 func (gui *Gui) updateQueueView() {
