@@ -58,15 +58,29 @@ container-build: bundles
 	docker build -t sconsify-build .
 
 binary: container-build
-	docker run --rm -v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" sconsify-build make build
+	docker run --rm -v "$(CURDIR)/bundles/container:/go/src/github.com/fabiofalci/sconsify/bundles" sconsify-build make build
 
 shell: container-build
 	docker run --rm -it \
-		-v "$(CURDIR)/bundles:/go/src/github.com/fabiofalci/sconsify/bundles" \
+		-v "$(CURDIR)/bundles/container:/go/src/github.com/fabiofalci/sconsify/bundles" \
 		-v /dev/snd:/dev/snd \
 		--privileged \
 		sconsify-build \
 		bash
 
+clean:
+	rm -rf bundles/
+
 bundles:
-	mkdir -p bundles
+	mkdir -p bundles/container
+
+#
+# Only works on osx as we can generate both osx and linux binaries in one go.
+#
+release: clean binary build
+	mkdir -p bundles/release/{linux,osx}
+	cp bundles/sconsify bundles/release/osx/
+	cp bundles/container/sconsify bundles/release/linux/
+	zip -j bundles/release/osx-x86_64-sconsify-$(VERSION).zip bundles/release/osx/sconsify
+	zip -j bundles/release/linux-x86_64-sconsify-$(VERSION).zip bundles/release/linux/sconsify
+
