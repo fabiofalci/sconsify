@@ -16,6 +16,7 @@ func (spotify *Spotify) shutdownSpotify() {
 }
 
 func (spotify *Spotify) play(trackUri *sconsify.Track) {
+
 	player := spotify.session.Player()
 	if !spotify.paused || spotify.currentTrack != trackUri {
 		link, err := spotify.session.ParseLink(trackUri.URI)
@@ -49,7 +50,7 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 		if err := player.Load(track); err != nil {
 			return
 		}
-
+		spotify.events.NewTrackLoaded(track.Duration())
 	}
 	player.Play()
 

@@ -110,6 +110,9 @@ func (cui *ConsoleUserInterface) ArtistAlbums(folder *sconsify.Playlist) {
 	})
 }
 
+func(cui *ConsoleUserInterface) NewTrackLoaded(duration time.Duration) {
+}
+
 func (gui *Gui) startGui() {
 	gui.g = gocui.NewGui()
 	if err := gui.g.Init(); err != nil {
