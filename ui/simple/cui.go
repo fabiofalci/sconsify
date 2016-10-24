@@ -20,6 +20,7 @@ var (
 	consoleUserInterface sconsify.UserInterface
 	player               Player
 	loadStateWhenInit    bool
+	timeLeftChannels *TimeLeftChannels
 )
 
 const (
@@ -31,6 +32,11 @@ const (
 )
 
 type ConsoleUserInterface struct{}
+
+type TimeLeftChannels struct {
+	time_left chan time.Duration
+	song_paused chan bool
+}
 
 type Gui struct {
 	g             *gocui.Gui
@@ -57,12 +63,20 @@ func InitialiseConsoleUserInterface(ev *sconsify.Events, loadState bool) sconsif
 
 func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 	gui.setStatus("Paused: " + track.GetFullTitle())
+	select {
+	case timeLeftChannels.song_paused <- true:
+	default:
+	}
 }
 
 func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 	gui.PlayingTrack = track
 	gui.setStatus("Playing: " + track.GetFullTitle())
 	gui.updateTracksView()
+	select {
+	case timeLeftChannels.song_paused <- false:
+	default:
+	}
 }
 
 func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
@@ -113,6 +127,41 @@ func (cui *ConsoleUserInterface) ArtistAlbums(folder *sconsify.Playlist) {
 }
 
 func(cui *ConsoleUserInterface) NewTrackLoaded(duration time.Duration) {
+	select {
+	case timeLeftChannels.time_left <- duration:
+	default:
+	}
+}
+
+func(gui *Gui) countdown() {
+
+	var time_left time.Duration
+	active := false
+	for {
+		select {
+		case paused := <-timeLeftChannels.song_paused:
+			active = !paused
+		case duration := <-timeLeftChannels.time_left:
+			time_left = duration
+			//active = true
+		default:
+		}
+
+		if (active) {
+			gui.g.Execute(func(g *gocui.Gui) error {
+				gui.clearTimeLeftView()
+				fmt.Fprintf(gui.timeLeftView, time_left.String())
+				return nil
+			})
+		}
+
+		then := time.Now().Round(time.Second)
+		time.Sleep(1 * time.Second)
+		diff := time.Now().Round(time.Second).Sub(then)
+		if (active) {
+			time_left = time_left - diff
+		}
+	}
 }
 
 func (gui *Gui) startGui() {
@@ -129,6 +178,13 @@ func (gui *Gui) startGui() {
 	gui.g.SelBgColor = gocui.ColorGreen
 	gui.g.SelFgColor = gocui.ColorBlack
 	gui.g.Cursor = true
+
+	// Time left counter thread
+	timeLeftChannels = &TimeLeftChannels {
+		time_left: make(chan time.Duration, 1),
+		song_paused: make(chan bool, 1),
+	}
+	go gui.countdown()
 
 	if err := gui.g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
@@ -337,14 +393,14 @@ func layout(g *gocui.Gui) error {
 		}
 		gui.queueView = v
 	}
-	if v, err := g.SetView(VIEW_STATUS, -1, maxY-2, maxX/2, maxY); err != nil {
+	if v, err := g.SetView(VIEW_STATUS, -1, maxY-2, int(playlistSize+trackSize), maxY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		gui.statusView = v
 	}
 
-	if v, err := g.SetView(VIEW_TIME_LEFT, maxX/2, maxY-2, maxX, maxY); err != nil {
+	if v, err := g.SetView(VIEW_TIME_LEFT, int(playlistSize+trackSize), maxY-2, maxX, maxY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
