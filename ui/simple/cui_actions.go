@@ -524,3 +524,9 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	// <-events.ShutdownUpdates()
 	return gocui.ErrQuit
 }
+
+func (gui *Gui) clearTimeLeftView() {
+	gui.timeLeftView.Clear()
+	gui.timeLeftView.SetCursor(0,0)
+	gui.timeLeftView.SetOrigin(0,0)
+}

@@ -27,6 +27,7 @@ const (
 	VIEW_TRACKS    = "tracks"
 	VIEW_QUEUE     = "queue"
 	VIEW_STATUS    = "status"
+	VIEW_TIME_LEFT = "time_left"
 )
 
 type ConsoleUserInterface struct{}
@@ -37,6 +38,7 @@ type Gui struct {
 	tracksView    *gocui.View
 	statusView    *gocui.View
 	queueView     *gocui.View
+	timeLeftView  *gocui.View
 
 	currentMessage string
 	initialised    bool
@@ -335,11 +337,18 @@ func layout(g *gocui.Gui) error {
 		}
 		gui.queueView = v
 	}
-	if v, err := g.SetView(VIEW_STATUS, -1, maxY-2, maxX, maxY); err != nil {
+	if v, err := g.SetView(VIEW_STATUS, -1, maxY-2, maxX/2, maxY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		gui.statusView = v
+	}
+
+	if v, err := g.SetView(VIEW_TIME_LEFT, maxX/2, maxY-2, maxX, maxY); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		gui.timeLeftView = v
 	}
 
 	if !gui.initialised && loadStateWhenInit {
