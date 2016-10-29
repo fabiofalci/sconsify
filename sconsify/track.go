@@ -55,7 +55,7 @@ func (track *Track) GetFullTitle() string {
 }
 
 func (track *Track) GetTitle() string {
-	return fmt.Sprintf("%v - %v", track.Artist.Name, track.Name)
+	return fmt.Sprintf("%v - %v", track.Name, track.Artist.Name)
 }
 
 func (track *Track) IsPartial() bool {
