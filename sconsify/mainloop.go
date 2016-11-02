@@ -48,6 +48,8 @@ func StartMainLoop(events *Events, ui UserInterface, askForFirstTrack bool) erro
 			ui.ArtistAlbums(playlist)
 		case <-events.ShutdownEngineUpdates():
 			return nil
+		case duration := <-events.NewTrackLoadedUpdate():
+			ui.NewTrackLoaded(duration)
 		}
 	}
 

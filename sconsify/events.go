@@ -1,5 +1,9 @@
 package sconsify
 
+import (
+	"time"
+)
+
 type Events struct {
 	shutdownEngine  chan bool
 	shutdownSpotify chan bool
@@ -18,6 +22,8 @@ type Events struct {
 	trackNotAvailable chan *Track
 	trackPlaying      chan *Track
 	trackPaused       chan *Track
+
+	newTrackLoaded	  chan time.Duration
 }
 
 func InitialiseEvents() *Events {
@@ -37,8 +43,11 @@ func InitialiseEvents() *Events {
 		playTokenLost:     make(chan bool),
 		playlists:         make(chan Playlists),
 		trackNotAvailable: make(chan *Track),
-		trackPlaying:      make(chan *Track),
-		trackPaused:       make(chan *Track)}
+		trackPlaying:      make(chan *Track,2),
+		trackPaused:       make(chan *Track),
+
+		newTrackLoaded:    make(chan time.Duration,2),
+	}
 }
 
 func (events *Events) ShutdownEngine() {
@@ -157,4 +166,15 @@ func (events *Events) ArtistAlbums(folder *Playlist) {
 
 func (events *Events) ArtistAlbumsUpdates() <-chan *Playlist {
 	return events.artistAlbums
+}
+
+func (events *Events) NewTrackLoaded(duration time.Duration) {
+	select {
+	case events.newTrackLoaded <- duration:
+	default:
+	}
+}
+
+func (events *Events) NewTrackLoadedUpdate() <-chan time.Duration {
+	return events.newTrackLoaded
 }

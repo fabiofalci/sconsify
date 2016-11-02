@@ -1,5 +1,7 @@
 package sconsify
 
+import "time"
+
 type UserInterface interface {
 	TrackPaused(track *Track)
 	TrackPlaying(track *Track)
@@ -9,4 +11,5 @@ type UserInterface interface {
 	NewPlaylists(playlists Playlists) error
 	ArtistAlbums(folder *Playlist)
 	Shutdown()
+	NewTrackLoaded(duration time.Duration)
 }

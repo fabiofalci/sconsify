@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/fabiofalci/sconsify/sconsify"
+	"time"
 )
 
 type NoUi struct {
@@ -125,6 +126,10 @@ func (noui *NoUi) listenForKeyboardEvents() {
 			noui.Shutdown()
 		}
 	}
+}
+
+func (noui *NoUi) NewTrackLoaded(duration time.Duration) {
+
 }
 
 func (p *SilentPrinter) Print(message string) {
