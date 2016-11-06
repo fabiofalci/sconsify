@@ -51,7 +51,7 @@ func ToSconsifyTrack(track *sp.Track) *Track {
 }
 
 func (track *Track) GetFullTitle() string {
-	return fmt.Sprintf("%v - %v [%v]", track.Artist.Name, track.Name, track.Duration)
+	return fmt.Sprintf("%v - %v [%v]", track.Name, track.Artist.Name, track.Duration)
 }
 
 func (track *Track) GetTitle() string {
