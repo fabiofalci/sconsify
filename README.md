@@ -7,6 +7,8 @@ A very early stage of a spotify console application.
 
 Requirements: [Libspotify SDK](https://developer.spotify.com/technologies/libspotify/) & [PortAudio](http://www.portaudio.com/) & Spotify user subscribed to the Premium tier of the Spotify Service ([Libspotify SDK terms of use](https://developer.spotify.com/developer-terms-of-use/)).
 
+Important macOS: it seems sconsify is not working properly on sierra.
+
 
 Installation
 ------------
