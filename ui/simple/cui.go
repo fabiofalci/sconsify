@@ -70,13 +70,16 @@ func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 }
 
 func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
-	gui.PlayingTrack = track
-	gui.setStatus("Playing: " + track.GetFullTitle())
-	gui.updateTracksView()
-	select {
-	case timeLeftChannels.song_paused <- false:
-	default:
-	}
+	gui.g.Execute(func(g *gocui.Gui) error {
+		gui.PlayingTrack = track
+		gui.setStatus("Playing: " + track.GetFullTitle())
+		gui.updateTracksView()
+		select {
+		case timeLeftChannels.song_paused <- false:
+		default:
+		}
+		return nil
+	})
 }
 
 func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
@@ -148,9 +151,10 @@ func(gui *Gui) countdown() {
 		}
 
 		if (active) {
+			time_left_copy := time_left
 			gui.g.Execute(func(g *gocui.Gui) error {
 				gui.clearTimeLeftView()
-				fmt.Fprintf(gui.timeLeftView, time_left.String())
+				fmt.Fprintf(gui.timeLeftView, time_left_copy.String())
 				return nil
 			})
 		}
