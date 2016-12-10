@@ -83,7 +83,10 @@ func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 }
 
 func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
-	gui.flash("Not available: " + track.GetTitle())
+	gui.g.Execute(func (g *gocui.Gui) error {
+		gui.flash("Not available: " + track.GetTitle())
+		return nil
+	})
 }
 
 func (cui *ConsoleUserInterface) Shutdown() {
@@ -198,7 +201,10 @@ func (gui *Gui) startGui() {
 func (gui *Gui) flash(message string) {
 	go func() {
 		time.Sleep(4 * time.Second)
-		gui.setStatus(gui.currentMessage)
+		gui.g.Execute(func(g *gocui.Gui) error {
+			gui.setStatus(gui.currentMessage)
+			return nil
+		})
 	}()
 	gui.updateStatus(message)
 }
@@ -255,7 +261,10 @@ func (gui *Gui) getNextFromPlaylist() *sconsify.Track {
 
 func (gui *Gui) getNextFromQueue() *sconsify.Track {
 	track := queue.Pop()
-	go gui.updateQueueView()
+	gui.g.Execute(func(g *gocui.Gui) error {
+		gui.updateQueueView()
+		return nil
+	})
 	return track
 }
 
