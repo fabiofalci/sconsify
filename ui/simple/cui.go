@@ -34,8 +34,8 @@ const (
 type ConsoleUserInterface struct{}
 
 type TimeLeftChannels struct {
-	time_left chan time.Duration
-	song_paused chan bool
+	timeLeft   chan time.Duration
+	songPaused chan bool
 }
 
 type Gui struct {
@@ -49,6 +49,8 @@ type Gui struct {
 	currentMessage string
 	initialised    bool
 	PlayingTrack   *sconsify.Track
+
+	ticker *time.Ticker
 }
 
 func InitialiseConsoleUserInterface(ev *sconsify.Events, loadState bool) sconsify.UserInterface {
@@ -64,7 +66,7 @@ func InitialiseConsoleUserInterface(ev *sconsify.Events, loadState bool) sconsif
 func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 	gui.setStatus("Paused: " + track.GetFullTitle())
 	select {
-	case timeLeftChannels.song_paused <- true:
+	case timeLeftChannels.songPaused <- true:
 	default:
 	}
 }
@@ -75,7 +77,7 @@ func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 		gui.setStatus("Playing: " + track.GetFullTitle())
 		gui.updateTracksView()
 		select {
-		case timeLeftChannels.song_paused <- false:
+		case timeLeftChannels.songPaused <- false:
 		default:
 		}
 		return nil
@@ -134,41 +136,70 @@ func (cui *ConsoleUserInterface) ArtistAlbums(folder *sconsify.Playlist) {
 
 func(cui *ConsoleUserInterface) NewTrackLoaded(duration time.Duration) {
 	select {
-	case timeLeftChannels.time_left <- duration:
+	case timeLeftChannels.timeLeft <- duration:
 	default:
 	}
 }
 
 func(gui *Gui) countdown() {
+	gui.ticker = time.NewTicker(time.Second)
+	go func() {
+		var timeLeft time.Duration
+		isPlaying := false
+		for range gui.ticker.C {
+			select {
+			case paused := <-timeLeftChannels.songPaused:
+				isPlaying = !paused
+			case duration := <-timeLeftChannels.timeLeft:
+				timeLeft = duration
+			default:
+			}
+			//infrastructure.Debugf("isPlaying %v Duration %v", isPlaying, timeLeft)
 
-	var time_left time.Duration
-	active := false
-	for {
-		select {
-		case paused := <-timeLeftChannels.song_paused:
-			active = !paused
-		case duration := <-timeLeftChannels.time_left:
-			time_left = duration
-			//active = true
-		default:
+			if (isPlaying) {
+				if (timeLeft > 0) {
+					timeLeft = timeLeft - time.Second
+				}
+				timeLeftCopy := timeLeft
+				gui.g.Execute(func(g *gocui.Gui) error {
+					gui.clearTimeLeftView()
+					if (timeLeftCopy > 0) {
+						fmt.Fprintf(gui.timeLeftView, timeLeftCopy.String())
+					}
+					return nil
+				})
+			}
 		}
+	}()
 
-		if (active) {
-			time_left_copy := time_left
-			gui.g.Execute(func(g *gocui.Gui) error {
-				gui.clearTimeLeftView()
-				fmt.Fprintf(gui.timeLeftView, time_left_copy.String())
-				return nil
-			})
-		}
-
-		then := time.Now().Round(time.Second)
-		time.Sleep(1 * time.Second)
-		diff := time.Now().Round(time.Second).Sub(then)
-		if (active) {
-			time_left = time_left - diff
-		}
-	}
+	//var time_left time.Duration
+	//active := false
+	//for {
+	//	select {
+	//	case paused := <-timeLeftChannels.song_paused:
+	//		active = !paused
+	//	case duration := <-timeLeftChannels.time_left:
+	//		time_left = duration
+	//		//active = true
+	//	default:
+	//	}
+	//
+	//	if (active) {
+	//		time_left_copy := time_left
+	//		gui.g.Execute(func(g *gocui.Gui) error {
+	//			gui.clearTimeLeftView()
+	//			fmt.Fprintf(gui.timeLeftView, time_left_copy.String())
+	//			return nil
+	//		})
+	//	}
+	//
+	//	then := time.Now().Round(time.Second)
+	//	time.Sleep(1 * time.Second)
+	//	diff := time.Now().Round(time.Second).Sub(then)
+	//	if (active) {
+	//		time_left = time_left - diff
+	//	}
+	//}
 }
 
 func (gui *Gui) startGui() {
@@ -188,10 +219,10 @@ func (gui *Gui) startGui() {
 
 	// Time left counter thread
 	timeLeftChannels = &TimeLeftChannels {
-		time_left: make(chan time.Duration, 1),
-		song_paused: make(chan bool, 1),
+		timeLeft: make(chan time.Duration, 1),
+		songPaused: make(chan bool, 1),
 	}
-	go gui.countdown()
+	gui.countdown()
 
 	if err := gui.g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
