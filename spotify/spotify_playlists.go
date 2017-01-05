@@ -8,53 +8,72 @@ import (
 	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 	"strconv"
+	"fmt"
 )
 
 func (spotify *Spotify) initPlaylist() error {
 	playlists := sconsify.InitPlaylists()
 
-	allPlaylists, err := spotify.session.Playlists()
-	if err != nil {
-		return err
-	}
-	allPlaylists.Wait()
-	var folderPlaylists []*sconsify.Playlist
-	var folder *sp.PlaylistFolder
-	infrastructure.Debugf("# of playlists %v", allPlaylists.Playlists())
-	for i := 0; i < allPlaylists.Playlists(); i++ {
-		if allPlaylists.PlaylistType(i) == sp.PlaylistTypeStartFolder {
-			folder, _ = allPlaylists.Folder(i)
-			folderPlaylists = make([]*sconsify.Playlist, 0)
-			infrastructure.Debugf("Opening folder '%v' (%v)", folder.Id(), folder.Name())
-		} else if allPlaylists.PlaylistType(i) == sp.PlaylistTypeEndFolder {
-			if folder != nil {
-				playlists.AddPlaylist(sconsify.InitFolder(strconv.Itoa(int(folder.Id())), folder.Name(), folderPlaylists))
-				infrastructure.Debugf("Closing folder '%v' (%v)", folder.Id(), folder.Name())
-			} else {
-				infrastructure.Debug("Closing a null folder, this doesn't look right ")
+	if spotify.client != nil {
+		if privateUser, err := spotify.client.CurrentUser(); err == nil {
+			offset := 0
+			total := 1
+			for offset <= total {
+				offset, total = spotify.loadPlaylists(offset, privateUser, playlists)
+				if offset > total {
+					fmt.Printf("Loaded %v from %v playlists\n", total, total)
+				} else {
+					fmt.Printf("Loaded %v from %v playlists\n", offset, total)
+				}
 			}
-			folderPlaylists = nil
-			folder = nil
+		} else {
+			panic(err)
 		}
-
-		if allPlaylists.PlaylistType(i) != sp.PlaylistTypePlaylist {
-			continue
+	} else {
+		fmt.Print("Warning: not using -web-api flag. Sconsify will load playlists using deprecated libspotify API. If not working try -web-api flag.")
+		allPlaylists, err := spotify.session.Playlists()
+		if err != nil {
+			return err
 		}
-
-		playlist := allPlaylists.Playlist(i)
-		playlist.Wait()
-		if spotify.canAddPlaylist(playlist, allPlaylists.PlaylistType(i)) {
-			id := playlist.Link().String()
-			infrastructure.Debugf("Playlist '%v' (%v)", id, playlist.Name())
-			tracks := make([]*sconsify.Track, playlist.Tracks())
-			infrastructure.Debugf("\t# of tracks %v", playlist.Tracks())
-			for i := 0; i < playlist.Tracks(); i++ {
-				tracks[i] = spotify.initTrack(playlist.Track(i))
+		allPlaylists.Wait()
+		var folderPlaylists []*sconsify.Playlist
+		var folder *sp.PlaylistFolder
+		infrastructure.Debugf("# of playlists %v", allPlaylists.Playlists())
+		for i := 0; i < allPlaylists.Playlists(); i++ {
+			if allPlaylists.PlaylistType(i) == sp.PlaylistTypeStartFolder {
+				folder, _ = allPlaylists.Folder(i)
+				folderPlaylists = make([]*sconsify.Playlist, 0)
+				infrastructure.Debugf("Opening folder '%v' (%v)", folder.Id(), folder.Name())
+			} else if allPlaylists.PlaylistType(i) == sp.PlaylistTypeEndFolder {
+				if folder != nil {
+					playlists.AddPlaylist(sconsify.InitFolder(strconv.Itoa(int(folder.Id())), folder.Name(), folderPlaylists))
+					infrastructure.Debugf("Closing folder '%v' (%v)", folder.Id(), folder.Name())
+				} else {
+					infrastructure.Debug("Closing a null folder, this doesn't look right ")
+				}
+				folderPlaylists = nil
+				folder = nil
 			}
-			if folderPlaylists == nil {
-				playlists.AddPlaylist(sconsify.InitPlaylist(id, playlist.Name(), tracks))
-			} else {
-				folderPlaylists = append(folderPlaylists, sconsify.InitSubPlaylist(id, playlist.Name(), tracks))
+
+			if allPlaylists.PlaylistType(i) != sp.PlaylistTypePlaylist {
+				continue
+			}
+
+			playlist := allPlaylists.Playlist(i)
+			playlist.Wait()
+			if spotify.canAddPlaylist(playlist, allPlaylists.PlaylistType(i)) {
+				id := playlist.Link().String()
+				infrastructure.Debugf("Playlist '%v' (%v)", id, playlist.Name())
+				tracks := make([]*sconsify.Track, playlist.Tracks())
+				infrastructure.Debugf("\t# of tracks %v", playlist.Tracks())
+				for i := 0; i < playlist.Tracks(); i++ {
+					tracks[i] = spotify.initTrack(playlist.Track(i))
+				}
+				if folderPlaylists == nil {
+					playlists.AddPlaylist(sconsify.InitPlaylist(id, playlist.Name(), tracks))
+				} else {
+					folderPlaylists = append(folderPlaylists, sconsify.InitSubPlaylist(id, playlist.Name(), tracks))
+				}
 			}
 		}
 	}
@@ -99,6 +118,30 @@ func (spotify *Spotify) initPlaylist() error {
 
 	spotify.events.NewPlaylist(playlists)
 	return nil
+}
+
+func (spotify *Spotify) loadPlaylists(offset int, privateUser *webspotify.PrivateUser, playlists *sconsify.Playlists) (int, int) {
+	limit := 20
+	options := &webspotify.Options{Limit: &limit, Offset: &offset}
+	if simplePlaylistPage, err := spotify.client.GetPlaylistsForUserOpt(privateUser.ID, options); err == nil {
+		for _, webPlaylist := range simplePlaylistPage.Playlists {
+			if fullPlaylist, err := spotify.client.GetPlaylist(webPlaylist.Owner.ID, webPlaylist.ID); err == nil {
+				tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
+				for i, track := range fullPlaylist.Tracks.Tracks {
+					webArtist := track.Track.Artists[0]
+					artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+					tracks[i] = sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
+				}
+				playlist := sconsify.InitPlaylist(string(fullPlaylist.URI), fullPlaylist.Name, tracks)
+				playlists.AddPlaylist(playlist)
+			}
+		}
+
+		// simplePlaylistPage.Offset is returning 0 instead of offset
+		return offset + limit, simplePlaylistPage.Total
+	}
+
+	return 0, 0
 }
 
 func (spotify *Spotify) loadWebApiCacheIfNecessary() *WebApiCache {
