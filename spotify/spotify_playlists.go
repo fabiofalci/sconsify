@@ -30,7 +30,7 @@ func (spotify *Spotify) initPlaylist() error {
 			panic(err)
 		}
 	} else {
-		fmt.Print("Warning: not using -web-api flag. Sconsify will load playlists using deprecated libspotify API. If not working try -web-api flag.")
+		fmt.Print("Warning: not using -web-api flag. Sconsify will load playlists using deprecated libspotify API. If not working try -web-api flag.\n")
 		allPlaylists, err := spotify.session.Playlists()
 		if err != nil {
 			return err
