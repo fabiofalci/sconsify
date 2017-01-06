@@ -19,8 +19,8 @@ Installation
 
 `Archlinux`
 
-	$ sudo pacman -S portaudio
-	$ sudo yaourt -S libspotify
+	$ pacman -S portaudio
+	$ yaourt -S libspotify
 
 `Ubuntu` & `debian`
 
