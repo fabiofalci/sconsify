@@ -17,7 +17,7 @@ type Spotify struct {
 	currentTrack       *sconsify.Track
 	paused             bool
 	events             *sconsify.Events
-	pa                 *portAudio
+	pa                 *audioWriter
 	session            *sp.Session
 	appKey             []byte
 	playlistFilter     []string
@@ -49,15 +49,18 @@ func initialiseSpotify(initConf *SpotifyInitConf, username string, pass []byte, 
 	if err := spotify.initKey(); err != nil {
 		return err
 	}
-	pa := newPortAudio()
+	audioWriter, err := newAudioWriter()
+	if err != nil {
+		return err
+	}
 
 	cacheLocation, err := spotify.initCache()
 	if err == nil {
-		err = spotify.initSession(pa, cacheLocation, initConf.PreferredBitrate)
+		err = spotify.initSession(audioWriter, cacheLocation, initConf.PreferredBitrate)
 		if err == nil {
 			err = spotify.login(username, pass)
 			if err == nil {
-				err = spotify.checkIfLoggedIn(initConf, pa)
+				err = spotify.checkIfLoggedIn(initConf, audioWriter)
 			}
 		}
 	}
@@ -74,14 +77,14 @@ func (spotify *Spotify) login(username string, pass []byte) error {
 	return <-spotify.session.LoggedInUpdates()
 }
 
-func (spotify *Spotify) initSession(pa *portAudio, cacheLocation string, preferredBitrate string) error {
+func (spotify *Spotify) initSession(audioWriter *audioWriter, cacheLocation string, preferredBitrate string) error {
 	var err error
 	spotify.session, err = sp.NewSession(&sp.Config{
 		ApplicationKey:   spotify.appKey,
 		ApplicationName:  "sconsify",
 		CacheLocation:    cacheLocation,
 		SettingsLocation: cacheLocation,
-		AudioConsumer:    pa,
+		AudioConsumer:    audioWriter,
 	})
 
 	switch preferredBitrate {
@@ -113,11 +116,11 @@ func (spotify *Spotify) initCache() (string, error) {
 	return cacheLocation, nil
 }
 
-func (spotify *Spotify) checkIfLoggedIn(initConf *SpotifyInitConf, pa *portAudio) error {
+func (spotify *Spotify) checkIfLoggedIn(initConf *SpotifyInitConf, audioWriter *audioWriter) error {
 	if !spotify.waitForSuccessfulConnectionStateUpdates() {
 		return errors.New("Could not login")
 	}
-	return spotify.finishInitialisation(initConf, pa)
+	return spotify.finishInitialisation(initConf, audioWriter)
 }
 
 func (spotify *Spotify) waitForSuccessfulConnectionStateUpdates() bool {
@@ -141,7 +144,7 @@ func (spotify *Spotify) isLoggedIn() bool {
 	return spotify.session.ConnectionState() == sp.ConnectionStateLoggedIn
 }
 
-func (spotify *Spotify) finishInitialisation(initConf *SpotifyInitConf, pa *portAudio) error {
+func (spotify *Spotify) finishInitialisation(initConf *SpotifyInitConf, audioWriter *audioWriter) error {
 	if initConf.WebApiAuth {
 		if spotify.client = webapi.Auth(initConf.SpotifyClientId, initConf.AuthRedirectUrl, initConf.CacheWebApiToken); spotify.client != nil {
 			if privateUser, err := spotify.client.CurrentUser(); err == nil {
@@ -156,7 +159,7 @@ func (spotify *Spotify) finishInitialisation(initConf *SpotifyInitConf, pa *port
 	// init audio could happen after initPlaylist but this logs to output therefore
 	// the screen isn't built properly
 	portaudio.Initialize()
-	go pa.player()
+	go audioWriter.player()
 	defer portaudio.Terminate()
 
 	if err := spotify.initPlaylist(); err != nil {
