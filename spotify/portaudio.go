@@ -4,6 +4,8 @@ package spotify
 import (
 	"github.com/gordonklaus/portaudio"
 	sp "github.com/op/go-libspotify/spotify"
+	"time"
+	"github.com/fabiofalci/sconsify/infrastructure"
 )
 
 type audio struct {
@@ -12,63 +14,110 @@ type audio struct {
 }
 
 type portAudio struct {
-	buffer chan *audio
+	buffer chan audio
+}
+
+type portAudioStream struct {
+	device *portaudio.DeviceInfo
+	stream *portaudio.Stream
+
+	channels   int
+	sampleRate int
 }
 
 func newPortAudio() *portAudio {
-	return &portAudio{buffer: make(chan *audio, 8)}
+	return &portAudio{buffer: make(chan audio, 8)}
 }
 
-func (pa *portAudio) player() {
-	out := make([]int16, 2048*2)
+func (pa *portAudio) player(stream *portAudioStream) {
+	buffer := make([]int16, 8192)
+	output := buffer[:]
 
-	stream, err := portaudio.OpenDefaultStream(
-		0,
-		2,     // audio.format.Channels,
-		44100, // float64(audio.format.SampleRate),
-		len(out),
-		&out,
-	)
-	if err != nil {
-		panic(err)
-	}
-	defer stream.Close()
-
-	stream.Start()
-	defer stream.Stop()
-
+	previous := time.Now().Second()
 	for {
-		// Decode the incoming data which is expected to be 2 channels and
-		// delivered as int16 in []byte, hence we need to convert it.
-
+		current := time.Now().Second()
+		if previous != current {
+			infrastructure.Debugf("Getting data %v\n", current)
+			previous = current
+		}
+		var input audio
 		select {
-		case audio := <-pa.buffer:
-			if len(audio.frames) != 2048*2*2 {
-				// panic("unexpected")
-				// don't know if it's a panic or track just ended
-				break
+		case input = <-pa.buffer:
+			// Initialize the audio stream based on the specification of the input format.
+			err := stream.Stream(&output, input.format.Channels, input.format.SampleRate)
+			if err != nil {
+				panic(err)
 			}
 
-			j := 0
-			for i := 0; i < len(audio.frames); i += 2 {
-				out[j] = int16(audio.frames[i]) | int16(audio.frames[i+1])<<8
-				j++
-			}
+			// Decode the incoming data which is expected to be 2 channels and
+			// delivered as int16 in []byte, hence we need to convert it.
+			i := 0
+			for i < len(input.frames) {
+				j := 0
+				for j < len(buffer) && i < len(input.frames) {
+					buffer[j] = int16(input.frames[i]) | int16(input.frames[i+1])<<8
+					j += 1
+					i += 2
+				}
 
-			stream.Write()
+				output = buffer[:j]
+				stream.Write()
+			}
+		//default:
+		//	infrastructure.Debugf("no message received")
+		}
+
+	}
+	infrastructure.Debugf("Out!!")
+}
+
+func (s *portAudioStream) Stream(buffer *[]int16, channels int, sampleRate int) error {
+	if s.stream == nil || s.channels != channels || s.sampleRate != sampleRate {
+		if err := s.reset(); err != nil {
+			return err
+		}
+
+		params := portaudio.HighLatencyParameters(nil, s.device)
+		params.Output.Channels = channels
+		params.SampleRate = float64(sampleRate)
+		params.FramesPerBuffer = len(*buffer)
+
+		stream, err := portaudio.OpenStream(params, buffer)
+		if err != nil {
+			return err
+		}
+		if err := stream.Start(); err != nil {
+			stream.Close()
+			return err
+		}
+
+		s.stream = stream
+		s.channels = channels
+		s.sampleRate = sampleRate
+	}
+	return nil
+}
+
+func (s *portAudioStream) reset() error {
+	if s.stream != nil {
+		if err := s.stream.Stop(); err != nil {
+			return err
+		}
+		if err := s.stream.Close(); err != nil {
+			return err
 		}
 	}
+	return nil
+}
+
+// Write pushes the data in the buffer through to PortAudio.
+func (s *portAudioStream) Write() error {
+	return s.stream.Write()
 }
 
 func (pa *portAudio) WriteAudio(format sp.AudioFormat, frames []byte) int {
-	audio := &audio{format, frames}
-
-	if len(frames) == 0 {
-		return 0
-	}
-
 	select {
-	case pa.buffer <- audio:
+	case pa.buffer <- audio{format, frames}:
 		return len(frames)
 	default:
 		return 0

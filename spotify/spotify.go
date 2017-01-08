@@ -156,7 +156,12 @@ func (spotify *Spotify) finishInitialisation(initConf *SpotifyInitConf, pa *port
 	// init audio could happen after initPlaylist but this logs to output therefore
 	// the screen isn't built properly
 	portaudio.Initialize()
-	go pa.player()
+	out, err := portaudio.DefaultHostApi()
+	if err != nil {
+		portaudio.Terminate()
+		return err
+	}
+	go pa.player(&portAudioStream{device: out.DefaultOutputDevice})
 	defer portaudio.Terminate()
 
 	if err := spotify.initPlaylist(); err != nil {
