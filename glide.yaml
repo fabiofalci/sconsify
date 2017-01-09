@@ -1,7 +1,6 @@
 package: github.com/fabiofalci/sconsify
 import:
 - package: github.com/fabiofalci/flagrc
-- package: github.com/gordonklaus/portaudio
 - package: github.com/howeyc/gopass
 - package: github.com/jroimartin/gocui
 - package: github.com/mitchellh/go-homedir
@@ -11,3 +10,5 @@ import:
 - package: github.com/zmb3/spotify
 - package: golang.org/x/oauth2
 - package: gopkg.in/vmihailenco/msgpack.v2
+- package: github.com/gordonklaus/portaudio
+  version: 2a038c93424fb36d026982db9fd365504a49f566

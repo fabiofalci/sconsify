@@ -1,5 +1,5 @@
-hash: 1b3276a7661d5708e45cdb325e7f9a62ca8305510160fc174f967c6091b9c505
-updated: 2016-03-01T22:26:23.257781298Z
+hash: b29af25b2d97b9befda3c0e78bfca97a8838b360ed44edaf57b4bc0e79e75b7a
+updated: 2017-01-07T21:41:46.397527876Z
 imports:
 - name: github.com/fabiofalci/flagrc
   version: 748e1426fdbd210e5ff8caf145546de70b559f28
@@ -8,7 +8,7 @@ imports:
   subpackages:
   - proto
 - name: github.com/gordonklaus/portaudio
-  version: c41f752f1e3fa5225a513d761c723f45bfe07b89
+  version: 2a038c93424fb36d026982db9fd365504a49f566
 - name: github.com/howeyc/gopass
   version: c89a32868e47b1b7ef388b4d94318b359506400a
 - name: github.com/jroimartin/gocui
@@ -40,18 +40,13 @@ imports:
 - name: google.golang.org/appengine
   version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
   subpackages:
-  - datastore
-  - urlfetch
   - internal
-  - internal/datastore
-  - internal/urlfetch
-  - internal/app_identity
-  - internal/modules
   - internal/base
+  - internal/datastore
   - internal/log
   - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
 - name: gopkg.in/vmihailenco/msgpack.v2
   version: 775d4b0cf44d799d42a1f6fded02252340f4e33d
-  subpackages:
-  - codes
-devImports: []
+testImports: []
