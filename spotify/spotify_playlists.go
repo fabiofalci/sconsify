@@ -11,70 +11,17 @@ import (
 	"fmt"
 )
 
+
 func (spotify *Spotify) initPlaylist() error {
 	playlists := sconsify.InitPlaylists()
 
 	if spotify.client != nil {
-		if privateUser, err := spotify.client.CurrentUser(); err == nil {
-			offset := 0
-			total := 1
-			for offset <= total {
-				offset, total = spotify.loadPlaylists(offset, privateUser, playlists)
-				if offset > total {
-					fmt.Printf("Loaded %v from %v playlists\n", total, total)
-				} else {
-					fmt.Printf("Loaded %v from %v playlists\n", offset, total)
-				}
-			}
-		} else {
-			panic(err)
-		}
-	} else {
-		fmt.Print("Warning: not using -web-api flag. Sconsify will load playlists using deprecated libspotify API. If not working try -web-api flag.\n")
-		allPlaylists, err := spotify.session.Playlists()
-		if err != nil {
+		if err := spotify.initWebApiPlaylist(playlists); err != nil {
 			return err
 		}
-		allPlaylists.Wait()
-		var folderPlaylists []*sconsify.Playlist
-		var folder *sp.PlaylistFolder
-		infrastructure.Debugf("# of playlists %v", allPlaylists.Playlists())
-		for i := 0; i < allPlaylists.Playlists(); i++ {
-			if allPlaylists.PlaylistType(i) == sp.PlaylistTypeStartFolder {
-				folder, _ = allPlaylists.Folder(i)
-				folderPlaylists = make([]*sconsify.Playlist, 0)
-				infrastructure.Debugf("Opening folder '%v' (%v)", folder.Id(), folder.Name())
-			} else if allPlaylists.PlaylistType(i) == sp.PlaylistTypeEndFolder {
-				if folder != nil {
-					playlists.AddPlaylist(sconsify.InitFolder(strconv.Itoa(int(folder.Id())), folder.Name(), folderPlaylists))
-					infrastructure.Debugf("Closing folder '%v' (%v)", folder.Id(), folder.Name())
-				} else {
-					infrastructure.Debug("Closing a null folder, this doesn't look right ")
-				}
-				folderPlaylists = nil
-				folder = nil
-			}
-
-			if allPlaylists.PlaylistType(i) != sp.PlaylistTypePlaylist {
-				continue
-			}
-
-			playlist := allPlaylists.Playlist(i)
-			playlist.Wait()
-			if spotify.canAddPlaylist(playlist, allPlaylists.PlaylistType(i)) {
-				id := playlist.Link().String()
-				infrastructure.Debugf("Playlist '%v' (%v)", id, playlist.Name())
-				tracks := make([]*sconsify.Track, playlist.Tracks())
-				infrastructure.Debugf("\t# of tracks %v", playlist.Tracks())
-				for i := 0; i < playlist.Tracks(); i++ {
-					tracks[i] = spotify.initTrack(playlist.Track(i))
-				}
-				if folderPlaylists == nil {
-					playlists.AddPlaylist(sconsify.InitPlaylist(id, playlist.Name(), tracks))
-				} else {
-					folderPlaylists = append(folderPlaylists, sconsify.InitSubPlaylist(id, playlist.Name(), tracks))
-				}
-			}
+	} else {
+		if err := spotify.initLibspotifyPlaylist(playlists); err != nil {
+			return err
 		}
 	}
 
@@ -120,8 +67,77 @@ func (spotify *Spotify) initPlaylist() error {
 	return nil
 }
 
+func (spotify *Spotify) initWebApiPlaylist(playlists *sconsify.Playlists) error {
+	if privateUser, err := spotify.client.CurrentUser(); err == nil {
+		offset := 0
+		total := 1
+		for offset <= total {
+			offset, total = spotify.loadPlaylists(offset, privateUser, playlists)
+			if offset > total {
+				fmt.Printf("Loaded %v from %v playlists\n", total, total)
+			} else {
+				fmt.Printf("Loaded %v from %v playlists\n", offset, total)
+			}
+		}
+	} else {
+		return err
+	}
+
+	return nil
+}
+
+func (spotify *Spotify) initLibspotifyPlaylist(playlists *sconsify.Playlists) error {
+	fmt.Print("Warning: not using -web-api flag. Sconsify will load playlists using deprecated libspotify API. If not working try -web-api flag.\n")
+	allPlaylists, err := spotify.session.Playlists()
+	if err != nil {
+		return err
+	}
+	allPlaylists.Wait()
+	var folderPlaylists []*sconsify.Playlist
+	var folder *sp.PlaylistFolder
+	infrastructure.Debugf("# of playlists %v", allPlaylists.Playlists())
+	for i := 0; i < allPlaylists.Playlists(); i++ {
+		if allPlaylists.PlaylistType(i) == sp.PlaylistTypeStartFolder {
+			folder, _ = allPlaylists.Folder(i)
+			folderPlaylists = make([]*sconsify.Playlist, 0)
+			infrastructure.Debugf("Opening folder '%v' (%v)", folder.Id(), folder.Name())
+		} else if allPlaylists.PlaylistType(i) == sp.PlaylistTypeEndFolder {
+			if folder != nil {
+				playlists.AddPlaylist(sconsify.InitFolder(strconv.Itoa(int(folder.Id())), folder.Name(), folderPlaylists))
+				infrastructure.Debugf("Closing folder '%v' (%v)", folder.Id(), folder.Name())
+			} else {
+				infrastructure.Debug("Closing a null folder, this doesn't look right ")
+			}
+			folderPlaylists = nil
+			folder = nil
+		}
+
+		if allPlaylists.PlaylistType(i) != sp.PlaylistTypePlaylist {
+			continue
+		}
+
+		playlist := allPlaylists.Playlist(i)
+		playlist.Wait()
+		if spotify.canAddPlaylist(playlist, allPlaylists.PlaylistType(i)) {
+			id := playlist.Link().String()
+			infrastructure.Debugf("Playlist '%v' (%v)", id, playlist.Name())
+			tracks := make([]*sconsify.Track, playlist.Tracks())
+			infrastructure.Debugf("\t# of tracks %v", playlist.Tracks())
+			for i := 0; i < playlist.Tracks(); i++ {
+				tracks[i] = spotify.initTrack(playlist.Track(i))
+			}
+			if folderPlaylists == nil {
+				playlists.AddPlaylist(sconsify.InitPlaylist(id, playlist.Name(), tracks))
+			} else {
+				folderPlaylists = append(folderPlaylists, sconsify.InitSubPlaylist(id, playlist.Name(), tracks))
+			}
+		}
+	}
+	return nil
+}
+
 func (spotify *Spotify) loadPlaylists(offset int, privateUser *webspotify.PrivateUser, playlists *sconsify.Playlists) (int, int) {
-	limit := 20
+	limit := 50
 	options := &webspotify.Options{Limit: &limit, Offset: &offset}
 	if simplePlaylistPage, err := spotify.client.GetPlaylistsForUserOpt(privateUser.ID, options); err == nil {
 		for _, webPlaylist := range simplePlaylistPage.Playlists {
