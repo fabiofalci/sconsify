@@ -141,16 +141,7 @@ func (spotify *Spotify) loadPlaylists(offset int, privateUser *webspotify.Privat
 	options := &webspotify.Options{Limit: &limit, Offset: &offset}
 	if simplePlaylistPage, err := spotify.client.GetPlaylistsForUserOpt(privateUser.ID, options); err == nil {
 		for _, webPlaylist := range simplePlaylistPage.Playlists {
-			if fullPlaylist, err := spotify.client.GetPlaylist(webPlaylist.Owner.ID, webPlaylist.ID); err == nil {
-				tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
-				for i, track := range fullPlaylist.Tracks.Tracks {
-					webArtist := track.Track.Artists[0]
-					artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
-					tracks[i] = sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
-				}
-				playlist := sconsify.InitPlaylist(string(fullPlaylist.URI), fullPlaylist.Name, tracks)
-				playlists.AddPlaylist(playlist)
-			}
+			spotify.loadPlaylistTracks(&webPlaylist, playlists)
 		}
 
 		// simplePlaylistPage.Offset is returning 0 instead of offset
@@ -158,6 +149,42 @@ func (spotify *Spotify) loadPlaylists(offset int, privateUser *webspotify.Privat
 	}
 
 	return 0, 0
+}
+
+func (spotify *Spotify) loadPlaylistTracks(webPlaylist *webspotify.SimplePlaylist, playlists *sconsify.Playlists) error {
+	limit := 100
+	offset := 0
+	total := 1
+	options := &webspotify.Options{Limit: &limit, Offset: &offset}
+
+	tracks := make([]*sconsify.Track, 0)
+	playlist := sconsify.InitPlaylist(string(webPlaylist.URI), webPlaylist.Name, tracks)
+	playlists.AddPlaylist(playlist)
+
+	for offset <= total {
+		playlistTrackPage, err := spotify.client.GetPlaylistTracksOpt(webPlaylist.Owner.ID, webPlaylist.ID, options, "")
+		if err != nil {
+			return err
+		}
+
+		for _, track := range playlistTrackPage.Tracks {
+			webArtist := track.Track.Artists[0]
+			artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+			track := sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
+			playlist.AddTrack(track)
+		}
+
+		offset = offset + limit
+		total = playlistTrackPage.Total
+
+		if offset > total {
+			infrastructure.Debugf("%v: loaded %v from %v tracks\n", playlist.Name(), total, total)
+		} else {
+			infrastructure.Debugf("%v: loaded %v from %v tracks\n", playlist.Name(), offset, total)
+		}
+	}
+
+	return nil
 }
 
 func (spotify *Spotify) loadWebApiCacheIfNecessary() *WebApiCache {
