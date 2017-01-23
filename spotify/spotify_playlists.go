@@ -1,6 +1,7 @@
 package spotify
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/fabiofalci/sconsify/infrastructure"
@@ -77,6 +78,9 @@ func (spotify *Spotify) initWebApiPlaylist(playlists *sconsify.Playlists) error 
 				fmt.Printf("Loaded %v from %v playlists\n", total, total)
 			} else {
 				fmt.Printf("Loaded %v from %v playlists\n", offset, total)
+			}
+			if total == 0 {
+				return errors.New("No playlist to load")
 			}
 		}
 	} else {
