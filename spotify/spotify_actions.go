@@ -11,6 +11,7 @@ import (
 
 func (spotify *Spotify) shutdownSpotify() {
 	spotify.session.Logout()
+	spotify.session.Close()
 	spotify.initCache()
 	spotify.events.ShutdownEngine()
 }
@@ -72,7 +73,8 @@ func (spotify *Spotify) search(query string) {
 
 	playlist := sconsify.InitSearchPlaylist(name, name, func(playlist *sconsify.Playlist) {
 		options := createWebSpotifyOptions(50, playlist.Tracks())
-		if searchResult, err := spotify.getWebApiClient().SearchOpt(query, webspotify.SearchTypeTrack, options); err == nil {
+		// TODO use spotify.client while still token valid, then switch to Default one
+		if searchResult, err := webspotify.DefaultClient.SearchOpt(query, webspotify.SearchTypeTrack, options); err == nil {
 			numberOfTracks := len(searchResult.Tracks.Tracks)
 			infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)
 			for _, track := range searchResult.Tracks.Tracks {
@@ -100,13 +102,6 @@ func checkAlias(query string) string {
 		return strings.Replace(query, "tr:", "track:", 1)
 	}
 	return query
-}
-
-func (spotify *Spotify) getWebApiClient() *webspotify.Client {
-	if spotify.client != nil {
-		return spotify.client
-	}
-	return webspotify.DefaultClient
 }
 
 func (spotify *Spotify) pause() {
