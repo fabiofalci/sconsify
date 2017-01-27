@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	sp "github.com/fabiofalci/go-libspotify/spotify"
 	"github.com/fabiofalci/sconsify/infrastructure"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/webapi"
 	"github.com/gordonklaus/portaudio"
-	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 )
 

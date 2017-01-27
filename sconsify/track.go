@@ -3,7 +3,7 @@ package sconsify
 import (
 	"fmt"
 
-	sp "github.com/op/go-libspotify/spotify"
+	sp "github.com/fabiofalci/go-libspotify/spotify"
 )
 
 type Track struct {

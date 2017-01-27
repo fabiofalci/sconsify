@@ -1,8 +1,12 @@
-hash: b29af25b2d97b9befda3c0e78bfca97a8838b360ed44edaf57b4bc0e79e75b7a
-updated: 2017-01-07T21:41:46.397527876Z
+hash: b702f64c106c4a73675fe7b155fd3b09eea41319b170a47a2cda01edf12b4d20
+updated: 2017-01-27T20:59:47.060863597Z
 imports:
 - name: github.com/fabiofalci/flagrc
   version: 748e1426fdbd210e5ff8caf145546de70b559f28
+- name: github.com/fabiofalci/go-libspotify
+  version: fbe297fba0309063d327bd290b0ed3a6e07f98c2
+  subpackages:
+  - spotify
 - name: github.com/golang/protobuf
   version: 552c7b9542c194800fd493123b3798ef0a832032
   subpackages:
@@ -19,10 +23,6 @@ imports:
   version: 981ab348d865cf048eb7d17e78ac7192632d8415
 - name: github.com/nsf/termbox-go
   version: 362329b0aa6447eadd52edd8d660ec1dff470295
-- name: github.com/op/go-libspotify
-  version: 12dd11fb33ecf760c356b65dc1116bc92589dea4
-  subpackages:
-  - spotify
 - name: github.com/zmb3/spotify
   version: 6de95a1b7a3de7283fc9343bba5b495d7a383b85
 - name: golang.org/x/crypto

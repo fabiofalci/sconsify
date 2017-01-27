@@ -4,14 +4,13 @@ import (
 	"errors"
 	"strings"
 
+	"fmt"
+	sp "github.com/fabiofalci/go-libspotify/spotify"
 	"github.com/fabiofalci/sconsify/infrastructure"
 	"github.com/fabiofalci/sconsify/sconsify"
-	sp "github.com/op/go-libspotify/spotify"
 	webspotify "github.com/zmb3/spotify"
 	"strconv"
-	"fmt"
 )
-
 
 func (spotify *Spotify) initPlaylist() error {
 	playlists := sconsify.InitPlaylists()
