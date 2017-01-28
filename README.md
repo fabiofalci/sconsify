@@ -13,7 +13,7 @@ Important macOS: it seems sconsify is not working properly on sierra.
 Installation
 ------------
 
-* Download current version [0.4.0-rc2](https://github.com/fabiofalci/sconsify/releases) 
+* Download current version [0.4.0-rc3](https://github.com/fabiofalci/sconsify/releases) 
 
 * Install dependencies:
 
