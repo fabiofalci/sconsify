@@ -84,13 +84,29 @@ UI mode keyboard
 
 * `/`: open a search field.
 
+Search fields: `album, artist or track`. 
+
+```
+    album:help
+    artist:the beatles
+    track:let it be
+```
+
+Aliases `al` = `album`, `ar` = `artist`, `tr` = `track`:
+
+```
+    al:help
+    ar:the beatles
+    tr:let it be
+```
+
 * `s`: shuffle tracks from current playlist. Press again to go back to normal mode.
 
 * `S`: shuffle tracks from all playlists. Press again to go back to normal mode.
 
 * `u`: queue selected track to play next.
 
-* `d`: delete selected track from the queue or delete selected search.
+* `dd`: delete selected element (playlist, track) from the UI (it doesn't save the change to spotify playlist).
 
 * `D`: delete all tracks from the queue if the focus is on the queue.
 
@@ -110,6 +126,8 @@ Vi navigation style:
 
 * `Ngg` and `NG` where N is a number: go to element at position N. 
 
+* Temporary playlist. Type `c` in the queue view, type a name and then a temporary playlist will appear containing all songs in the queue view.
+
 
 No UI mode keyboard 
 -------------------
@@ -118,6 +136,20 @@ No UI mode keyboard
 
 * `Control C`: exit.
 
+Interprocess commands
+--------------------
+
+Sconsify starts a server for interprocess commands using `sconsify -command <command>`. Available commands: `replay, play_pause, next`. 
+
+[i3](http://i3wm.org/) bindings for multimedia keys:
+
+```
+    bindsym XF86AudioPrev exec sconsify -command replay
+    bindsym XF86AudioPlay exec sconsify -command play_pause
+    bindsym XF86AudioNext exec sconsify -command next
+```
+
+`macOS`: TODO show how to create using Automator/Service/Keyboard
 
 sconsifyrc
 ----------
@@ -132,7 +164,7 @@ Similar to [.ackrc](http://beyondgrep.com/documentation/) you can define default
 How to build
 ---------------------------------
 
-Install go 1.5 ([1.6](https://github.com/op/go-libspotify/issues/18) doesn't work because of new gco pointer rules), [glide](https://glide.sh/) and get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
+Install go (same version from Dockerfile), [glide](https://glide.sh/) and get a Spotify application key and copy as a byte array to `/sconsify/spotify/spotify_key_array.key`.
 
 	var key = []byte{
 	    0x02, 0xA2, ...
