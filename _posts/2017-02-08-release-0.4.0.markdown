@@ -1,0 +1,31 @@
+---
+layout: post
+title:  "Release 0.4.0"
+date:   2017-02-08 21:54:00
+categories: release
+---
+Sconsify 0.4.0:
+
+- Mark playing song in the track list.
+
+- Search aliases `al` = `album`, `ar` = `artist`, `tr` = `track`:
+
+```
+    al:help
+    ar:the beatles
+    tr:let it be
+```
+- Fix pause to actually pause the track and not to stop it.
+
+- Temporary playlist. Type `c` in the queue view, type a name and then a temporary playlist will appear containing all songs in the queue view.
+
+- Show tracks as `title + artist` instead of `artist + title`.
+
+- Load playlists using spotify web api by default as it seems that loading playlists using libspotify doesn't work anymore.
+
+- Fix `macOS` Sierra issues by updating go (1.7.5) and fixing gco pointer rules.
+
+
+[Release page][release-page].
+
+[release-page]:      https://github.com/fabiofalci/sconsify/releases/tag/v0.4.0
