@@ -5,7 +5,7 @@ ifeq ($(UNAME), Darwin)
 	SED := sed -i '' -e '$$ d'
 endif
 
-VERSION := 0.4.0
+VERSION := 0.5.0-local
 COMMIT := $(shell git rev-parse --short HEAD)
 BUILD_DATE := $(shell date +"%s")
 SPOTIFY_CLIENT_ID := 4e1fa8c468ce42c2a45c7c9e40e6d9d0
