@@ -149,7 +149,7 @@ Sconsify starts a server for interprocess commands using `sconsify -command <com
     bindsym XF86AudioNext exec sconsify -command next
 ```
 
-`macOS`: TODO show how to create using Automator/Service/Keyboard
+`macOS`: create a new service in `Automator`. Then pick `Library > Utilities > Run Shell Script`. Drag it to the workflow. Pick `no input` and then add to the script `/path/to/sconsify -command replay`, save it. Go to Keyboard `Shortcuts > Services` in System Settings, find the service you've just saved and type the desired shortcut. Repeat for each command (`replay, play_pause, next`).
 
 sconsifyrc
 ----------
