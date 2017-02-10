@@ -121,7 +121,7 @@ func (noui *NoUi) listenForKeyboardEvents() {
 			noui.events.NextPlay()
 		} else if key == "p" {
 			fmt.Println("")
-			noui.events.Pause()
+			noui.events.PlayPauseToggle()
 		} else if key == "q" {
 			noui.Shutdown()
 		}

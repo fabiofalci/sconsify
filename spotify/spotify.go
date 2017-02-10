@@ -178,6 +178,8 @@ func (spotify *Spotify) waitForEvents() {
 			spotify.play(track)
 		case <-spotify.events.PauseUpdates():
 			spotify.pause()
+		case <-spotify.events.PlayPauseToggleUpdates():
+			spotify.playPauseToggle()
 		case <-spotify.events.ReplayUpdates():
 			spotify.play(spotify.currentTrack)
 		case <-spotify.events.ShutdownSpotifyUpdates():

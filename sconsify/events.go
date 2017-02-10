@@ -12,6 +12,7 @@ type Events struct {
 	pause  chan bool
 	search chan string
 	replay chan bool
+	playPauseToggle  chan bool
 
 	getArtistAlbums chan *Artist
 	artistAlbums    chan *Playlist
@@ -35,6 +36,7 @@ func InitialiseEvents() *Events {
 		pause:  make(chan bool),
 		search: make(chan string),
 		replay: make(chan bool),
+		playPauseToggle:  make(chan bool),
 
 		getArtistAlbums: make(chan *Artist),
 		artistAlbums:    make(chan *Playlist),
@@ -134,6 +136,14 @@ func (events *Events) Pause() {
 
 func (events *Events) PauseUpdates() <-chan bool {
 	return events.pause
+}
+
+func (events *Events) PlayPauseToggle() {
+	events.playPauseToggle <- true
+}
+
+func (events *Events) PlayPauseToggleUpdates() <-chan bool {
+	return events.playPauseToggle
 }
 
 func (events *Events) NewPlaylist(playlists *Playlists) {

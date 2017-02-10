@@ -12,7 +12,7 @@ type Player interface {
 type RegularPlayer struct{}
 
 func (p *RegularPlayer) Pause() {
-	events.Pause()
+	events.PlayPauseToggle()
 }
 
 func (p *RegularPlayer) Play() {

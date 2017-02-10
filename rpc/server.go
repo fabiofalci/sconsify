@@ -36,6 +36,8 @@ func Client(command string) {
 		method = "PlayPause"
 	} else if command == "replay" {
 		method = "ReplayTrack"
+	} else if command == "pause" {
+		method = "PauseTrack"
 	} else {
 		fmt.Println("Unknown command")
 		return
@@ -59,6 +61,11 @@ func (t *Server) NextTrack(args *NoArgs, reply *string) error {
 }
 
 func (t *Server) PlayPause(args *NoArgs, reply *string) error {
+	t.events.PlayPauseToggle()
+	return nil
+}
+
+func (t *Server) PauseTrack(args *NoArgs, reply *string) error {
 	t.events.Pause()
 	return nil
 }

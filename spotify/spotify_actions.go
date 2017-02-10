@@ -104,13 +104,19 @@ func checkAlias(query string) string {
 	return query
 }
 
-func (spotify *Spotify) pause() {
+func (spotify *Spotify) playPauseToggle() {
 	if spotify.currentTrack != nil {
 		if spotify.paused {
 			spotify.play(spotify.currentTrack)
 		} else {
 			spotify.pauseCurrentTrack()
 		}
+	}
+}
+
+func (spotify *Spotify) pause() {
+	if spotify.currentTrack != nil && !spotify.paused {
+		spotify.pauseCurrentTrack()
 	}
 }
 
