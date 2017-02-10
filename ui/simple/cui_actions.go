@@ -510,12 +510,12 @@ func getTypedCommand() string {
 }
 
 func executeAction(g *gocui.Gui, v *gocui.View) error {
-	if (actionBeingExecuted == Search) {
+	if actionBeingExecuted == Search {
 		return searchCommand(g, v)
-	} else if (actionBeingExecuted == CreatePlaylist) {
+	} else if actionBeingExecuted == CreatePlaylist {
 		return createPlaylistCommand(g, v)
 	}
-	return nil;
+	return nil
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
@@ -527,6 +527,6 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) clearTimeLeftView() {
 	gui.timeLeftView.Clear()
-	gui.timeLeftView.SetCursor(0,0)
-	gui.timeLeftView.SetOrigin(0,0)
+	gui.timeLeftView.SetCursor(0, 0)
+	gui.timeLeftView.SetOrigin(0, 0)
 }

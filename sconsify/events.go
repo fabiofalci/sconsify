@@ -8,11 +8,11 @@ type Events struct {
 	shutdownEngine  chan bool
 	shutdownSpotify chan bool
 
-	play   chan *Track
-	pause  chan bool
-	search chan string
-	replay chan bool
-	playPauseToggle  chan bool
+	play            chan *Track
+	pause           chan bool
+	search          chan string
+	replay          chan bool
+	playPauseToggle chan bool
 
 	getArtistAlbums chan *Artist
 	artistAlbums    chan *Playlist
@@ -24,7 +24,7 @@ type Events struct {
 	trackPlaying      chan *Track
 	trackPaused       chan *Track
 
-	newTrackLoaded	  chan time.Duration
+	newTrackLoaded chan time.Duration
 }
 
 func InitialiseEvents() *Events {
@@ -32,11 +32,11 @@ func InitialiseEvents() *Events {
 		shutdownEngine:  make(chan bool),
 		shutdownSpotify: make(chan bool),
 
-		play:   make(chan *Track),
-		pause:  make(chan bool),
-		search: make(chan string),
-		replay: make(chan bool),
-		playPauseToggle:  make(chan bool),
+		play:            make(chan *Track),
+		pause:           make(chan bool),
+		search:          make(chan string),
+		replay:          make(chan bool),
+		playPauseToggle: make(chan bool),
 
 		getArtistAlbums: make(chan *Artist),
 		artistAlbums:    make(chan *Playlist),
@@ -45,10 +45,10 @@ func InitialiseEvents() *Events {
 		playTokenLost:     make(chan bool),
 		playlists:         make(chan Playlists),
 		trackNotAvailable: make(chan *Track),
-		trackPlaying:      make(chan *Track,2),
+		trackPlaying:      make(chan *Track, 2),
 		trackPaused:       make(chan *Track),
 
-		newTrackLoaded:    make(chan time.Duration,2),
+		newTrackLoaded: make(chan time.Duration, 2),
 	}
 }
 

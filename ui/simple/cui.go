@@ -20,7 +20,7 @@ var (
 	consoleUserInterface sconsify.UserInterface
 	player               Player
 	loadStateWhenInit    bool
-	timeLeftChannels *TimeLeftChannels
+	timeLeftChannels     *TimeLeftChannels
 )
 
 const (
@@ -34,7 +34,7 @@ const (
 type ConsoleUserInterface struct{}
 
 type TimeLeftChannels struct {
-	time_left chan time.Duration
+	time_left   chan time.Duration
 	song_paused chan bool
 }
 
@@ -83,7 +83,7 @@ func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 }
 
 func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
-	gui.g.Execute(func (g *gocui.Gui) error {
+	gui.g.Execute(func(g *gocui.Gui) error {
 		gui.flash("Not available: " + track.GetTitle())
 		return nil
 	})
@@ -132,14 +132,14 @@ func (cui *ConsoleUserInterface) ArtistAlbums(folder *sconsify.Playlist) {
 	})
 }
 
-func(cui *ConsoleUserInterface) NewTrackLoaded(duration time.Duration) {
+func (cui *ConsoleUserInterface) NewTrackLoaded(duration time.Duration) {
 	select {
 	case timeLeftChannels.time_left <- duration:
 	default:
 	}
 }
 
-func(gui *Gui) countdown() {
+func (gui *Gui) countdown() {
 
 	var time_left time.Duration
 	active := false
@@ -153,7 +153,7 @@ func(gui *Gui) countdown() {
 		default:
 		}
 
-		if (active) {
+		if active {
 			time_left_copy := time_left
 			gui.g.Execute(func(g *gocui.Gui) error {
 				gui.clearTimeLeftView()
@@ -165,7 +165,7 @@ func(gui *Gui) countdown() {
 		then := time.Now().Round(time.Second)
 		time.Sleep(1 * time.Second)
 		diff := time.Now().Round(time.Second).Sub(then)
-		if (active) {
+		if active {
 			time_left = time_left - diff
 		}
 	}
@@ -187,8 +187,8 @@ func (gui *Gui) startGui() {
 	gui.g.Cursor = true
 
 	// Time left counter thread
-	timeLeftChannels = &TimeLeftChannels {
-		time_left: make(chan time.Duration, 1),
+	timeLeftChannels = &TimeLeftChannels{
+		time_left:   make(chan time.Duration, 1),
 		song_paused: make(chan bool, 1),
 	}
 	go gui.countdown()
@@ -279,13 +279,13 @@ func (gui *Gui) replay() {
 func (gui *Gui) createPlaylistFromQueue(playlistName string) {
 	gui.g.Execute(func(g *gocui.Gui) error {
 		unsavedFolder := playlists.Get("*Unsaved")
-		if (unsavedFolder == nil) {
+		if unsavedFolder == nil {
 			unsavedFolder = sconsify.InitFolder("*Unsaved", "*Unsaved", make([]*sconsify.Playlist, 0))
 			playlists.AddPlaylist(unsavedFolder)
 		}
 
-		playlist := unsavedFolder.GetPlaylist(" "+playlistName)
-		if (playlist == nil) {
+		playlist := unsavedFolder.GetPlaylist(" " + playlistName)
+		if playlist == nil {
 			playlist = sconsify.InitPlaylist(playlistName, " "+playlistName, make([]*sconsify.Track, 0))
 			unsavedFolder.AddPlaylist(playlist)
 		}

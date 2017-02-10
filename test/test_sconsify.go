@@ -9,8 +9,8 @@ import (
 	"github.com/fabiofalci/sconsify/infrastructure"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify/mock"
-	"os/exec"
 	"github.com/fabiofalci/sconsify/ui/simple"
+	"os/exec"
 )
 
 var output bytes.Buffer
