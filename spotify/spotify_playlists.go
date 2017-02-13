@@ -171,10 +171,14 @@ func (spotify *Spotify) loadPlaylistTracks(webPlaylist *webspotify.SimplePlaylis
 		}
 
 		for _, track := range playlistTrackPage.Tracks {
-			webArtist := track.Track.Artists[0]
-			artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
-			track := sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
-			playlist.AddTrack(track)
+			if len(track.Track.Artists) > 0 {
+				webArtist := track.Track.Artists[0]
+				artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+				track := sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
+				playlist.AddTrack(track)
+			} else {
+				infrastructure.Debugf("%v: track will be ignored as it doesn't have artist\n", track.Track.URI)
+			}
 		}
 
 		offset = offset + limit
