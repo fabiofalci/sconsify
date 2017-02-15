@@ -11,10 +11,12 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+type keyHandler func(*gocui.Gui, *gocui.View) error
+
 type KeyMapping struct {
 	key  interface{}
 	mod  gocui.Modifier
-	h    gocui.KeybindingHandler
+	h    keyHandler
 	view string
 }
 
@@ -22,7 +24,7 @@ type Keyboard struct {
 	ConfiguredKeys map[string][]string
 	UsedFunctions  map[string]bool
 
-	SequentialKeys map[string]gocui.KeybindingHandler
+	SequentialKeys map[string]keyHandler
 
 	Keys []*KeyMapping
 }
@@ -157,7 +159,7 @@ func (keyboard *Keyboard) addKey(key string, command string) {
 	keyboard.UsedFunctions[command] = true
 }
 
-func (keyboard *Keyboard) configureKey(handler gocui.KeybindingHandler, command string, view string) {
+func (keyboard *Keyboard) configureKey(handler keyHandler, command string, view string) {
 	for key, commands := range keyboard.ConfiguredKeys {
 		switch key {
 		case "<enter>":
@@ -192,7 +194,7 @@ func keybindings() error {
 		ConfiguredKeys: make(map[string][]string),
 		UsedFunctions:  make(map[string]bool),
 		Keys:           make([]*KeyMapping, 0),
-		SequentialKeys: make(map[string]gocui.KeybindingHandler)}
+		SequentialKeys: make(map[string]keyHandler)}
 
 	multipleKeysBuffer = make([]rune, 0, 0)
 	keyboard.loadKeyFunctions()
@@ -293,11 +295,11 @@ func addKeyBinding(keys *[]*KeyMapping, key *KeyMapping) {
 	*keys = append(*keys, key)
 }
 
-func newKeyMapping(key interface{}, view string, h gocui.KeybindingHandler) *KeyMapping {
+func newKeyMapping(key interface{}, view string, h  keyHandler) *KeyMapping {
 	return newModifiedKeyMapping(gocui.ModNone, key, view, h)
 }
 
-func newModifiedKeyMapping(mod gocui.Modifier, key interface{}, view string, h gocui.KeybindingHandler) *KeyMapping {
+func newModifiedKeyMapping(mod gocui.Modifier, key interface{}, view string, h keyHandler) *KeyMapping {
 	return &KeyMapping{mod: mod, key: key, h: h, view: view}
 }
 

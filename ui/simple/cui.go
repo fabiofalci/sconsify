@@ -172,13 +172,14 @@ func (gui *Gui) countdown() {
 }
 
 func (gui *Gui) startGui() {
-	gui.g = gocui.NewGui()
-	if err := gui.g.Init(); err != nil {
+	var err error
+	gui.g, err = gocui.NewGui(gocui.OutputNormal)
+	if err != nil {
 		log.Panicln(err)
 	}
 	defer gui.g.Close()
 
-	gui.g.SetLayout(layout)
+	gui.g.SetManagerFunc(layout)
 	if err := keybindings(); err != nil {
 		log.Panicln(err)
 	}
@@ -388,7 +389,7 @@ func layout(g *gocui.Gui) error {
 
 		gui.updatePlaylistsView()
 
-		if err := g.SetCurrentView(VIEW_PLAYLISTS); err != nil {
+		if _, err := g.SetCurrentView(VIEW_PLAYLISTS); err != nil {
 			return err
 		}
 	}
@@ -503,21 +504,24 @@ func (gui *Gui) enableTracksView() error {
 	gui.tracksView.Highlight = true
 	gui.playlistsView.Highlight = false
 	gui.queueView.Highlight = false
-	return gui.g.SetCurrentView(VIEW_TRACKS)
+	_, err := gui.g.SetCurrentView(VIEW_TRACKS)
+	return err
 }
 
 func (gui *Gui) enableSideView() error {
 	gui.tracksView.Highlight = false
 	gui.playlistsView.Highlight = true
 	gui.queueView.Highlight = false
-	return gui.g.SetCurrentView(VIEW_PLAYLISTS)
+	_, err := gui.g.SetCurrentView(VIEW_PLAYLISTS)
+	return err
 }
 
 func (gui *Gui) enableQueueView() error {
 	gui.tracksView.Highlight = false
 	gui.playlistsView.Highlight = false
 	gui.queueView.Highlight = true
-	return gui.g.SetCurrentView(VIEW_QUEUE)
+	_, err := gui.g.SetCurrentView(VIEW_QUEUE)
+	return err
 }
 
 func (gui *Gui) clearStatusView() {

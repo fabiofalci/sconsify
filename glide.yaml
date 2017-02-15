@@ -1,22 +1,13 @@
 package: github.com/fabiofalci/sconsify
 import:
 - package: github.com/fabiofalci/flagrc
-  version: 748e1426fdbd210e5ff8caf145546de70b559f28
 - package: github.com/howeyc/gopass
-  version: c89a32868e47b1b7ef388b4d94318b359506400a
 - package: github.com/jroimartin/gocui
-  version: a8eba6db38c8459e1bbccfe38359b0405084a4f2
 - package: github.com/mitchellh/go-homedir
-  version: 981ab348d865cf048eb7d17e78ac7192632d8415
 - package: github.com/fabiofalci/go-libspotify
   version: fbe297fba0309063d327bd290b0ed3a6e07f98c2
   subpackages:
   - spotify
 - package: github.com/zmb3/spotify
-  version: 6de95a1b7a3de7283fc9343bba5b495d7a383b85
 - package: golang.org/x/oauth2
-  version: 2cd4472c321b6cba78e029d99f0e7fe51032fd21
-- package: gopkg.in/vmihailenco/msgpack.v2
-  version: 775d4b0cf44d799d42a1f6fded02252340f4e33d
 - package: github.com/gordonklaus/portaudio
-  version: 2a038c93424fb36d026982db9fd365504a49f566
