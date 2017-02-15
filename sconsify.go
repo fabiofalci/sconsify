@@ -35,6 +35,7 @@ func main() {
 
 	providedUsername := flag.String("username", "", "Spotify username.")
 	providedWebApi := flag.Bool("web-api", true, "Use Spotify WEB API for more features. It requires web authorization.")
+	providedOpenBrowser := flag.String("open-browser-cmd", "", "Open browser command to complete the web authorization.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll shuffle tracks.")
 	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
 	providedPreferredBitrate := flag.String("preferred-bitrate", "320k", "Preferred bitrate: 96k, 160k, 320k.")
@@ -81,6 +82,7 @@ func main() {
 		CacheWebApiContent: *providedWebApiCacheContent,
 		SpotifyClientId:    spotifyClientId,
 		AuthRedirectUrl:    authRedirectUrl,
+		OpenBrowserCommand: *providedOpenBrowser,
 	}
 	go spotify.Initialise(initConf, username, pass, events)
 

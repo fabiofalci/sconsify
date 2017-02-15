@@ -12,12 +12,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"os/exec"
 )
 
-func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool) *spotify.Client {
+func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool, openBrowserCommand string) (*spotify.Client, error) {
 	if spotifyClientId == "" {
 		fmt.Print("Spotify Client ID not set")
-		return nil
+		return nil, nil
 	}
 
 	auth := spotify.NewAuthenticator(authRedirectUrl,
@@ -32,7 +33,16 @@ func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool)
 	if token == nil || hasExpired(token.Expiry) {
 		url := auth.AuthURL("")
 		url = strings.Replace(url, "response_type=code", "response_type=token", -1)
-		fmt.Printf("For web api authorization go to url:\n\n%v\n\n", url)
+
+		if openBrowserCommand != "" {
+			fmt.Printf("\nOpen browser command provided: %v %v\n\n", openBrowserCommand, url)
+			cmd := exec.Command(openBrowserCommand, url)
+			if err := cmd.Run(); err != nil {
+				return nil, err
+			}
+		} else {
+			fmt.Printf("For web api authorization go to url:\n\n%v\n\n", url)
+		}
 
 		fmt.Print("And paste the access token here: ")
 		reader := bufio.NewReader(os.Stdin)
@@ -44,7 +54,7 @@ func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool)
 		seconds, err := strconv.ParseInt(strings.Split(result[2], ":")[1], 10, 64)
 		if err != nil {
 			fmt.Printf("Error %v\n", err)
-			return nil
+			return nil, err
 		}
 		expiry := time.Now().Add(time.Duration(seconds) * time.Second)
 		token = &oauth2.Token{
@@ -58,7 +68,7 @@ func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool)
 	}
 
 	client := auth.NewClient(token)
-	return &client
+	return &client, nil
 }
 
 func hasExpired(expiry time.Time) bool {
