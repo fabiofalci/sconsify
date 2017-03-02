@@ -200,39 +200,39 @@ func keybindings() error {
 	keyboard.loadKeyFunctions()
 	keyboard.defaultValues()
 
-	for i := 'a'; i <= 'z'; i++ {
-		key := i
-		addKeyBinding(&keyboard.Keys, newKeyMapping(i, "", func(g *gocui.Gui, v *gocui.View) error {
-			return keyPressed(key, g, v)
-		}))
-	}
-
-	for i := 'A'; i <= 'Z'; i++ {
-		key := i
-		addKeyBinding(&keyboard.Keys, newKeyMapping(i, "", func(g *gocui.Gui, v *gocui.View) error {
-			return keyPressed(key, g, v)
-		}))
-	}
-
-	for _, value := range []rune{'>', '<', '/'} {
-		key := value
-		addKeyBinding(&keyboard.Keys, newKeyMapping(key, "", func(g *gocui.Gui, v *gocui.View) error {
-			return keyPressed(key, g, v)
-		}))
-	}
-	var specialKeys = []gocui.Key{
-		gocui.KeySpace, gocui.KeyArrowUp,
-		gocui.KeyArrowDown, gocui.KeyArrowLeft,
-		gocui.KeyArrowRight, gocui.KeyEnter}
-
-	for _, value := range specialKeys {
-		key := value
-		addKeyBinding(&keyboard.Keys, newKeyMapping(key, "", func(g *gocui.Gui, v *gocui.View) error {
-			return keyPressed(rune(key), g, v)
-		}))
-	}
-
 	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
+		for i := 'a'; i <= 'z'; i++ {
+			key := i
+			addKeyBinding(&keyboard.Keys, newKeyMapping(i, view, func(g *gocui.Gui, v *gocui.View) error {
+				return keyPressed(key, g, v)
+			}))
+		}
+
+		for i := 'A'; i <= 'Z'; i++ {
+			key := i
+			addKeyBinding(&keyboard.Keys, newKeyMapping(i, view, func(g *gocui.Gui, v *gocui.View) error {
+				return keyPressed(key, g, v)
+			}))
+		}
+
+		for _, value := range []rune{'>', '<', '/'} {
+			key := value
+			addKeyBinding(&keyboard.Keys, newKeyMapping(key, view, func(g *gocui.Gui, v *gocui.View) error {
+				return keyPressed(key, g, v)
+			}))
+		}
+		var specialKeys = []gocui.Key{
+			gocui.KeySpace, gocui.KeyArrowUp,
+			gocui.KeyArrowDown, gocui.KeyArrowLeft,
+			gocui.KeyArrowRight, gocui.KeyEnter}
+
+		for _, value := range specialKeys {
+			key := value
+			addKeyBinding(&keyboard.Keys, newKeyMapping(key, view, func(g *gocui.Gui, v *gocui.View) error {
+				return keyPressed(rune(key), g, v)
+			}))
+		}
+
 		keyboard.configureKey(pauseTrackCommand, PauseTrack, view)
 		keyboard.configureKey(setShuffleMode, ShuffleMode, view)
 		keyboard.configureKey(setShuffleAllMode, ShuffleAllMode, view)
@@ -506,9 +506,8 @@ func createPlaylistCommand(g *gocui.Gui, v *gocui.View) error {
 }
 
 func getTypedCommand() string {
-	// after user hit Enter, the typed command is at position -1
-	typed, _ := gui.statusView.Line(-1)
-	return strings.Trim(typed, " ")
+	typed, _ := gui.statusView.Line(0)
+	return strings.Trim(typed, " \x00")
 }
 
 func executeAction(g *gocui.Gui, v *gocui.View) error {
