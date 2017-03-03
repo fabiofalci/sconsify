@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
+type Publisher struct {
+
+}
+
 type Events struct {
 	shutdownEngine  chan bool
 	shutdownSpotify chan bool
@@ -27,8 +31,16 @@ type Events struct {
 	newTrackLoaded chan time.Duration
 }
 
+var (
+	subscribers []*Events
+)
+
+func init() {
+	subscribers = make([]*Events, 0)
+}
+
 func InitialiseEvents() *Events {
-	return &Events{
+	events := &Events{
 		shutdownEngine:  make(chan bool),
 		shutdownSpotify: make(chan bool),
 
@@ -50,28 +62,37 @@ func InitialiseEvents() *Events {
 
 		newTrackLoaded: make(chan time.Duration, 2),
 	}
+
+	subscribers = append(subscribers, events)
+	return events
 }
 
-func (events *Events) ShutdownEngine() {
-	events.shutdownEngine <- true
+func (publisher *Publisher) ShutdownEngine() {
+	for _, subscriber := range subscribers {
+		subscriber.shutdownEngine <- true
+	}
 }
 
 func (events *Events) ShutdownEngineUpdates() <-chan bool {
 	return events.shutdownEngine
 }
 
-func (events *Events) ShutdownSpotify() {
-	events.shutdownSpotify <- true
+func (publisher *Publisher) ShutdownSpotify() {
+	for _, subscriber := range subscribers {
+		subscriber.shutdownSpotify <- true
+	}
 }
 
 func (events *Events) ShutdownSpotifyUpdates() <-chan bool {
 	return events.shutdownSpotify
 }
 
-func (events *Events) TrackPlaying(track *Track) {
-	select {
-	case events.trackPlaying <- track:
-	default:
+func (publisher *Publisher) TrackPlaying(track *Track) {
+	for _, subscriber := range subscribers {
+		select {
+		case subscriber.trackPlaying <- track:
+		default:
+		}
 	}
 }
 
@@ -79,10 +100,12 @@ func (events *Events) TrackPlayingUpdates() <-chan *Track {
 	return events.trackPlaying
 }
 
-func (events *Events) TrackPaused(track *Track) {
-	select {
-	case events.trackPaused <- track:
-	default:
+func (publisher *Publisher) TrackPaused(track *Track) {
+	for _, subscriber := range subscribers {
+		select {
+		case subscriber.trackPaused <- track:
+		default:
+		}
 	}
 }
 
@@ -90,98 +113,122 @@ func (events *Events) TrackPausedUpdates() <-chan *Track {
 	return events.trackPaused
 }
 
-func (events *Events) Search(query string) {
-	events.search <- query
+func (publisher *Publisher) Search(query string) {
+	for _, subscriber := range subscribers {
+		subscriber.search <- query
+	}
 }
 
 func (events *Events) SearchUpdates() <-chan string {
 	return events.search
 }
 
-func (events *Events) TrackNotAvailable(track *Track) {
-	events.trackNotAvailable <- track
+func (publisher *Publisher) TrackNotAvailable(track *Track) {
+	for _, subscriber := range subscribers {
+		subscriber.trackNotAvailable <- track
+	}
 }
 
 func (events *Events) TrackNotAvailableUpdates() <-chan *Track {
 	return events.trackNotAvailable
 }
 
-func (events *Events) NextPlay() {
-	events.nextPlay <- true
+func (publisher *Publisher) NextPlay() {
+	for _, subscriber := range subscribers {
+		subscriber.nextPlay <- true
+	}
 }
 
 func (events *Events) NextPlayUpdates() <-chan bool {
 	return events.nextPlay
 }
 
-func (events *Events) Play(track *Track) {
-	events.play <- track
+func (publisher *Publisher) Play(track *Track) {
+	for _, subscriber := range subscribers {
+		subscriber.play <- track
+	}
 }
 
 func (events *Events) PlayUpdates() <-chan *Track {
 	return events.play
 }
 
-func (events *Events) Replay() {
-	events.replay <- true
+func (publisher *Publisher) Replay() {
+	for _, subscriber := range subscribers {
+		subscriber.replay <- true
+	}
 }
 
 func (events *Events) ReplayUpdates() <-chan bool {
 	return events.replay
 }
 
-func (events *Events) Pause() {
-	events.pause <- true
+func (publisher *Publisher) Pause() {
+	for _, subscriber := range subscribers {
+		subscriber.pause <- true
+	}
 }
 
 func (events *Events) PauseUpdates() <-chan bool {
 	return events.pause
 }
 
-func (events *Events) PlayPauseToggle() {
-	events.playPauseToggle <- true
+func (publisher *Publisher) PlayPauseToggle() {
+	for _, subscriber := range subscribers {
+		subscriber.playPauseToggle <- true
+	}
 }
 
 func (events *Events) PlayPauseToggleUpdates() <-chan bool {
 	return events.playPauseToggle
 }
 
-func (events *Events) NewPlaylist(playlists *Playlists) {
-	events.playlists <- *playlists
+func (publisher *Publisher) NewPlaylist(playlists *Playlists) {
+	for _, subscriber := range subscribers {
+		subscriber.playlists <- *playlists
+	}
 }
 
 func (events *Events) PlaylistsUpdates() <-chan Playlists {
 	return events.playlists
 }
 
-func (events *Events) PlayTokenLost() {
-	events.playTokenLost <- true
+func (publisher *Publisher) PlayTokenLost() {
+	for _, subscriber := range subscribers {
+		subscriber.playTokenLost <- true
+	}
 }
 
 func (events *Events) PlayTokenLostUpdates() <-chan bool {
 	return events.playTokenLost
 }
 
-func (events *Events) GetArtistAlbums(artist *Artist) {
-	events.getArtistAlbums <- artist
+func (publisher *Publisher) GetArtistAlbums(artist *Artist) {
+	for _, subscriber := range subscribers {
+		subscriber.getArtistAlbums <- artist
+	}
 }
 
 func (events *Events) GetArtistAlbumsUpdates() <-chan *Artist {
 	return events.getArtistAlbums
 }
 
-func (events *Events) ArtistAlbums(folder *Playlist) {
-	events.artistAlbums <- folder
+func (publisher *Publisher) ArtistAlbums(folder *Playlist) {
+	for _, subscriber := range subscribers {
+		subscriber.artistAlbums <- folder
+	}
 }
 
 func (events *Events) ArtistAlbumsUpdates() <-chan *Playlist {
 	return events.artistAlbums
 }
 
-func (events *Events) NewTrackLoaded(duration time.Duration) {
-	select {
-	case events.newTrackLoaded <- duration:
-	default:
+func (publisher *Publisher) NewTrackLoaded(duration time.Duration) {
+	for _, subscriber := range subscribers {
+		select {
+		case subscriber.newTrackLoaded <- duration:
+		default:
+		}
 	}
 }
 
