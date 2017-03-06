@@ -17,6 +17,7 @@ type NoUi struct {
 	repeatOn  bool
 	playlists *sconsify.Playlists
 	events    *sconsify.Events
+	publisher *sconsify.Publisher
 }
 
 type Printer interface {
@@ -26,15 +27,16 @@ type Printer interface {
 type SilentPrinter struct{}
 type StandardOutputPrinter struct{}
 
-func InitialiseNoUserInterface(events *sconsify.Events, output Printer, repeatOn *bool, shuffle *bool) sconsify.UserInterface {
+func InitialiseNoUserInterface(events *sconsify.Events, publisher *sconsify.Publisher, output Printer, repeatOn *bool, shuffle *bool) sconsify.UserInterface {
 	if output == nil {
 		output = new(StandardOutputPrinter)
 	}
 	noui := &NoUi{
-		output:   output,
-		shuffle:  *shuffle,
-		repeatOn: *repeatOn,
-		events:   events,
+		output:    output,
+		shuffle:   *shuffle,
+		repeatOn:  *repeatOn,
+		events:    events,
+		publisher: publisher,
 	}
 
 	go noui.listenForTermination()
@@ -47,7 +49,7 @@ func (noui *NoUi) TrackPaused(track *sconsify.Track) {
 }
 
 func (noui *NoUi) TrackNotAvailable(track *sconsify.Track) {
-	go noui.events.NextPlay()
+	go noui.publisher.NextPlay()
 }
 
 func (noui *NoUi) PlayTokenLost() error {
@@ -99,7 +101,7 @@ func (noui *NoUi) ArtistAlbums(folder *sconsify.Playlist) {
 }
 
 func (noui *NoUi) Shutdown() {
-	noui.events.ShutdownEngine()
+	noui.publisher.ShutdownEngine()
 }
 
 func (noui *NoUi) listenForKeyboardEvents() {
@@ -118,10 +120,10 @@ func (noui *NoUi) listenForKeyboardEvents() {
 		key := string(b)
 		if key == ">" {
 			fmt.Println("")
-			noui.events.NextPlay()
+			noui.publisher.NextPlay()
 		} else if key == "p" {
 			fmt.Println("")
-			noui.events.PlayPauseToggle()
+			noui.publisher.PlayPauseToggle()
 		} else if key == "q" {
 			noui.Shutdown()
 		}

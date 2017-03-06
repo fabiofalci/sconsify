@@ -12,12 +12,12 @@ type NoArgs struct {
 }
 
 type Server struct {
-	events *sconsify.Events
+	publisher *sconsify.Publisher
 }
 
-func StartServer(ev *sconsify.Events) {
+func StartServer(p *sconsify.Publisher) {
 	server := new(Server)
-	server.events = ev
+	server.publisher = p
 	rpc.Register(server)
 	rpc.HandleHTTP()
 	listener, err := net.Listen("tcp", ":45800")
@@ -56,21 +56,21 @@ func Client(command string) {
 }
 
 func (t *Server) NextTrack(args *NoArgs, reply *string) error {
-	t.events.NextPlay()
+	t.publisher.NextPlay()
 	return nil
 }
 
 func (t *Server) PlayPause(args *NoArgs, reply *string) error {
-	t.events.PlayPauseToggle()
+	t.publisher.PlayPauseToggle()
 	return nil
 }
 
 func (t *Server) PauseTrack(args *NoArgs, reply *string) error {
-	t.events.Pause()
+	t.publisher.Pause()
 	return nil
 }
 
 func (t *Server) ReplayTrack(args *NoArgs, reply *string) error {
-	t.events.Replay()
+	t.publisher.Replay()
 	return nil
 }

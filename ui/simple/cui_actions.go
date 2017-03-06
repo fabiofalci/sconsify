@@ -393,7 +393,7 @@ func openCloseFolderCommand(g *gocui.Gui, v *gocui.View) error {
 func artistAlbums(g *gocui.Gui, v *gocui.View) error {
 	if playlist, trackIndex := gui.getSelectedPlaylistAndTrack(); playlist != nil {
 		track := playlist.Track(trackIndex)
-		events.GetArtistAlbums(track.Artist)
+		publisher.GetArtistAlbums(track.Artist)
 	}
 	return nil
 }
@@ -477,7 +477,7 @@ func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 
 func searchCommand(g *gocui.Gui, v *gocui.View) error {
 	if query := getTypedCommand(); query != "" {
-		events.Search(query)
+		publisher.Search(query)
 	}
 	gui.enableSideView()
 	gui.clearStatusView()

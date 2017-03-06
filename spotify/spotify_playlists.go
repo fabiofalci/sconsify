@@ -63,7 +63,7 @@ func (spotify *Spotify) initPlaylist() error {
 		}
 	}
 
-	spotify.events.NewPlaylist(playlists)
+	spotify.publisher.NewPlaylist(playlists)
 	return nil
 }
 

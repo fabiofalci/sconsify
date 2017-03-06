@@ -13,7 +13,7 @@ func (spotify *Spotify) shutdownSpotify() {
 	spotify.session.Logout()
 	spotify.session.Close()
 	spotify.initCache()
-	spotify.events.ShutdownEngine()
+	spotify.publisher.ShutdownEngine()
 }
 
 func (spotify *Spotify) play(trackUri *sconsify.Track) {
@@ -40,22 +40,22 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 				if retry < 4 {
 					go func() {
 						time.Sleep(100 * time.Millisecond)
-						spotify.events.Play(trackUri)
+						spotify.publisher.Play(trackUri)
 					}()
 					return
 				}
 			}
-			spotify.events.TrackNotAvailable(trackUri)
+			spotify.publisher.TrackNotAvailable(trackUri)
 			return
 		}
 		if err := player.Load(track); err != nil {
 			return
 		}
-		spotify.events.NewTrackLoaded(track.Duration())
+		spotify.publisher.NewTrackLoaded(track.Duration())
 	}
 	player.Play()
 
-	spotify.events.TrackPlaying(trackUri)
+	spotify.publisher.TrackPlaying(trackUri)
 	spotify.currentTrack = trackUri
 	spotify.paused = false
 	return
@@ -90,7 +90,7 @@ func (spotify *Spotify) search(query string) {
 	playlist.ExecuteLoad()
 	playlists.AddPlaylist(playlist)
 
-	spotify.events.NewPlaylist(playlists)
+	spotify.publisher.NewPlaylist(playlists)
 }
 
 func checkAlias(query string) string {
@@ -123,7 +123,7 @@ func (spotify *Spotify) pause() {
 func (spotify *Spotify) pauseCurrentTrack() {
 	player := spotify.session.Player()
 	player.Pause()
-	spotify.events.TrackPaused(spotify.currentTrack)
+	spotify.publisher.TrackPaused(spotify.currentTrack)
 	spotify.paused = true
 }
 
@@ -155,6 +155,6 @@ func (spotify *Spotify) artistAlbums(artist *sconsify.Artist) {
 			folder.AddPlaylist(playlist)
 		}
 
-		spotify.events.ArtistAlbums(folder)
+		spotify.publisher.ArtistAlbums(folder)
 	}
 }

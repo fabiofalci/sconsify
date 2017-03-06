@@ -17,6 +17,7 @@ type Spotify struct {
 	currentTrack       *sconsify.Track
 	paused             bool
 	events             *sconsify.Events
+	publisher          *sconsify.Publisher
 	pa                 *portAudio
 	session            *sp.Session
 	appKey             []byte
@@ -36,15 +37,15 @@ type SpotifyInitConf struct {
 	OpenBrowserCommand string
 }
 
-func Initialise(initConf *SpotifyInitConf, username string, pass []byte, events *sconsify.Events) {
-	if err := initialiseSpotify(initConf, username, pass, events); err != nil {
+func Initialise(initConf *SpotifyInitConf, username string, pass []byte, events *sconsify.Events, publisher *sconsify.Publisher) {
+	if err := initialiseSpotify(initConf, username, pass, events, publisher); err != nil {
 		fmt.Printf("Error: %v\n", err)
-		events.ShutdownEngine()
+		publisher.ShutdownEngine()
 	}
 }
 
-func initialiseSpotify(initConf *SpotifyInitConf, username string, pass []byte, events *sconsify.Events) error {
-	spotify := &Spotify{events: events}
+func initialiseSpotify(initConf *SpotifyInitConf, username string, pass []byte, events *sconsify.Events, publisher *sconsify.Publisher) error {
+	spotify := &Spotify{events: events, publisher: publisher}
 	spotify.setPlaylistFilter(initConf.PlaylistFilter)
 	spotify.cacheWebApiContent = initConf.CacheWebApiContent
 	if err := spotify.initKey(); err != nil {
@@ -177,9 +178,9 @@ func (spotify *Spotify) waitForEvents() {
 	for {
 		select {
 		case <-spotify.session.EndOfTrackUpdates():
-			spotify.events.NextPlay()
+			spotify.publisher.NextPlay()
 		case <-spotify.session.PlayTokenLostUpdates():
-			spotify.events.PlayTokenLost()
+			spotify.publisher.PlayTokenLost()
 		case track := <-spotify.events.PlayUpdates():
 			spotify.play(track)
 		case <-spotify.events.PauseUpdates():

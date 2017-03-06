@@ -1,6 +1,6 @@
 package sconsify
 
-func StartMainLoop(events *Events, ui UserInterface, askForFirstTrack bool) error {
+func StartMainLoop(events *Events, publisher *Publisher, ui UserInterface, askForFirstTrack bool) error {
 	select {
 	case playlists := <-events.PlaylistsUpdates():
 		err := ui.NewPlaylists(playlists)
@@ -13,14 +13,14 @@ func StartMainLoop(events *Events, ui UserInterface, askForFirstTrack bool) erro
 	}
 
 	defer func() {
-		events.ShutdownSpotify()
+		publisher.ShutdownSpotify()
 		// wait for spotify shutdown
 		<-events.ShutdownEngineUpdates()
 	}()
 
 	getNextToPlay := func() {
 		if track := ui.GetNextToPlay(); track != nil {
-			events.Play(track)
+			publisher.Play(track)
 		}
 	}
 

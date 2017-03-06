@@ -12,7 +12,7 @@ type Player interface {
 type RegularPlayer struct{}
 
 func (p *RegularPlayer) Pause() {
-	events.PlayPauseToggle()
+	publisher.PlayPauseToggle()
 }
 
 func (p *RegularPlayer) Play() {
@@ -35,7 +35,7 @@ func (p *RegularPlayer) Play() {
 		} else {
 			track := playlist.Track(trackIndex)
 			playlists.SetCurrents(playlist.Name(), trackIndex)
-			events.Play(track)
+			publisher.Play(track)
 		}
 	}
 }

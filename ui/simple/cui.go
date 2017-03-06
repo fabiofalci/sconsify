@@ -15,6 +15,7 @@ import (
 var (
 	gui                  *Gui
 	events               *sconsify.Events
+	publisher            *sconsify.Publisher
 	queue                *ui.Queue
 	playlists            *sconsify.Playlists
 	consoleUserInterface sconsify.UserInterface
@@ -51,8 +52,9 @@ type Gui struct {
 	PlayingTrack   *sconsify.Track
 }
 
-func InitialiseConsoleUserInterface(ev *sconsify.Events, loadState bool) sconsify.UserInterface {
+func InitialiseConsoleUserInterface(ev *sconsify.Events, p *sconsify.Publisher, loadState bool) sconsify.UserInterface {
 	events = ev
+	publisher = p
 	gui = &Gui{}
 	consoleUserInterface = &ConsoleUserInterface{}
 	queue = ui.InitQueue()
@@ -91,7 +93,7 @@ func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
 
 func (cui *ConsoleUserInterface) Shutdown() {
 	persistState()
-	events.ShutdownEngine()
+	publisher.ShutdownEngine()
 }
 
 func (cui *ConsoleUserInterface) PlayTokenLost() error {
@@ -270,11 +272,11 @@ func (gui *Gui) getNextFromQueue() *sconsify.Track {
 }
 
 func (gui *Gui) playNext() {
-	events.NextPlay()
+	publisher.NextPlay()
 }
 
 func (gui *Gui) replay() {
-	events.Replay()
+	publisher.Replay()
 }
 
 func (gui *Gui) createPlaylistFromQueue(playlistName string) {

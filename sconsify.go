@@ -73,6 +73,7 @@ func main() {
 	fmt.Println("Sconsify - your awesome Spotify music service in a text-mode interface.")
 	username, pass := credentials(providedUsername)
 	events := sconsify.InitialiseEvents()
+	publisher := &sconsify.Publisher{}
 
 	initConf := &spotify.SpotifyInitConf{
 		WebApiAuth:         *providedWebApi,
@@ -84,22 +85,22 @@ func main() {
 		AuthRedirectUrl:    authRedirectUrl,
 		OpenBrowserCommand: *providedOpenBrowser,
 	}
-	go spotify.Initialise(initConf, username, pass, events)
+	go spotify.Initialise(initConf, username, pass, events, publisher)
 
 	if *providedServer {
-		go rpc.StartServer(events)
+		go rpc.StartServer(publisher)
 	}
 
 	if *providedUi {
-		ui := simple.InitialiseConsoleUserInterface(events, true)
-		sconsify.StartMainLoop(events, ui, false)
+		ui := simple.InitialiseConsoleUserInterface(events, publisher, true)
+		sconsify.StartMainLoop(events, publisher, ui, false)
 	} else {
 		var output noui.Printer
 		if *providedNoUiSilent {
 			output = new(noui.SilentPrinter)
 		}
-		ui := noui.InitialiseNoUserInterface(events, output, providedNoUiRepeatOn, providedNoUiShuffle)
-		sconsify.StartMainLoop(events, ui, true)
+		ui := noui.InitialiseNoUserInterface(events, publisher, output, providedNoUiRepeatOn, providedNoUiShuffle)
+		sconsify.StartMainLoop(events, publisher, ui, true)
 	}
 }
 
