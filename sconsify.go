@@ -75,6 +75,8 @@ func main() {
 	events := sconsify.InitialiseEvents()
 	publisher := &sconsify.Publisher{}
 
+	go toFile()
+
 	initConf := &spotify.SpotifyInitConf{
 		WebApiAuth:         *providedWebApi,
 		PlaylistFilter:     *providedPlaylists,
@@ -101,6 +103,35 @@ func main() {
 		}
 		ui := noui.InitialiseNoUserInterface(events, publisher, output, providedNoUiRepeatOn, providedNoUiShuffle)
 		sconsify.StartMainLoop(events, publisher, ui, true)
+	}
+}
+
+func toFile() {
+	toFileEvents := sconsify.InitialiseEvents()
+
+
+	for {
+		select {
+		case track := <-toFileEvents.TrackPausedUpdates():
+			infrastructure.Debugf("Paused %s", track.GetFullTitle())
+		case track := <-toFileEvents.TrackPlayingUpdates():
+			infrastructure.Debugf("Playing %v", track.GetFullTitle())
+		case <-toFileEvents.TrackNotAvailableUpdates():
+		case <-toFileEvents.PlayTokenLostUpdates():
+		case <-toFileEvents.NextPlayUpdates():
+		case <-toFileEvents.PlaylistsUpdates():
+		case <-toFileEvents.ArtistAlbumsUpdates():
+		case <-toFileEvents.ShutdownEngineUpdates():
+			return
+		case <-toFileEvents.NewTrackLoadedUpdate():
+		case <-toFileEvents.ShutdownSpotifyUpdates():
+		case <-toFileEvents.SearchUpdates():
+		case <-toFileEvents.PlayUpdates():
+		case <-toFileEvents.ReplayUpdates():
+		case <-toFileEvents.PauseUpdates():
+		case <-toFileEvents.PlayPauseToggleUpdates():
+		case <-toFileEvents.GetArtistAlbumsUpdates():
+		}
 	}
 }
 
