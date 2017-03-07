@@ -109,20 +109,19 @@ func main() {
 func toFile() {
 	toFileEvents := sconsify.InitialiseEvents()
 
-
 	for {
 		select {
 		case track := <-toFileEvents.TrackPausedUpdates():
 			infrastructure.Debugf("Paused %s", track.GetFullTitle())
 		case track := <-toFileEvents.TrackPlayingUpdates():
 			infrastructure.Debugf("Playing %v", track.GetFullTitle())
+		case <-toFileEvents.ShutdownEngineUpdates():
+			break
 		case <-toFileEvents.TrackNotAvailableUpdates():
 		case <-toFileEvents.PlayTokenLostUpdates():
 		case <-toFileEvents.NextPlayUpdates():
 		case <-toFileEvents.PlaylistsUpdates():
 		case <-toFileEvents.ArtistAlbumsUpdates():
-		case <-toFileEvents.ShutdownEngineUpdates():
-			return
 		case <-toFileEvents.NewTrackLoadedUpdate():
 		case <-toFileEvents.ShutdownSpotifyUpdates():
 		case <-toFileEvents.SearchUpdates():

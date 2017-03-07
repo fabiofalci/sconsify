@@ -89,10 +89,7 @@ func (events *Events) ShutdownSpotifyUpdates() <-chan bool {
 
 func (publisher *Publisher) TrackPlaying(track *Track) {
 	for _, subscriber := range subscribers {
-		select {
-		case subscriber.trackPlaying <- track:
-		default:
-		}
+		subscriber.trackPlaying <- track
 	}
 }
 
@@ -102,10 +99,7 @@ func (events *Events) TrackPlayingUpdates() <-chan *Track {
 
 func (publisher *Publisher) TrackPaused(track *Track) {
 	for _, subscriber := range subscribers {
-		select {
-		case subscriber.trackPaused <- track:
-		default:
-		}
+		subscriber.trackPaused <- track
 	}
 }
 
