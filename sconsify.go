@@ -18,6 +18,7 @@ import (
 	"github.com/howeyc/gopass"
 	"runtime"
 	"strconv"
+	"io/ioutil"
 )
 
 var version string
@@ -36,6 +37,7 @@ func main() {
 	providedUsername := flag.String("username", "", "Spotify username.")
 	providedWebApi := flag.Bool("web-api", true, "Use Spotify WEB API for more features. It requires web authorization.")
 	providedOpenBrowser := flag.String("open-browser-cmd", "", "Open browser command to complete the web authorization.")
+	providedStatusFile := flag.String("status-file", "", "File that sconsify will output status such as track being played.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll shuffle tracks.")
 	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
 	providedPreferredBitrate := flag.String("preferred-bitrate", "320k", "Preferred bitrate: 96k, 160k, 320k.")
@@ -75,7 +77,9 @@ func main() {
 	events := sconsify.InitialiseEvents()
 	publisher := &sconsify.Publisher{}
 
-	go toFile()
+	if *providedStatusFile != "" {
+		go toStatusFile(*providedStatusFile)
+	}
 
 	initConf := &spotify.SpotifyInitConf{
 		WebApiAuth:         *providedWebApi,
@@ -106,15 +110,17 @@ func main() {
 	}
 }
 
-func toFile() {
+func toStatusFile(fileName string) {
 	toFileEvents := sconsify.InitialiseEvents()
 
 	for {
 		select {
 		case track := <-toFileEvents.TrackPausedUpdates():
-			infrastructure.Debugf("Paused %s", track.GetFullTitle())
+			content := []byte(fmt.Sprintf("Paused %s", track.GetFullTitle()))
+			ioutil.WriteFile(fileName, content, 0644)
 		case track := <-toFileEvents.TrackPlayingUpdates():
-			infrastructure.Debugf("Playing %v", track.GetFullTitle())
+			content := []byte(fmt.Sprintf("Playing %s", track.GetFullTitle()))
+			ioutil.WriteFile(fileName, content, 0644)
 		case <-toFileEvents.ShutdownEngineUpdates():
 			break
 		case <-toFileEvents.TrackNotAvailableUpdates():
