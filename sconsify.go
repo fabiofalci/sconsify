@@ -18,7 +18,7 @@ import (
 	"github.com/howeyc/gopass"
 	"runtime"
 	"strconv"
-	"io/ioutil"
+	"github.com/fabiofalci/sconsify/ui"
 )
 
 var version string
@@ -78,7 +78,7 @@ func main() {
 	publisher := &sconsify.Publisher{}
 
 	if *providedStatusFile != "" {
-		go toStatusFile(*providedStatusFile)
+		go ui.ToStatusFile(*providedStatusFile, "{{.Name}} - {{.Artist.Name}}\n")
 	}
 
 	initConf := &spotify.SpotifyInitConf{
@@ -107,36 +107,6 @@ func main() {
 		}
 		ui := noui.InitialiseNoUserInterface(events, publisher, output, providedNoUiRepeatOn, providedNoUiShuffle)
 		sconsify.StartMainLoop(events, publisher, ui, true)
-	}
-}
-
-func toStatusFile(fileName string) {
-	toFileEvents := sconsify.InitialiseEvents()
-
-	for {
-		select {
-		case track := <-toFileEvents.TrackPausedUpdates():
-			content := []byte(fmt.Sprintf("Paused %s", track.GetFullTitle()))
-			ioutil.WriteFile(fileName, content, 0644)
-		case track := <-toFileEvents.TrackPlayingUpdates():
-			content := []byte(fmt.Sprintf("Playing %s", track.GetFullTitle()))
-			ioutil.WriteFile(fileName, content, 0644)
-		case <-toFileEvents.ShutdownEngineUpdates():
-			break
-		case <-toFileEvents.TrackNotAvailableUpdates():
-		case <-toFileEvents.PlayTokenLostUpdates():
-		case <-toFileEvents.NextPlayUpdates():
-		case <-toFileEvents.PlaylistsUpdates():
-		case <-toFileEvents.ArtistAlbumsUpdates():
-		case <-toFileEvents.NewTrackLoadedUpdate():
-		case <-toFileEvents.ShutdownSpotifyUpdates():
-		case <-toFileEvents.SearchUpdates():
-		case <-toFileEvents.PlayUpdates():
-		case <-toFileEvents.ReplayUpdates():
-		case <-toFileEvents.PauseUpdates():
-		case <-toFileEvents.PlayPauseToggleUpdates():
-		case <-toFileEvents.GetArtistAlbumsUpdates():
-		}
 	}
 }
 
