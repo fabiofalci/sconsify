@@ -38,6 +38,7 @@ func main() {
 	providedWebApi := flag.Bool("web-api", true, "Use Spotify WEB API for more features. It requires web authorization.")
 	providedOpenBrowser := flag.String("open-browser-cmd", "", "Open browser command to complete the web authorization.")
 	providedStatusFile := flag.String("status-file", "", "File that sconsify will output status such as track being played.")
+	providedStatusFileTemplate := flag.String("status-file-template", "", "Status file template.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll shuffle tracks.")
 	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
 	providedPreferredBitrate := flag.String("preferred-bitrate", "320k", "Preferred bitrate: 96k, 160k, 320k.")
@@ -78,7 +79,11 @@ func main() {
 	publisher := &sconsify.Publisher{}
 
 	if *providedStatusFile != "" {
-		go ui.ToStatusFile(*providedStatusFile, "{{.Name}} - {{.Artist.Name}}\n")
+		statusFileTemplate := "{{.Action}}: {{.Track}} - {{.Artist}}\n"
+		if *providedStatusFileTemplate!= "" {
+			statusFileTemplate = *providedStatusFileTemplate
+		}
+		go ui.ToStatusFile(*providedStatusFile, statusFileTemplate)
 	}
 
 	initConf := &spotify.SpotifyInitConf{

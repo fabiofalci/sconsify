@@ -7,6 +7,12 @@ import (
 	"bytes"
 )
 
+type StatusTrack struct {
+	Action string
+	Track  string
+	Artist string
+}
+
 func ToStatusFile(fileName string, text string) {
 	toFileEvents := sconsify.InitialiseEvents()
 
@@ -16,11 +22,11 @@ func ToStatusFile(fileName string, text string) {
 		select {
 		case track := <-toFileEvents.TrackPausedUpdates():
 			var b bytes.Buffer
-			t.Execute(&b, track)
+			t.Execute(&b, StatusTrack{Action: "Paused", Track: track.Name, Artist: track.Artist.Name})
 			ioutil.WriteFile(fileName, b.Bytes(), 0644)
 		case track := <-toFileEvents.TrackPlayingUpdates():
 			var b bytes.Buffer
-			t.Execute(&b, track)
+			t.Execute(&b, StatusTrack{Action: "Playing", Track: track.Name, Artist: track.Artist.Name})
 			ioutil.WriteFile(fileName, b.Bytes(), 0644)
 		case <-toFileEvents.ShutdownEngineUpdates():
 			break
