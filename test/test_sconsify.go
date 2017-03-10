@@ -37,7 +37,7 @@ func main() {
 	infrastructure.InitialiseLogger()
 	defer infrastructure.CloseLogger()
 
-	go mock.Initialise(events, publisher)
+	go mock.Initialise(events, publisher, true)
 
 	if *runTest {
 		go runTests()

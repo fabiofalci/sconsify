@@ -19,6 +19,7 @@ import (
 	"runtime"
 	"strconv"
 	"github.com/fabiofalci/sconsify/ui"
+	"github.com/fabiofalci/sconsify/spotify/mock"
 )
 
 var version string
@@ -51,6 +52,7 @@ func main() {
 	askingVersion := flag.Bool("version", false, "Print version.")
 	providedCommand := flag.String("command", "", "Execute a command in the server: replay, play_pause, next")
 	providedServer := flag.Bool("server", true, "Start a background server to accept commands.")
+	providedMockLibspotify := flag.Bool("mock-libspotify", true, "Mock libspotify.")
 	flag.Parse()
 
 	if *askingVersion {
@@ -96,7 +98,11 @@ func main() {
 		AuthRedirectUrl:    authRedirectUrl,
 		OpenBrowserCommand: *providedOpenBrowser,
 	}
-	go spotify.Initialise(initConf, username, pass, events, publisher)
+	if *providedMockLibspotify {
+		go mock.Initialise(events, publisher, false)
+	} else {
+		go spotify.Initialise(initConf, username, pass, events, publisher)
+	}
 
 	if *providedServer {
 		go rpc.StartServer(publisher)
