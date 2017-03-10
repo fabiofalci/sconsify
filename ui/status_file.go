@@ -18,6 +18,7 @@ func ToStatusFile(fileName string, text string) {
 
 	t := template.Must(template.New("statusTemplate").Parse(text))
 
+	ioutil.WriteFile(fileName, []byte(""), 0644)
 	for {
 		select {
 		case track := <-toFileEvents.TrackPausedUpdates():
@@ -29,6 +30,7 @@ func ToStatusFile(fileName string, text string) {
 			t.Execute(&b, StatusTrack{Action: "Playing", Track: track.Name, Artist: track.Artist.Name})
 			ioutil.WriteFile(fileName, b.Bytes(), 0644)
 		case <-toFileEvents.ShutdownEngineUpdates():
+			ioutil.WriteFile(fileName, []byte(""), 0644)
 			break
 		case <-toFileEvents.TrackNotAvailableUpdates():
 		case <-toFileEvents.PlayTokenLostUpdates():
