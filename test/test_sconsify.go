@@ -32,18 +32,19 @@ func main() {
 
 	fmt.Println("Sconsify - your awesome Spotify music service in a text-mode interface.")
 	events := sconsify.InitialiseEvents()
+	publisher := &sconsify.Publisher{}
 
 	infrastructure.InitialiseLogger()
 	defer infrastructure.CloseLogger()
 
-	go mock.Initialise(events)
+	go mock.Initialise(events, publisher)
 
 	if *runTest {
 		go runTests()
 	}
 
-	ui := simple.InitialiseConsoleUserInterface(events, false)
-	sconsify.StartMainLoop(events, ui, false)
+	ui := simple.InitialiseConsoleUserInterface(events, publisher, false)
+	sconsify.StartMainLoop(events, publisher, ui, false)
 	println(output.String())
 	sleep() // otherwise gocui eventually fails to quit properly
 }

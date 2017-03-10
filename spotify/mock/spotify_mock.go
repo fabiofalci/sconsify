@@ -10,7 +10,7 @@ var (
 	elvisPresley = sconsify.InitArtist("Elvis Presley:3", "Elvis Presley")
 )
 
-func Initialise(events *sconsify.Events) {
+func Initialise(events *sconsify.Events, publisher *sconsify.Publisher) {
 	playlists := sconsify.InitPlaylists()
 
 	tracks := make([]*sconsify.Track, 2)
@@ -39,8 +39,8 @@ func Initialise(events *sconsify.Events) {
 	tracks[2] = sconsify.InitTrack("ramones5", theRamones, "Judy is a punk", "1m9s")
 	playlists.AddPlaylist(sconsify.InitPlaylist("ramonesplaylist1", "Ramones", tracks))
 
-	events.NewPlaylist(playlists)
-	waitForMockEvents(events)
+	publisher.NewPlaylist(playlists)
+	waitForMockEvents(events, publisher)
 }
 
 func getSearchedPlaylist() *sconsify.Playlists {
@@ -54,16 +54,16 @@ func getSearchedPlaylist() *sconsify.Playlists {
 	return playlists
 }
 
-func waitForMockEvents(events *sconsify.Events) {
+func waitForMockEvents(events *sconsify.Events, publisher *sconsify.Publisher) {
 	for {
 		select {
 		case <-events.PlayUpdates():
 		case <-events.PauseUpdates():
 		case <-events.ReplayUpdates():
 		case <-events.ShutdownSpotifyUpdates():
-			events.ShutdownEngine()
+			publisher.ShutdownEngine()
 		case <-events.SearchUpdates():
-			events.NewPlaylist(getSearchedPlaylist())
+			publisher.NewPlaylist(getSearchedPlaylist())
 		}
 	}
 }

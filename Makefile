@@ -17,7 +17,7 @@ test:
 	go test -v ./...
 
 test-ui:
-	go run test/test_sconsify.go -run-test |&pp
+	go run test/test_sconsify.go -run-test
 
 run: container-build
 	docker run --rm -it \
