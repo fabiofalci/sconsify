@@ -13,24 +13,35 @@ type StatusTrack struct {
 	Artist string
 }
 
-func ToStatusFile(fileName string, text string) {
+var fileName string
+
+func toFile(content []byte) {
+	ioutil.WriteFile(fileName, content, 0600)
+}
+
+func cleanStatusFile() {
+	toFile([]byte(""))
+}
+
+func ToStatusFile(file string, text string) {
+	fileName = file
 	toFileEvents := sconsify.InitialiseEvents()
 
 	t := template.Must(template.New("statusTemplate").Parse(text))
 
-	ioutil.WriteFile(fileName, []byte(""), 0644)
+	cleanStatusFile()
 	for {
 		select {
 		case track := <-toFileEvents.TrackPausedUpdates():
 			var b bytes.Buffer
 			t.Execute(&b, StatusTrack{Action: "Paused", Track: track.Name, Artist: track.Artist.Name})
-			ioutil.WriteFile(fileName, b.Bytes(), 0644)
+			toFile(b.Bytes())
 		case track := <-toFileEvents.TrackPlayingUpdates():
 			var b bytes.Buffer
 			t.Execute(&b, StatusTrack{Action: "Playing", Track: track.Name, Artist: track.Artist.Name})
-			ioutil.WriteFile(fileName, b.Bytes(), 0644)
+			toFile(b.Bytes())
 		case <-toFileEvents.ShutdownEngineUpdates():
-			ioutil.WriteFile(fileName, []byte(""), 0644)
+			cleanStatusFile()
 			break
 		case <-toFileEvents.TrackNotAvailableUpdates():
 		case <-toFileEvents.PlayTokenLostUpdates():
