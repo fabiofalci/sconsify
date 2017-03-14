@@ -73,7 +73,7 @@ func (spotify *Spotify) search(query string) {
 
 	playlist := sconsify.InitSearchPlaylist(name, name, func(playlist *sconsify.Playlist) {
 		options := createWebSpotifyOptions(50, playlist.Tracks())
-		// TODO use spotify.client while still token valid, then switch to Default one
+		// TODO use pl.client while still token valid, then switch to Default one
 		if searchResult, err := webspotify.DefaultClient.SearchOpt(query, webspotify.SearchTypeTrack, options); err == nil {
 			numberOfTracks := len(searchResult.Tracks.Tracks)
 			infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)

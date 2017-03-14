@@ -11,6 +11,7 @@ import (
 	"github.com/fabiofalci/sconsify/webapi"
 	"github.com/gordonklaus/portaudio"
 	webspotify "github.com/zmb3/spotify"
+	"strings"
 )
 
 type Spotify struct {
@@ -166,7 +167,7 @@ func (spotify *Spotify) finishInitialisation(initConf *SpotifyInitConf, pa *port
 	go pa.player()
 	defer portaudio.Terminate()
 
-	if err := spotify.initPlaylist(); err != nil {
+	if err := SpotifyInitPlaylist(spotify); err != nil {
 		return err
 	}
 
@@ -196,5 +197,15 @@ func (spotify *Spotify) waitForEvents() {
 		case artist := <-spotify.events.GetArtistAlbumsUpdates():
 			spotify.artistAlbums(artist)
 		}
+	}
+}
+
+func (spotify *Spotify) setPlaylistFilter(playlistFilter string) {
+	if playlistFilter == "" {
+		return
+	}
+	spotify.playlistFilter = strings.Split(playlistFilter, ",")
+	for i := range spotify.playlistFilter {
+		spotify.playlistFilter[i] = strings.Trim(spotify.playlistFilter[i], " ")
 	}
 }

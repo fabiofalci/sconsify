@@ -2,6 +2,7 @@ package mock
 
 import (
 	"github.com/fabiofalci/sconsify/sconsify"
+	"github.com/fabiofalci/sconsify/spotify"
 )
 
 var (
@@ -39,6 +40,9 @@ func Initialise(events *sconsify.Events, publisher *sconsify.Publisher, addPlayl
 		tracks[1] = sconsify.InitTrack("ramones4", theRamones, "Pet semetary", "3m21s")
 		tracks[2] = sconsify.InitTrack("ramones5", theRamones, "Judy is a punk", "1m9s")
 		playlists.AddPlaylist(sconsify.InitPlaylist("ramonesplaylist1", "Ramones", tracks))
+	} else {
+		sp := &spotify.Spotify{}
+		spotify.SpotifyInitPlaylist(sp)
 	}
 
 	publisher.NewPlaylist(playlists)
