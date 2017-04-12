@@ -3,6 +3,8 @@ A spotify console app
 
 [![Join the chat at https://gitter.im/fabiofalci/sconsify](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fabiofalci/sconsify?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+Important notice: [libspotify](https://developer.spotify.com/technologies/libspotify/) is no longer available for download. If you have installed, then sconsify should be working. Unfortunately, we don't know for how long.
+
 A very early stage of a spotify console application.
 
 Requirements: [Libspotify SDK](https://developer.spotify.com/technologies/libspotify/) & [PortAudio](http://www.portaudio.com/) & Spotify user subscribed to the Premium tier of the Spotify Service ([Libspotify SDK terms of use](https://developer.spotify.com/developer-terms-of-use/)).
