@@ -33,9 +33,17 @@ Install [brew, the missing package manager for OS X](http://brew.sh/) and
 
 	$ brew tap homebrew/binary
 	$ brew install portaudio
-	$ brew install libspotify
-	$ cd /usr/local/opt/libspotify/lib/
-	$ ln -s libspotify.dylib libspotify
+
+Then, download `libspotify` 12.1.51 for Mac OS X/Darwin
+Uncompress the file and copy libspotify.framework to /Library/Frameworks (optional)
+	
+	$ wget https://developer.spotify.com/download/libspotify/libspotify-12.1.51-Darwin-universal.zip
+	$ sudo cp -R ./libspotify-12.1.51-Darwin-universal/libspotify.framework /Library/Frameworks
+	
+sconsify will load libspotify from `/usr/local/opt/libspotify/lib/libspotify`. User should create a symbolic link to `/usr/local/opt/libspotify/lib/libspotify`
+
+	$ mkdir -p /usr/local/opt/libspotify/lib
+	$ ln -s /Library/Frameworks/libspotify.framework/libspotify /usr/local/opt/libspotify/lib
 
 * Run `./sconsify`
 
