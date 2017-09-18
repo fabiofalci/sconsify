@@ -27,6 +27,12 @@ Installation
 	$ curl http://apt.mopidy.com/mopidy.gpg | sudo apt-key add - && sudo curl -o /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
 	$ sudo apt-get update && sudo apt-get install -y libportaudio2 libspotify12 --no-install-recommends 
 
+`Fedora Workstation`
+
+Install libspotify-devel from rpmfusion-nonfree. [Install instructions](https://rpmfusion.org/Configuration/)
+
+	$ sudo dnf install libspotify portaudio
+
 `OSX`
 
 Install [brew, the missing package manager for OS X](http://brew.sh/) and
