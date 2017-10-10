@@ -144,7 +144,9 @@ func (spotify *Spotify) loadPlaylists(offset int, privateUser *webspotify.Privat
 	options := &webspotify.Options{Limit: &limit, Offset: &offset}
 	if simplePlaylistPage, err := spotify.client.GetPlaylistsForUserOpt(privateUser.ID, options); err == nil {
 		for _, webPlaylist := range simplePlaylistPage.Playlists {
-			spotify.loadPlaylistTracks(&webPlaylist, playlists)
+			if spotify.isOnFilter(webPlaylist.Name) {
+				spotify.loadPlaylistTracks(&webPlaylist, playlists)
+			}
 		}
 
 		// simplePlaylistPage.Offset is returning 0 instead of offset

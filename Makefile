@@ -13,6 +13,7 @@ AUTH_REDIRECT_URL := https://fabiofalci.github.io/sconsify-auth/index.html
 
 default: build
 
+.PHONY: test
 test:
 	go test -v ./...
 
