@@ -62,7 +62,7 @@ There are 2 modes:
 
 * `Console user interface` mode: it presents a text user interface with playlists and tracks.
 
-* `No user interface` mode: it doesn't present user interface and just suffle tracks.
+* `No user interface` mode: it doesn't present user interface and just shuffle tracks.
 
 
 Parameters
