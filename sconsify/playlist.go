@@ -60,6 +60,24 @@ func (playlist *Playlist) GetNextTrack(currentIndexTrack int) (int, bool) {
 	return currentIndexTrack + 1, false
 }
 
+func (playlist *Playlist) FindTrackIndex(query string, fromIndex int) int {
+	for i := fromIndex; i < len(playlist.tracks); i++ {
+		if strings.Contains(strings.ToUpper(playlist.tracks[i].Name), strings.ToUpper(query)) ||
+			strings.Contains(strings.ToUpper(playlist.tracks[i].Artist.Name), strings.ToUpper(query)) {
+			return i
+		}
+	}
+	if fromIndex > 0 {
+		for i := 0; i < fromIndex; i++ {
+			if strings.Contains(strings.ToUpper(playlist.tracks[i].Name), strings.ToUpper(query)) ||
+				strings.Contains(strings.ToUpper(playlist.tracks[i].Artist.Name), strings.ToUpper(query)) {
+				return i
+			}
+		}
+	}
+	return -1
+}
+
 func (playlist *Playlist) Track(index int) *Track {
 	if index < len(playlist.tracks) {
 		return playlist.tracks[index]

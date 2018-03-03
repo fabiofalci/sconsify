@@ -515,12 +515,18 @@ func executeSearchView(query string) {
 		if playlist != nil {
 			goTo(gui.g, gui.playlistsView, playlist.Position)
 		}
-	}
-	if currentView == VIEW_QUEUE {
+	} else if currentView == VIEW_QUEUE {
 		gui.enableQueueView()
-	}
-	if currentView == VIEW_TRACKS {
+	} else if currentView == VIEW_TRACKS {
 		gui.enableTracksView()
+		playlist, trackIndex := gui.getSelectedPlaylistAndTrack()
+		trackIndex++
+		if playlist != nil {
+			trackIndex := playlist.FindTrackIndex(query, trackIndex)
+			if trackIndex > -1 {
+				goTo(gui.g, gui.tracksView, trackIndex + 1)
+			}
+		}
 	}
 }
 
