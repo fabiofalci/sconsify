@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Release 0.5.0"
-date:   2017-03-03 18:31:00
+date:   2018-03-03 18:31:00
 categories: release
 ---
 Sconsify 0.5.0, a minor release just to get some things out:
