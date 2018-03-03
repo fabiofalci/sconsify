@@ -13,7 +13,7 @@ Requirements: [Libspotify SDK](https://developer.spotify.com/technologies/libspo
 Installation
 ------------
 
-* Download current version [0.4.0](https://github.com/fabiofalci/sconsify/releases) 
+* Download current version [0.5.0](https://github.com/fabiofalci/sconsify/releases) 
 
 * Install dependencies:
 
