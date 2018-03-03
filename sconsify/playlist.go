@@ -12,6 +12,8 @@ type Playlist struct {
 	name   string
 	search bool
 
+	Position int
+
 	subPlaylist bool
 	open        bool
 	playlists   []*Playlist

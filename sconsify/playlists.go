@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 type Playlists struct {
@@ -44,6 +45,24 @@ func (playlists *Playlists) Get(name string) *Playlist {
 			}
 		}
 	}
+	return nil
+}
+func (playlists *Playlists) Find(query string, fromIndex int) *Playlist {
+	fromIndex--
+	names := playlists.Names()
+	for i := fromIndex; i < len(names); i++ {
+		if strings.HasPrefix(strings.ToUpper(names[i]), strings.ToUpper(query)) {
+			return playlists.Get(names[i])
+		}
+	}
+	if fromIndex > 0 {
+		for i := 0; i < fromIndex; i++ {
+			if strings.HasPrefix(strings.ToUpper(names[i]), strings.ToUpper(query)) {
+				return playlists.Get(names[i])
+			}
+		}
+	}
+
 	return nil
 }
 

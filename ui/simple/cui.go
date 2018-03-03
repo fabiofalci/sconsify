@@ -351,13 +351,20 @@ func (gui *Gui) updateTracksView() {
 
 func (gui *Gui) updatePlaylistsView() {
 	gui.playlistsView.Clear()
+	position := 0
 	for _, key := range playlists.Names() {
 		fmt.Fprintln(gui.playlistsView, key)
+		position++
+
 		playlist := playlists.Get(key)
+		playlist.Position = position
 		if playlist.IsFolder() && playlist.IsFolderOpen() {
 			for i := 0; i < playlist.Playlists(); i++ {
 				subPlaylist := playlist.Playlist(i)
 				fmt.Fprintln(gui.playlistsView, subPlaylist.Name())
+				position++
+
+				subPlaylist.Position = position
 			}
 		}
 	}

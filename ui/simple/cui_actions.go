@@ -41,6 +41,7 @@ const (
 	NextTrack          = "NextTrack"
 	ReplayTrack        = "ReplayTrack"
 	Search             = "Search"
+	SearchView         = "SearchView"
 	Quit               = "Quit"
 	QueueTrack         = "QueueTrack"
 	QueuePlaylist      = "QueuePlaylist"
@@ -63,6 +64,7 @@ var multipleKeysBuffer []rune
 var multipleKeysNumber int
 var keyboard *Keyboard
 var actionBeingExecuted string
+var currentView string
 
 func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[PauseTrack] {
@@ -82,6 +84,9 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[Search] {
 		keyboard.addKey("/", Search)
+	}
+	if !keyboard.UsedFunctions[SearchView] {
+		keyboard.addKey("\\", SearchView)
 	}
 	if !keyboard.UsedFunctions[Quit] {
 		keyboard.addKey("q", Quit)
@@ -215,7 +220,7 @@ func keybindings() error {
 			}))
 		}
 
-		for _, value := range []rune{'>', '<', '/'} {
+		for _, value := range []rune{'>', '<', '/', '\\'} {
 			key := value
 			addKeyBinding(&keyboard.Keys, newKeyMapping(key, view, func(g *gocui.Gui, v *gocui.View) error {
 				return keyPressed(key, g, v)
@@ -239,6 +244,7 @@ func keybindings() error {
 		keyboard.configureKey(nextTrackCommand, NextTrack, view)
 		keyboard.configureKey(replayTrackCommand, ReplayTrack, view)
 		keyboard.configureKey(enableSearchInputCommand, Search, view)
+		keyboard.configureKey(enableSearchViewInputCommand, SearchView, view)
 		keyboard.configureKey(repeatPlayingTrackCommand, RepeatPlayingTrack, view)
 		keyboard.configureKey(quit, Quit, view)
 		keyboard.configureKey(goToFirstLineCommand, GoToFirstLine, view)
@@ -467,6 +473,42 @@ func removeTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func enableSearchViewInputCommand(g *gocui.Gui, v *gocui.View) error {
+	gui.clearStatusView()
+	gui.statusView.Editable = true
+	currentView = v.Name()
+	gui.g.SetCurrentView(VIEW_STATUS)
+	actionBeingExecuted = SearchView
+	return nil
+}
+
+func searchViewCommand(g *gocui.Gui, v *gocui.View) error {
+	if query := getTypedCommand(); query != "" {
+		if currentView == VIEW_PLAYLISTS {
+			gui.enableSideView()
+			currentPosition := 0
+			selectedPlaylist := gui.getSelectedPlaylist()
+			if selectedPlaylist != nil {
+				currentPosition = selectedPlaylist.Position
+			}
+			playlist := playlists.Find(query, currentPosition)
+			if playlist != nil {
+				goTo(gui.g, gui.playlistsView, playlist.Position)
+			}
+		}
+		if currentView == VIEW_QUEUE {
+			gui.enableQueueView()
+		}
+		if currentView == VIEW_TRACKS {
+			gui.enableTracksView()
+		}
+	}
+	gui.clearStatusView()
+	gui.statusView.Editable = false
+	gui.updateCurrentStatus()
+	return nil
+}
+
 func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.clearStatusView()
 	gui.statusView.Editable = true
@@ -513,6 +555,8 @@ func getTypedCommand() string {
 func executeAction(g *gocui.Gui, v *gocui.View) error {
 	if actionBeingExecuted == Search {
 		return searchCommand(g, v)
+	} else if actionBeingExecuted == SearchView {
+		return searchViewCommand(g, v)
 	} else if actionBeingExecuted == CreatePlaylist {
 		return createPlaylistCommand(g, v)
 	}
