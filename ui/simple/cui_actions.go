@@ -251,6 +251,15 @@ func keybindings() error {
 		keyboard.configureKey(cursorDown, Down, view)
 		keyboard.configureKey(removeTrackCommand, RemoveTrack, view)
 		keyboard.configureKey(removeAllTracksCommand, RemoveAllTracks, view)
+
+		// numbers
+		for i := 0; i < 10; i++ {
+			numberCopy := i
+			addKeyBinding(&keyboard.Keys, newKeyMapping(rune(i+48), view,
+				func(g *gocui.Gui, v *gocui.View) error {
+					return multipleKeysNumberPressed(numberCopy)
+				}))
+		}
 	}
 
 	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
@@ -266,15 +275,6 @@ func keybindings() error {
 	keyboard.configureKey(artistAlbums, ArtistAlbums, VIEW_TRACKS)
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
 	keyboard.configureKey(enableCreatePlaylistCommand, CreatePlaylist, VIEW_QUEUE)
-
-	// numbers
-	for i := 0; i < 10; i++ {
-		numberCopy := i
-		addKeyBinding(&keyboard.Keys, newKeyMapping(rune(i+48), "",
-			func(g *gocui.Gui, v *gocui.View) error {
-				return multipleKeysNumberPressed(numberCopy)
-			}))
-	}
 
 	for _, key := range keyboard.Keys {
 		// it needs to copy the key because closures copy var references and we don't
