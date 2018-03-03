@@ -42,6 +42,7 @@ const (
 	ReplayTrack        = "ReplayTrack"
 	Search             = "Search"
 	SearchView         = "SearchView"
+	RepeatSearchView   = "RepeatSearchView"
 	Quit               = "Quit"
 	QueueTrack         = "QueueTrack"
 	QueuePlaylist      = "QueuePlaylist"
@@ -65,6 +66,7 @@ var multipleKeysNumber int
 var keyboard *Keyboard
 var actionBeingExecuted string
 var currentView string
+var lastQuery string
 
 func (keyboard *Keyboard) defaultValues() {
 	if !keyboard.UsedFunctions[PauseTrack] {
@@ -87,6 +89,9 @@ func (keyboard *Keyboard) defaultValues() {
 	}
 	if !keyboard.UsedFunctions[SearchView] {
 		keyboard.addKey("\\", SearchView)
+	}
+	if !keyboard.UsedFunctions[RepeatSearchView] {
+		keyboard.addKey("n", RepeatSearchView)
 	}
 	if !keyboard.UsedFunctions[Quit] {
 		keyboard.addKey("q", Quit)
@@ -245,6 +250,7 @@ func keybindings() error {
 		keyboard.configureKey(replayTrackCommand, ReplayTrack, view)
 		keyboard.configureKey(enableSearchInputCommand, Search, view)
 		keyboard.configureKey(enableSearchViewInputCommand, SearchView, view)
+		keyboard.configureKey(enableRepeatSearchViewInputCommand, RepeatSearchView, view)
 		keyboard.configureKey(repeatPlayingTrackCommand, RepeatPlayingTrack, view)
 		keyboard.configureKey(quit, Quit, view)
 		keyboard.configureKey(goToFirstLineCommand, GoToFirstLine, view)
@@ -482,31 +488,40 @@ func enableSearchViewInputCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func enableRepeatSearchViewInputCommand(g *gocui.Gui, v *gocui.View) error {
+	executeSearchView(lastQuery)
+	return nil
+}
+
 func searchViewCommand(g *gocui.Gui, v *gocui.View) error {
 	if query := getTypedCommand(); query != "" {
-		if currentView == VIEW_PLAYLISTS {
-			gui.enableSideView()
-			currentPosition := 0
-			selectedPlaylist := gui.getSelectedPlaylist()
-			if selectedPlaylist != nil {
-				currentPosition = selectedPlaylist.Position
-			}
-			playlist := playlists.Find(query, currentPosition)
-			if playlist != nil {
-				goTo(gui.g, gui.playlistsView, playlist.Position)
-			}
-		}
-		if currentView == VIEW_QUEUE {
-			gui.enableQueueView()
-		}
-		if currentView == VIEW_TRACKS {
-			gui.enableTracksView()
-		}
+		executeSearchView(query)
+		lastQuery = query
 	}
 	gui.clearStatusView()
 	gui.statusView.Editable = false
 	gui.updateCurrentStatus()
 	return nil
+}
+func executeSearchView(query string) {
+	if currentView == VIEW_PLAYLISTS {
+		gui.enableSideView()
+		currentPosition := 0
+		selectedPlaylist := gui.getSelectedPlaylist()
+		if selectedPlaylist != nil {
+			currentPosition = selectedPlaylist.Position
+		}
+		playlist := playlists.Find(query, currentPosition)
+		if playlist != nil {
+			goTo(gui.g, gui.playlistsView, playlist.Position)
+		}
+	}
+	if currentView == VIEW_QUEUE {
+		gui.enableQueueView()
+	}
+	if currentView == VIEW_TRACKS {
+		gui.enableTracksView()
+	}
 }
 
 func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
