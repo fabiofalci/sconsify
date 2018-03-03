@@ -1,0 +1,21 @@
+---
+layout: post
+title:  "Release 0.5.0"
+date:   2017-03-03 18:31:00
+categories: release
+---
+Sconsify 0.5.0, a minor release just to get some things out:
+
+- Add a `pause` command (different than the current `play_pause` that toggles play/pause). Useful in cases such as locking the computer and pausing the music. For instance `i3` binding:
+
+```
+bindsym Control+Mod1+l exec "i3lock -c 000000 && sconsify -command pause"
+```
+
+- Ignore tracks with no artists. TODO still need fixing, maybe just ignoring the artist but still showing in the playlist.
+
+- Spotify has changed search endpoint, it requires authentication now. Unfortunately, that means after 1 hour the token expires and search won't work anymore. As there is no way to refresh token, a sconsify restart is required. 
+
+[Release page][release-page].
+
+[release-page]:      https://github.com/fabiofalci/sconsify/releases/tag/v0.5.0
