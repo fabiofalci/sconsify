@@ -35,8 +35,8 @@ const (
 type ConsoleUserInterface struct{}
 
 type TimeLeftChannels struct {
-	time_left   chan time.Duration
-	song_paused chan bool
+	timeLeft   chan time.Duration
+	songPaused chan bool
 }
 
 type Gui struct {
@@ -66,7 +66,7 @@ func InitialiseConsoleUserInterface(ev *sconsify.Events, p *sconsify.Publisher, 
 func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 	gui.setStatus("Paused: " + track.GetFullTitle())
 	select {
-	case timeLeftChannels.song_paused <- true:
+	case timeLeftChannels.songPaused <- true:
 	default:
 	}
 }
@@ -77,7 +77,7 @@ func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 		gui.setStatus("Playing: " + track.GetFullTitle())
 		gui.updateTracksView()
 		select {
-		case timeLeftChannels.song_paused <- false:
+		case timeLeftChannels.songPaused <- false:
 		default:
 		}
 		return nil
@@ -136,7 +136,7 @@ func (cui *ConsoleUserInterface) ArtistAlbums(folder *sconsify.Playlist) {
 
 func (cui *ConsoleUserInterface) NewTrackLoaded(duration time.Duration) {
 	select {
-	case timeLeftChannels.time_left <- duration:
+	case timeLeftChannels.timeLeft <- duration:
 	default:
 	}
 }
@@ -147,9 +147,9 @@ func (gui *Gui) countdown() {
 	active := false
 	for {
 		select {
-		case paused := <-timeLeftChannels.song_paused:
+		case paused := <-timeLeftChannels.songPaused:
 			active = !paused
-		case duration := <-timeLeftChannels.time_left:
+		case duration := <-timeLeftChannels.timeLeft:
 			time_left = duration
 			//active = true
 		default:
@@ -191,8 +191,8 @@ func (gui *Gui) startGui() {
 
 	// Time left counter thread
 	timeLeftChannels = &TimeLeftChannels{
-		time_left:   make(chan time.Duration, 1),
-		song_paused: make(chan bool, 1),
+		timeLeft:   make(chan time.Duration, 1),
+		songPaused: make(chan bool, 1),
 	}
 	go gui.countdown()
 
