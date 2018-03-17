@@ -21,7 +21,7 @@ func (p *RegularPlayer) Play() {
 			if playlist.IsOnDemand() {
 				go func() {
 					playlist.ExecuteLoad()
-					gui.g.Execute(func(g *gocui.Gui) error {
+					gui.g.Update(func(g *gocui.Gui) error {
 						gui.updatePlaylistsView()
 						cx, cy := gui.tracksView.Cursor()
 						ox, oy := gui.tracksView.Origin()

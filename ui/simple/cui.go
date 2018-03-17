@@ -72,7 +72,7 @@ func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 }
 
 func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
-	gui.g.Execute(func(g *gocui.Gui) error {
+	gui.g.Update(func(g *gocui.Gui) error {
 		gui.PlayingTrack = track
 		gui.setStatus("Playing: " + track.GetFullTitle())
 		gui.updateTracksView()
@@ -85,7 +85,7 @@ func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 }
 
 func (cui *ConsoleUserInterface) TrackNotAvailable(track *sconsify.Track) {
-	gui.g.Execute(func(g *gocui.Gui) error {
+	gui.g.Update(func(g *gocui.Gui) error {
 		gui.flash("Not available: " + track.GetTitle())
 		return nil
 	})
@@ -115,7 +115,7 @@ func (cui *ConsoleUserInterface) NewPlaylists(newPlaylist sconsify.Playlists) er
 		playlists = &newPlaylist
 		go gui.startGui()
 	} else {
-		gui.g.Execute(func(g *gocui.Gui) error {
+		gui.g.Update(func(g *gocui.Gui) error {
 			playlists.Merge(&newPlaylist)
 			gui.updatePlaylistsView()
 			gui.updateTracksView()
@@ -126,7 +126,7 @@ func (cui *ConsoleUserInterface) NewPlaylists(newPlaylist sconsify.Playlists) er
 }
 
 func (cui *ConsoleUserInterface) ArtistAlbums(folder *sconsify.Playlist) {
-	gui.g.Execute(func(g *gocui.Gui) error {
+	gui.g.Update(func(g *gocui.Gui) error {
 		playlists.AddPlaylist(folder)
 		gui.updatePlaylistsView()
 		gui.updateTracksView()
@@ -157,7 +157,7 @@ func (gui *Gui) countdown() {
 
 		if active {
 			time_left_copy := time_left
-			gui.g.Execute(func(g *gocui.Gui) error {
+			gui.g.Update(func(g *gocui.Gui) error {
 				gui.clearTimeLeftView()
 				fmt.Fprintf(gui.timeLeftView, time_left_copy.String())
 				return nil
@@ -204,7 +204,7 @@ func (gui *Gui) startGui() {
 func (gui *Gui) flash(message string) {
 	go func() {
 		time.Sleep(4 * time.Second)
-		gui.g.Execute(func(g *gocui.Gui) error {
+		gui.g.Update(func(g *gocui.Gui) error {
 			gui.setStatus(gui.currentMessage)
 			return nil
 		})
@@ -222,7 +222,7 @@ func (gui *Gui) updateCurrentStatus() {
 }
 
 func (gui *Gui) updateStatus(message string) {
-	gui.g.Execute(func(g *gocui.Gui) error {
+	gui.g.Update(func(g *gocui.Gui) error {
 		gui.clearStatusView()
 		fmt.Fprintf(gui.statusView, playlists.GetModeAsString()+"%v\n", message)
 		return nil
@@ -264,7 +264,7 @@ func (gui *Gui) getNextFromPlaylist() *sconsify.Track {
 
 func (gui *Gui) getNextFromQueue() *sconsify.Track {
 	track := queue.Pop()
-	gui.g.Execute(func(g *gocui.Gui) error {
+	gui.g.Update(func(g *gocui.Gui) error {
 		gui.updateQueueView()
 		return nil
 	})
@@ -280,7 +280,7 @@ func (gui *Gui) replay() {
 }
 
 func (gui *Gui) createPlaylistFromQueue(playlistName string) {
-	gui.g.Execute(func(g *gocui.Gui) error {
+	gui.g.Update(func(g *gocui.Gui) error {
 		unsavedFolder := playlists.Get("*Unsaved")
 		if unsavedFolder == nil {
 			unsavedFolder = sconsify.InitFolder("*Unsaved", "*Unsaved", make([]*sconsify.Playlist, 0))

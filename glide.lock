@@ -1,5 +1,5 @@
-hash: aa57e6f1e0a70484147b1858bf4a376dca23f4fdf00c6c582b0fce5bec0d9813
-updated: 2017-02-14T18:28:37.50659311Z
+hash: 7969d5ca9411e4db9a7ce6103f0898925e78b5335c9b71bd20af689dda4d70c0
+updated: 2018-03-17T11:04:14.566230113Z
 imports:
 - name: github.com/fabiofalci/flagrc
   version: 748e1426fdbd210e5ff8caf145546de70b559f28
@@ -16,13 +16,13 @@ imports:
 - name: github.com/howeyc/gopass
   version: bf9dde6d0d2c004a008c27aaee91170c786f6db8
 - name: github.com/jroimartin/gocui
-  version: ed41d1bd2c217d4d1e312c2ee5d2f0c7793a99cc
+  version: 4f518eddb04b8f73870836b6d1941e8aa3c06637
 - name: github.com/mattn/go-runewidth
-  version: 14207d285c6c197daabb5c9793d63e7af9ab2d50
+  version: 737072b4e32b7a5018b4a7125da8d12de90e8045
 - name: github.com/mitchellh/go-homedir
   version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: github.com/nsf/termbox-go
-  version: 3540b76b9c77679aeffd0a47e00243fb0ce47133
+  version: e2050e41c8847748ec5288741c0b19a8cb26d084
 - name: github.com/zmb3/spotify
   version: d12d726b0e288deb2a8d21212da3f64268612fe5
 - name: golang.org/x/crypto
