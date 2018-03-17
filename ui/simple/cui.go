@@ -143,23 +143,23 @@ func (cui *ConsoleUserInterface) NewTrackLoaded(duration time.Duration) {
 
 func (gui *Gui) countdown() {
 
-	var time_left time.Duration
+	var timeLeft time.Duration
 	active := false
 	for {
 		select {
 		case paused := <-timeLeftChannels.songPaused:
 			active = !paused
 		case duration := <-timeLeftChannels.timeLeft:
-			time_left = duration
+			timeLeft = duration
 			//active = true
 		default:
 		}
 
 		if active {
-			time_left_copy := time_left
+			timeLeftCopy := timeLeft
 			gui.g.Update(func(g *gocui.Gui) error {
 				gui.clearTimeLeftView()
-				fmt.Fprintf(gui.timeLeftView, time_left_copy.String())
+				fmt.Fprintf(gui.timeLeftView, timeLeftCopy.String())
 				return nil
 			})
 		}
@@ -168,7 +168,7 @@ func (gui *Gui) countdown() {
 		time.Sleep(1 * time.Second)
 		diff := time.Now().Round(time.Second).Sub(then)
 		if active {
-			time_left = time_left - diff
+			timeLeft = timeLeft - diff
 		}
 	}
 }
