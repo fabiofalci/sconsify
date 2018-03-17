@@ -25,11 +25,11 @@ var (
 )
 
 const (
-	VIEW_PLAYLISTS = "playlists"
-	VIEW_TRACKS    = "tracks"
-	VIEW_QUEUE     = "queue"
-	VIEW_STATUS    = "status"
-	VIEW_TIME_LEFT = "time_left"
+	PlaylistsView = "playlists"
+	TracksView    = "tracks"
+	QueueView     = "queue"
+	StatusView    = "status"
+	TimeLeftView  = "time_left"
 )
 
 type ConsoleUserInterface struct{}
@@ -389,7 +389,7 @@ func layout(g *gocui.Gui) error {
 	max := float32(maxX)
 	playlistSize := max * 0.15
 	trackSize := max * 0.60
-	if v, err := g.SetView(VIEW_PLAYLISTS, -1, -1, int(playlistSize), maxY-2); err != nil {
+	if v, err := g.SetView(PlaylistsView, -1, -1, int(playlistSize), maxY-2); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -398,11 +398,11 @@ func layout(g *gocui.Gui) error {
 
 		gui.updatePlaylistsView()
 
-		if _, err := g.SetCurrentView(VIEW_PLAYLISTS); err != nil {
+		if _, err := g.SetCurrentView(PlaylistsView); err != nil {
 			return err
 		}
 	}
-	if v, err := g.SetView(VIEW_TRACKS, int(playlistSize), -1, int(playlistSize+trackSize), maxY-2); err != nil {
+	if v, err := g.SetView(TracksView, int(playlistSize), -1, int(playlistSize+trackSize), maxY-2); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -410,20 +410,20 @@ func layout(g *gocui.Gui) error {
 
 		gui.updateTracksView()
 	}
-	if v, err := g.SetView(VIEW_QUEUE, int(playlistSize+trackSize), -1, maxX, maxY-2); err != nil {
+	if v, err := g.SetView(QueueView, int(playlistSize+trackSize), -1, maxX, maxY-2); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		gui.queueView = v
 	}
-	if v, err := g.SetView(VIEW_STATUS, -1, maxY-2, int(playlistSize+trackSize), maxY); err != nil {
+	if v, err := g.SetView(StatusView, -1, maxY-2, int(playlistSize+trackSize), maxY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		gui.statusView = v
 	}
 
-	if v, err := g.SetView(VIEW_TIME_LEFT, int(playlistSize+trackSize), maxY-2, maxX, maxY); err != nil {
+	if v, err := g.SetView(TimeLeftView, int(playlistSize+trackSize), maxY-2, maxX, maxY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -513,7 +513,7 @@ func (gui *Gui) enableTracksView() error {
 	gui.tracksView.Highlight = true
 	gui.playlistsView.Highlight = false
 	gui.queueView.Highlight = false
-	_, err := gui.g.SetCurrentView(VIEW_TRACKS)
+	_, err := gui.g.SetCurrentView(TracksView)
 	return err
 }
 
@@ -521,7 +521,7 @@ func (gui *Gui) enableSideView() error {
 	gui.tracksView.Highlight = false
 	gui.playlistsView.Highlight = true
 	gui.queueView.Highlight = false
-	_, err := gui.g.SetCurrentView(VIEW_PLAYLISTS)
+	_, err := gui.g.SetCurrentView(PlaylistsView)
 	return err
 }
 
@@ -529,7 +529,7 @@ func (gui *Gui) enableQueueView() error {
 	gui.tracksView.Highlight = false
 	gui.playlistsView.Highlight = false
 	gui.queueView.Highlight = true
-	_, err := gui.g.SetCurrentView(VIEW_QUEUE)
+	_, err := gui.g.SetCurrentView(QueueView)
 	return err
 }
 

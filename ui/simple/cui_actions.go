@@ -188,9 +188,9 @@ func (keyboard *Keyboard) configureKey(handler keyHandler, command string, view 
 		for _, c := range commands {
 			if c == command {
 				if view == "" {
-					keyboard.SequentialKeys[VIEW_PLAYLISTS+" "+key] = handler
-					keyboard.SequentialKeys[VIEW_QUEUE+" "+key] = handler
-					keyboard.SequentialKeys[VIEW_TRACKS+" "+key] = handler
+					keyboard.SequentialKeys[PlaylistsView+" "+key] = handler
+					keyboard.SequentialKeys[QueueView+" "+key] = handler
+					keyboard.SequentialKeys[TracksView+" "+key] = handler
 				} else {
 					keyboard.SequentialKeys[view+" "+key] = handler
 				}
@@ -210,7 +210,7 @@ func keybindings() error {
 	keyboard.loadKeyFunctions()
 	keyboard.defaultValues()
 
-	for _, view := range []string{VIEW_TRACKS, VIEW_PLAYLISTS, VIEW_QUEUE} {
+	for _, view := range []string{TracksView, PlaylistsView, QueueView} {
 		for i := 'a'; i <= 'z'; i++ {
 			key := i
 			addKeyBinding(&keyboard.Keys, newKeyMapping(i, view, func(g *gocui.Gui, v *gocui.View) error {
@@ -274,19 +274,19 @@ func keybindings() error {
 		}
 	}
 
-	keyboard.configureKey(queueTrackCommand, QueueTrack, VIEW_TRACKS)
-	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, VIEW_PLAYLISTS)
-	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, VIEW_TRACKS)
+	keyboard.configureKey(queueTrackCommand, QueueTrack, TracksView)
+	keyboard.configureKey(queuePlaylistCommand, QueuePlaylist, PlaylistsView)
+	keyboard.configureKey(playSelectedTrack, PlaySelectedTrack, TracksView)
 
-	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, VIEW_STATUS, executeAction))
-	keyboard.configureKey(mainNextViewLeft, Left, VIEW_TRACKS)
-	keyboard.configureKey(nextView, Left, VIEW_QUEUE)
-	keyboard.configureKey(nextView, Right, VIEW_PLAYLISTS)
-	keyboard.configureKey(mainNextViewRight, Right, VIEW_TRACKS)
-	keyboard.configureKey(openCloseFolderCommand, OpenCloseFolder, VIEW_PLAYLISTS)
-	keyboard.configureKey(artistAlbums, ArtistAlbums, VIEW_TRACKS)
+	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyEnter, StatusView, executeAction))
+	keyboard.configureKey(mainNextViewLeft, Left, TracksView)
+	keyboard.configureKey(nextView, Left, QueueView)
+	keyboard.configureKey(nextView, Right, PlaylistsView)
+	keyboard.configureKey(mainNextViewRight, Right, TracksView)
+	keyboard.configureKey(openCloseFolderCommand, OpenCloseFolder, PlaylistsView)
+	keyboard.configureKey(artistAlbums, ArtistAlbums, TracksView)
 	addKeyBinding(&keyboard.Keys, newKeyMapping(gocui.KeyCtrlC, "", quit))
-	keyboard.configureKey(enableCreatePlaylistCommand, CreatePlaylist, VIEW_QUEUE)
+	keyboard.configureKey(enableCreatePlaylistCommand, CreatePlaylist, QueueView)
 
 	for _, key := range keyboard.Keys {
 		// it needs to copy the key because closures copy var references and we don't
@@ -436,14 +436,14 @@ func queuePlaylistCommand(g *gocui.Gui, v *gocui.View) error {
 
 func removeAllTracksCommand(g *gocui.Gui, v *gocui.View) error {
 	switch v.Name() {
-	case VIEW_PLAYLISTS:
-	case VIEW_TRACKS:
+	case PlaylistsView:
+	case TracksView:
 		if playlist, index := gui.getSelectedPlaylistAndTrack(); index > -1 {
 			playlist.RemoveAllTracks()
 			gui.updateTracksView()
 			return gui.enableSideView()
 		}
-	case VIEW_QUEUE:
+	case QueueView:
 		gui.clearQueueView()
 		return gui.enableTracksView()
 	}
@@ -452,13 +452,13 @@ func removeAllTracksCommand(g *gocui.Gui, v *gocui.View) error {
 
 func removeTrackCommand(g *gocui.Gui, v *gocui.View) error {
 	switch v.Name() {
-	case VIEW_PLAYLISTS:
+	case PlaylistsView:
 		if playlist := gui.getSelectedPlaylist(); playlist != nil {
 			playlists.Remove(playlist.Name())
 			gui.updatePlaylistsView()
 			gui.updateTracksView()
 		}
-	case VIEW_TRACKS:
+	case TracksView:
 		if playlist, index := gui.getSelectedPlaylistAndTrack(); index > -1 {
 			for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
 				playlist.RemoveTrack(index)
@@ -466,7 +466,7 @@ func removeTrackCommand(g *gocui.Gui, v *gocui.View) error {
 			gui.updateTracksView()
 			goTo(g, v, index+1)
 		}
-	case VIEW_QUEUE:
+	case QueueView:
 		if index := gui.getQueueSelectedTrackIndex(); index > -1 {
 			for i := 1; i <= getOffsetFromTypedNumbers(); i++ {
 				if queue.Remove(index) != nil {
@@ -483,7 +483,7 @@ func enableSearchViewInputCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.clearStatusView()
 	gui.statusView.Editable = true
 	currentView = v.Name()
-	gui.g.SetCurrentView(VIEW_STATUS)
+	gui.g.SetCurrentView(StatusView)
 	actionBeingExecuted = SearchView
 	return nil
 }
@@ -504,7 +504,7 @@ func searchViewCommand(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 func executeSearchView(query string) {
-	if currentView == VIEW_PLAYLISTS {
+	if currentView == PlaylistsView {
 		gui.enableSideView()
 		currentPosition := 0
 		selectedPlaylist := gui.getSelectedPlaylist()
@@ -515,9 +515,9 @@ func executeSearchView(query string) {
 		if playlist != nil {
 			goTo(gui.g, gui.playlistsView, playlist.Position)
 		}
-	} else if currentView == VIEW_QUEUE {
+	} else if currentView == QueueView {
 		gui.enableQueueView()
-	} else if currentView == VIEW_TRACKS {
+	} else if currentView == TracksView {
 		gui.enableTracksView()
 		playlist, trackIndex := gui.getSelectedPlaylistAndTrack()
 		trackIndex++
@@ -533,7 +533,7 @@ func executeSearchView(query string) {
 func enableSearchInputCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.clearStatusView()
 	gui.statusView.Editable = true
-	gui.g.SetCurrentView(VIEW_STATUS)
+	gui.g.SetCurrentView(StatusView)
 	actionBeingExecuted = Search
 	return nil
 }
@@ -552,7 +552,7 @@ func searchCommand(g *gocui.Gui, v *gocui.View) error {
 func enableCreatePlaylistCommand(g *gocui.Gui, v *gocui.View) error {
 	gui.clearStatusView()
 	gui.statusView.Editable = true
-	gui.g.SetCurrentView(VIEW_STATUS)
+	gui.g.SetCurrentView(StatusView)
 	actionBeingExecuted = CreatePlaylist
 	return nil
 }
