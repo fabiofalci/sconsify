@@ -50,6 +50,8 @@ func StartMainLoop(events *Events, publisher *Publisher, ui UserInterface, askFo
 			return nil
 		case duration := <-events.NewTrackLoadedUpdate():
 			ui.NewTrackLoaded(duration)
+		case <-events.TokenExpiredUpdates():
+			ui.TokenExpired()
 		}
 	}
 

@@ -7,6 +7,7 @@ import (
 	webspotify "github.com/zmb3/spotify"
 	"strings"
 	"time"
+	"github.com/fabiofalci/sconsify/webapi"
 )
 
 func (spotify *Spotify) shutdownSpotify() {
@@ -73,7 +74,17 @@ func (spotify *Spotify) search(query string) {
 
 	playlist := sconsify.InitSearchPlaylist(name, name, func(playlist *sconsify.Playlist) {
 		options := createWebSpotifyOptions(50, playlist.Tracks())
-		// search is an auth endpoint now, when the token expires, it won't work
+
+		if webapi.HasTokenExpired()	{
+			webapi.LoadTokenFromFile()
+			if webapi.HasTokenExpired()	{
+				spotify.publisher.TokenExpired()
+			} else {
+				client := webapi.NewClient()
+				spotify.client = &client
+			}
+		}
+
 		if searchResult, err := spotify.client.SearchOpt(query, webspotify.SearchTypeTrack, options); err == nil {
 			numberOfTracks := len(searchResult.Tracks.Tracks)
 			infrastructure.Debugf("Search '%v' returned %v track(s)", query, numberOfTracks)

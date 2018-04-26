@@ -49,6 +49,7 @@ func ToStatusFile(file string, text string) {
 		case <-toFileEvents.PlaylistsUpdates():
 		case <-toFileEvents.ArtistAlbumsUpdates():
 		case <-toFileEvents.NewTrackLoadedUpdate():
+		case <-toFileEvents.TokenExpiredUpdates():
 		case <-toFileEvents.ShutdownSpotifyUpdates():
 		case <-toFileEvents.SearchUpdates():
 		case <-toFileEvents.PlayUpdates():

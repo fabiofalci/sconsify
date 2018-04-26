@@ -141,6 +141,13 @@ func (cui *ConsoleUserInterface) NewTrackLoaded(duration time.Duration) {
 	}
 }
 
+func (cui *ConsoleUserInterface) TokenExpired() {
+	gui.g.Update(func(g *gocui.Gui) error {
+		gui.flash("Token has expired. To issue a new one: sconsify -issue-web-api-token")
+		return nil
+	})
+}
+
 func (gui *Gui) countdown() {
 
 	var timeLeft time.Duration

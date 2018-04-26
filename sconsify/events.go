@@ -29,6 +29,7 @@ type Events struct {
 	trackPaused       chan *Track
 
 	newTrackLoaded chan time.Duration
+	tokenExpired   chan bool
 }
 
 var (
@@ -61,6 +62,7 @@ func InitialiseEvents() *Events {
 		trackPaused:       make(chan *Track),
 
 		newTrackLoaded: make(chan time.Duration, 2),
+		tokenExpired:   make(chan bool),
 	}
 
 	subscribers = append(subscribers, events)
@@ -228,4 +230,17 @@ func (publisher *Publisher) NewTrackLoaded(duration time.Duration) {
 
 func (events *Events) NewTrackLoadedUpdate() <-chan time.Duration {
 	return events.newTrackLoaded
+}
+
+func (publisher *Publisher) TokenExpired() {
+	for _, subscriber := range subscribers {
+		select {
+		case subscriber.tokenExpired <- true:
+		default:
+		}
+	}
+}
+
+func (events *Events) TokenExpiredUpdates() <-chan bool {
+	return events.tokenExpired
 }

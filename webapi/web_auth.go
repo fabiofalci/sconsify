@@ -15,13 +15,17 @@ import (
 	"os/exec"
 )
 
+
+var token *oauth2.Token
+var auth spotify.Authenticator
+
 func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool, openBrowserCommand string) (*spotify.Client, error) {
 	if spotifyClientId == "" {
 		fmt.Print("Spotify Client ID not set")
 		return nil, nil
 	}
 
-	auth := spotify.NewAuthenticator(authRedirectUrl,
+	auth = spotify.NewAuthenticator(authRedirectUrl,
 		spotify.ScopeUserLibraryRead,
 		spotify.ScopeUserFollowRead,
 		spotify.ScopePlaylistReadCollaborative,
@@ -29,8 +33,8 @@ func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool,
 
 	auth.SetAuthInfo(spotifyClientId, "")
 
-	token := loadToken()
-	if token == nil || hasExpired(token.Expiry) {
+	LoadTokenFromFile()
+	if token == nil || HasTokenExpired() {
 		url := auth.AuthURL("")
 		url = strings.Replace(url, "response_type=code", "response_type=token", -1)
 
@@ -65,17 +69,31 @@ func Auth(spotifyClientId string, authRedirectUrl string, cacheWebApiToken bool,
 		if cacheWebApiToken {
 			persistToken(token)
 		}
+	} else {
+		fmt.Println("Token still valid")
 	}
 
-	client := auth.NewClient(token)
+	client := NewClient()
 	return &client, nil
+}
+
+func NewClient() spotify.Client {
+	return auth.NewClient(token)
+}
+
+func HasTokenExpired() bool {
+	return hasExpired(token.Expiry)
 }
 
 func hasExpired(expiry time.Time) bool {
 	return expiry.Before(time.Now())
 }
 
-func loadToken() *oauth2.Token {
+func LoadTokenFromFile() {
+	token = loadTokenFromFile()
+}
+
+func loadTokenFromFile() *oauth2.Token {
 	if fileLocation := infrastructure.GetWebApiTokenLocation(); fileLocation != "" {
 		if b, err := ioutil.ReadFile(fileLocation); err == nil {
 			var token *oauth2.Token

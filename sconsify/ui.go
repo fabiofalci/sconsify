@@ -12,4 +12,5 @@ type UserInterface interface {
 	ArtistAlbums(folder *Playlist)
 	Shutdown()
 	NewTrackLoaded(duration time.Duration)
+	TokenExpired()
 }

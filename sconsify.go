@@ -19,6 +19,7 @@ import (
 	"runtime"
 	"strconv"
 	"github.com/fabiofalci/sconsify/ui"
+	"github.com/fabiofalci/sconsify/webapi"
 )
 
 var version string
@@ -46,6 +47,7 @@ func main() {
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
 	providedNoUiShuffle := flag.Bool("noui-shuffle", true, "Shuffle tracks or follow playlist order.")
 	providedWebApiCacheToken := flag.Bool("web-api-cache-token", true, "Cache the web-api token as plain text in ~/.sconsify until its expiration.")
+	providedIssueWebApiToken := flag.Bool("issue-web-api-token", false, "Issue a new web-api token.")
 	providedWebApiCacheContent := flag.Bool("web-api-cache-content", true, "Cache some of the web-api content as plain text in ~/.sconsify.")
 	providedDebug := flag.Bool("debug", false, "Enable debug mode.")
 	askingVersion := flag.Bool("version", false, "Print version.")
@@ -74,6 +76,23 @@ func main() {
 	}
 
 	fmt.Println("Sconsify - your awesome Spotify music service in a text-mode interface.")
+
+	initConf := &spotify.SpotifyInitConf{
+		WebApiAuth:         *providedWebApi,
+		PlaylistFilter:     *providedPlaylists,
+		PreferredBitrate:   *providedPreferredBitrate,
+		CacheWebApiToken:   *providedWebApiCacheToken,
+		CacheWebApiContent: *providedWebApiCacheContent,
+		SpotifyClientId:    spotifyClientId,
+		AuthRedirectUrl:    authRedirectUrl,
+		OpenBrowserCommand: *providedOpenBrowser,
+	}
+
+	if *providedIssueWebApiToken {
+		webapi.Auth(initConf.SpotifyClientId, initConf.AuthRedirectUrl, initConf.CacheWebApiToken, initConf.OpenBrowserCommand)
+		return
+	}
+
 	username, pass := credentials(providedUsername)
 	events := sconsify.InitialiseEvents()
 	publisher := &sconsify.Publisher{}
@@ -86,16 +105,6 @@ func main() {
 		go ui.ToStatusFile(*providedStatusFile, statusFileTemplate)
 	}
 
-	initConf := &spotify.SpotifyInitConf{
-		WebApiAuth:         *providedWebApi,
-		PlaylistFilter:     *providedPlaylists,
-		PreferredBitrate:   *providedPreferredBitrate,
-		CacheWebApiToken:   *providedWebApiCacheToken,
-		CacheWebApiContent: *providedWebApiCacheContent,
-		SpotifyClientId:    spotifyClientId,
-		AuthRedirectUrl:    authRedirectUrl,
-		OpenBrowserCommand: *providedOpenBrowser,
-	}
 	go spotify.Initialise(initConf, username, pass, events, publisher)
 
 	if *providedServer {

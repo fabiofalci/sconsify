@@ -134,6 +134,10 @@ func (noui *NoUi) NewTrackLoaded(duration time.Duration) {
 
 }
 
+func (noui *NoUi) TokenExpired() {
+
+}
+
 func (p *SilentPrinter) Print(message string) {
 }
 
