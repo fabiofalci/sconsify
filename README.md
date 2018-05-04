@@ -155,7 +155,7 @@ No UI mode keyboard
 Interprocess commands
 --------------------
 
-Sconsify starts a server for interprocess commands using `sconsify -command <command>`. Available commands: `replay, play_pause, next`. 
+Sconsify starts a server for interprocess commands using `sconsify -command <command>`. Available commands: `replay, play_pause, next, pause`. 
 
 [i3](http://i3wm.org/) bindings for multimedia keys:
 
@@ -163,9 +163,12 @@ Sconsify starts a server for interprocess commands using `sconsify -command <com
     bindsym XF86AudioPrev exec sconsify -command replay
     bindsym XF86AudioPlay exec sconsify -command play_pause
     bindsym XF86AudioNext exec sconsify -command next
+
+    # pause when locking computer with i3lock
+    bindsym Control+Mod1+l exec "i3lock -c 000000 && sconsify -command pause"
 ```
 
-`macOS`: create a new service in `Automator`. Then pick `Library > Utilities > Run Shell Script`. Drag it to the workflow. Pick `no input` and then add to the script `/path/to/sconsify -command replay`, save it. Go to Keyboard `Shortcuts > Services` in System Settings, find the service you've just saved and type the desired shortcut. Repeat for each command (`replay, play_pause, next`).
+`macOS`: create a new service in `Automator`. Then pick `Library > Utilities > Run Shell Script`. Drag it to the workflow. Pick `no input` and then add to the script `/path/to/sconsify -command replay`, save it. Go to Keyboard `Shortcuts > Services` in System Settings, find the service you've just saved and type the desired shortcut. Repeat for each command (`replay, play_pause, next, pause`).
 
 sconsifyrc
 ----------

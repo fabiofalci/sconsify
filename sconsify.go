@@ -51,7 +51,7 @@ func main() {
 	providedWebApiCacheContent := flag.Bool("web-api-cache-content", true, "Cache some of the web-api content as plain text in ~/.sconsify.")
 	providedDebug := flag.Bool("debug", false, "Enable debug mode.")
 	askingVersion := flag.Bool("version", false, "Print version.")
-	providedCommand := flag.String("command", "", "Execute a command in the server: replay, play_pause, next")
+	providedCommand := flag.String("command", "", "Execute a command in the server: replay, play_pause, next, pause")
 	providedServer := flag.Bool("server", true, "Start a background server to accept commands.")
 	flag.Parse()
 
