@@ -122,6 +122,8 @@ Aliases `al` = `album`, `ar` = `artist`, `tr` = `track`:
 
 * `u`: queue selected track to play next.
 
+* `r`: repeat the playing track.
+
 * `dd`: delete selected element (playlist, track) from the UI (it doesn't save the change to spotify playlist).
 
 * `D`: delete all tracks from the queue if the focus is on the queue.
