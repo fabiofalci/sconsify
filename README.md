@@ -172,6 +172,14 @@ Sconsify starts a server for interprocess commands using `sconsify -command <com
 
 `macOS`: create a new service in `Automator`. Then pick `Library > Utilities > Run Shell Script`. Drag it to the workflow. Pick `no input` and then add to the script `/path/to/sconsify -command replay`, save it. Go to Keyboard `Shortcuts > Services` in System Settings, find the service you've just saved and type the desired shortcut. Repeat for each command (`replay, play_pause, next, pause`).
 
+If you prefer doing this within tmux, you can put the following lines to your `.tmux.conf` file:
+
+```tmux
+bind-key F7 run-shell 'sconsify -command replay'
+bind-key F8 run-shell 'sconsify -command play_pause'
+bind-key F9 run-shell 'sconsify -command next'
+```
+
 sconsifyrc
 ----------
 
