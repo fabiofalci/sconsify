@@ -12,3 +12,4 @@ import:
 - package: github.com/zmb3/spotify
 - package: golang.org/x/oauth2
 - package: github.com/gordonklaus/portaudio
+- package: github.com/guelfey/go.dbus

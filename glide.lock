@@ -1,5 +1,5 @@
-hash: 7969d5ca9411e4db9a7ce6103f0898925e78b5335c9b71bd20af689dda4d70c0
-updated: 2019-10-11T10:03:36.039129942+01:00
+hash: 79f38586d6169b6b7719fc47c6f5942af913a5271d3a96764e88b9b0a427e6a7
+updated: 2019-10-11T21:46:33.725959267+01:00
 imports:
 - name: github.com/fabiofalci/flagrc
   version: 748e1426fdbd210e5ff8caf145546de70b559f28
@@ -13,6 +13,8 @@ imports:
   - proto
 - name: github.com/gordonklaus/portaudio
   version: 00e7307ccd93051979a933c6fd5ead641eba5686
+- name: github.com/guelfey/go.dbus
+  version: f6a3a2366cc39b8479cadc499d3c735fb10fbdda
 - name: github.com/howeyc/gopass
   version: 7cb4b85ec19c7c220ab71433a230f7eb200d639d
 - name: github.com/jroimartin/gocui
