@@ -167,7 +167,7 @@ func (spotify *Spotify) loadPlaylistTracks(webPlaylist *webspotify.SimplePlaylis
 	playlists.AddPlaylist(playlist)
 
 	for offset <= total {
-		playlistTrackPage, err := spotify.client.GetPlaylistTracksOpt(webPlaylist.Owner.ID, webPlaylist.ID, options, "")
+		playlistTrackPage, err := spotify.client.GetPlaylistTracksOpt(webPlaylist.ID, options, "")
 		if err != nil {
 			return err
 		}
@@ -255,7 +255,7 @@ func (spotify *Spotify) loadNewReleases(playlist *sconsify.Playlist, webApiCache
 		if _, simplePlaylistPage, err := spotify.client.FeaturedPlaylistsOpt(&webspotify.PlaylistOptions{Options: *createWebSpotifyOptions(50, playlist.Playlists())}); err == nil {
 			webApiCache.NewReleases = make([]webspotify.FullPlaylist, len(simplePlaylistPage.Playlists))
 			for i, webPlaylist := range simplePlaylistPage.Playlists {
-				if fullPlaylist, err := spotify.client.GetPlaylist(webPlaylist.Owner.ID, webPlaylist.ID); err == nil {
+				if fullPlaylist, err := spotify.client.GetPlaylist(webPlaylist.ID); err == nil {
 					webApiCache.NewReleases[i] = *fullPlaylist
 				}
 			}
@@ -264,11 +264,13 @@ func (spotify *Spotify) loadNewReleases(playlist *sconsify.Playlist, webApiCache
 
 	if webApiCache.NewReleases != nil {
 		for _, fullPlaylist := range webApiCache.NewReleases {
-			tracks := make([]*sconsify.Track, len(fullPlaylist.Tracks.Tracks))
-			for i, track := range fullPlaylist.Tracks.Tracks {
-				webArtist := track.Track.Artists[0]
-				artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
-				tracks[i] = sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String())
+			var tracks []*sconsify.Track
+			for _, track := range fullPlaylist.Tracks.Tracks {
+				if len(track.Track.Artists) > 0 {
+					webArtist := track.Track.Artists[0]
+					artist := sconsify.InitArtist(string(webArtist.URI), webArtist.Name)
+					tracks = append(tracks, sconsify.InitWebApiTrack(string(track.Track.URI), artist, track.Track.Name, track.Track.TimeDuration().String()))
+				}
 			}
 			playlist.AddPlaylist(sconsify.InitSubPlaylist(string(fullPlaylist.URI), fullPlaylist.Name, tracks))
 		}

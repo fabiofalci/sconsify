@@ -1,5 +1,5 @@
 hash: 7969d5ca9411e4db9a7ce6103f0898925e78b5335c9b71bd20af689dda4d70c0
-updated: 2018-03-17T11:04:14.566230113Z
+updated: 2019-10-11T10:03:36.039129942+01:00
 imports:
 - name: github.com/fabiofalci/flagrc
   version: 748e1426fdbd210e5ff8caf145546de70b559f28
@@ -8,41 +8,43 @@ imports:
   subpackages:
   - spotify
 - name: github.com/golang/protobuf
-  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  version: 1680a479a2cfb3fa22b972af7e36d0a0fde47bf8
   subpackages:
   - proto
 - name: github.com/gordonklaus/portaudio
-  version: 2a038c93424fb36d026982db9fd365504a49f566
+  version: 00e7307ccd93051979a933c6fd5ead641eba5686
 - name: github.com/howeyc/gopass
-  version: bf9dde6d0d2c004a008c27aaee91170c786f6db8
+  version: 7cb4b85ec19c7c220ab71433a230f7eb200d639d
 - name: github.com/jroimartin/gocui
   version: 4f518eddb04b8f73870836b6d1941e8aa3c06637
 - name: github.com/mattn/go-runewidth
-  version: 737072b4e32b7a5018b4a7125da8d12de90e8045
+  version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
 - name: github.com/mitchellh/go-homedir
-  version: b8bc1bf767474819792c23f32d8286a45736f1c6
+  version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/nsf/termbox-go
-  version: e2050e41c8847748ec5288741c0b19a8cb26d084
+  version: 93860e16131719fa9722e7c448dbf8c0e3210a0d
 - name: github.com/zmb3/spotify
-  version: d12d726b0e288deb2a8d21212da3f64268612fe5
+  version: e12fb981aacbbe98868183a3056d162245ec96fa
 - name: golang.org/x/crypto
-  version: 453249f01cfeb54c3d549ddb75ff152ca243f9d8
+  version: af544f31c8ac5794d2134b792e9eb714d9d8f9ce
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: 61557ac0112b576429a0df080e1c2cef5dfbb642
+  version: d66e71096ffb9f08f36d9aefcae80ce319de6d68
   subpackages:
   - context
+  - context/ctxhttp
 - name: golang.org/x/oauth2
-  version: de0725b330ab43c1a3d6c84d961cf01183783f1e
+  version: 0f29369cfe4552d0e4bcddc57cc75f4d7e672a33
   subpackages:
   - internal
 - name: golang.org/x/sys
-  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  version: b09406accb4736d857a32bf9444cd7edae2ffa79
   subpackages:
   - unix
+  - windows
 - name: google.golang.org/appengine
-  version: 2e4a801b39fc199db615bfca7d0b9f8cd9580599
+  version: 971852bfffca25b069c31162ae8f247a3dba083b
   subpackages:
   - internal
   - internal/base
