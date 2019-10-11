@@ -108,7 +108,8 @@ func main() {
 	go spotify.Initialise(initConf, username, pass, events, publisher)
 
 	if *providedServer {
-		go rpc.StartServer(publisher)
+		//go rpc.StartServer(publisher)
+		go infrastructure.StartDbus(publisher)
 	}
 
 	if *providedUi {
