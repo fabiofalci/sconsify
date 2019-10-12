@@ -22,6 +22,36 @@ type DbusMethods struct {
 	publisher *sconsify.Publisher
 }
 
+func StartDbus(publisher *sconsify.Publisher, fallbackOnServer bool) {
+	if !tryToStartDbusSession(publisher) {
+		if fallbackOnServer {
+			StartServer(publisher)
+		}
+	}
+}
+
+func tryToStartDbusSession(publisher *sconsify.Publisher) bool {
+	conn, err := dbus.SessionBus()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Cannot access dbus, ignoring...")
+		return false
+	}
+	reply, err := conn.RequestName("org.mpris.MediaPlayer2.sconsify", dbus.NameFlagDoNotQueue)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Cannot request dbus name, ignoring...")
+		return false
+	}
+	if reply != dbus.RequestNameReplyPrimaryOwner {
+		fmt.Fprintln(os.Stderr, "org.mpris.MediaPlayer2.sconsify name already taken, ignoring...")
+		return false
+	}
+	dbusMethods := new(DbusMethods)
+	dbusMethods.publisher = publisher
+	conn.Export(dbusMethods, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player")
+	conn.Export(introspect.Introspectable(intro), "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Introspectable")
+	return true
+}
+
 func (dbus DbusMethods) PlayPause() *dbus.Error {
 	dbus.publisher.PlayPauseToggle()
 	return nil
@@ -47,24 +77,3 @@ func (dbus DbusMethods) Stop() *dbus.Error {
 	return nil
 }
 
-func StartDbus(publisher *sconsify.Publisher) {
-	conn, err := dbus.SessionBus()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Cannot access dbus, ignoring...")
-		return
-	}
-	reply, err := conn.RequestName("org.mpris.MediaPlayer2.sconsify", dbus.NameFlagDoNotQueue)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Cannot request dbus name, ignoring...")
-		return
-	}
-	if reply != dbus.RequestNameReplyPrimaryOwner {
-		fmt.Fprintln(os.Stderr, "org.mpris.MediaPlayer2.sconsify name already taken, ignoring...")
-		return
-	}
-	dbusMethods := new(DbusMethods)
-	dbusMethods.publisher = publisher
-	conn.Export(dbusMethods, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player")
-	conn.Export(introspect.Introspectable(intro), "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Introspectable")
-	//select {}
-}

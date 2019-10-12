@@ -52,7 +52,7 @@ func main() {
 	providedDebug := flag.Bool("debug", false, "Enable debug mode.")
 	askingVersion := flag.Bool("version", false, "Print version.")
 	providedCommand := flag.String("command", "", "Execute a command in the server: replay, play_pause, next, pause")
-	providedServer := flag.Bool("server", true, "Start a background server to accept commands.")
+	providedServer := flag.Bool("server", true, "If it fails to register on dbus, start a background server to accept commands.")
 	flag.Parse()
 
 	if *askingVersion {
@@ -107,10 +107,7 @@ func main() {
 
 	go spotify.Initialise(initConf, username, pass, events, publisher)
 
-	if *providedServer {
-		//go rpc.StartServer(publisher)
-		go rpc.StartDbus(publisher)
-	}
+	go rpc.StartDbus(publisher, *providedServer)
 
 	if *providedUi {
 		ui := simple.InitialiseConsoleUserInterface(events, publisher, true)
