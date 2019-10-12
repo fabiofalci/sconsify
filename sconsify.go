@@ -13,13 +13,13 @@ import (
 	"github.com/fabiofalci/sconsify/rpc"
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/fabiofalci/sconsify/spotify"
+	"github.com/fabiofalci/sconsify/ui"
 	"github.com/fabiofalci/sconsify/ui/noui"
 	"github.com/fabiofalci/sconsify/ui/simple"
+	"github.com/fabiofalci/sconsify/webapi"
 	"github.com/howeyc/gopass"
 	"runtime"
 	"strconv"
-	"github.com/fabiofalci/sconsify/ui"
-	"github.com/fabiofalci/sconsify/webapi"
 )
 
 var version string
@@ -109,7 +109,7 @@ func main() {
 
 	if *providedServer {
 		//go rpc.StartServer(publisher)
-		go infrastructure.StartDbus(publisher)
+		go rpc.StartDbus(publisher)
 	}
 
 	if *providedUi {

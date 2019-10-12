@@ -1,4 +1,4 @@
-package infrastructure
+package rpc
 
 import (
 	"fmt"
