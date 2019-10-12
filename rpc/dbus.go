@@ -16,6 +16,7 @@ const intro = `
 		<method name="Previous"/>
 		<method name="Pause"/>
 		<method name="Stop"/>
+		<method name="Play"/>
 	</interface>` + introspect.IntrospectDataString + `</node> `
 
 type DbusMethods struct {
@@ -74,6 +75,11 @@ func (dbus DbusMethods) Pause() *dbus.Error {
 
 func (dbus DbusMethods) Stop() *dbus.Error {
 	dbus.publisher.Stop()
+	return nil
+}
+
+func (dbus DbusMethods) Play() *dbus.Error {
+	dbus.publisher.Play(nil)
 	return nil
 }
 
