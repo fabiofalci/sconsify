@@ -48,6 +48,10 @@ func (noui *NoUi) TrackPaused(track *sconsify.Track) {
 	noui.output.Print(fmt.Sprintf("Paused: %v\n", track.GetFullTitle()))
 }
 
+func (noui *NoUi) TrackStopped(track *sconsify.Track) {
+	noui.output.Print(fmt.Sprintf("Stopped: %v\n", track.GetFullTitle()))
+}
+
 func (noui *NoUi) TrackNotAvailable(track *sconsify.Track) {
 	go noui.publisher.NextPlay()
 }

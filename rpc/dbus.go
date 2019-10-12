@@ -73,7 +73,7 @@ func (dbus DbusMethods) Pause() *dbus.Error {
 }
 
 func (dbus DbusMethods) Stop() *dbus.Error {
-	//dbus.publisher.Stop()
+	dbus.publisher.Stop()
 	return nil
 }
 

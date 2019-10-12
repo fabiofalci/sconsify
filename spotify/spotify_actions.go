@@ -138,6 +138,16 @@ func (spotify *Spotify) pauseCurrentTrack() {
 	spotify.paused = true
 }
 
+func (spotify *Spotify) stop() {
+	if spotify.currentTrack != nil && !spotify.paused {
+		player := spotify.session.Player()
+		player.Pause()
+		player.Unload()
+		spotify.publisher.TrackStopped(spotify.currentTrack)
+		spotify.stopped = true
+	}
+}
+
 func (spotify *Spotify) artistAlbums(artist *sconsify.Artist) {
 	if simpleAlbumPage, err := spotify.client.GetArtistAlbums(webspotify.ID(artist.GetSpotifyID())); err == nil {
 		folder := sconsify.InitFolder(artist.URI, "*"+artist.Name, make([]*sconsify.Playlist, 0))

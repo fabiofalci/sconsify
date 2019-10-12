@@ -14,6 +14,7 @@ type Events struct {
 
 	play            chan *Track
 	pause           chan bool
+	stop            chan bool
 	search          chan string
 	replay          chan bool
 	playPauseToggle chan bool
@@ -27,6 +28,7 @@ type Events struct {
 	trackNotAvailable chan *Track
 	trackPlaying      chan *Track
 	trackPaused       chan *Track
+	trackStopped      chan *Track
 
 	newTrackLoaded chan time.Duration
 	tokenExpired   chan bool
@@ -47,6 +49,7 @@ func InitialiseEvents() *Events {
 
 		play:            make(chan *Track),
 		pause:           make(chan bool),
+		stop:            make(chan bool),
 		search:          make(chan string),
 		replay:          make(chan bool),
 		playPauseToggle: make(chan bool),
@@ -60,6 +63,7 @@ func InitialiseEvents() *Events {
 		trackNotAvailable: make(chan *Track),
 		trackPlaying:      make(chan *Track, 2),
 		trackPaused:       make(chan *Track),
+		trackStopped:      make(chan *Track),
 
 		newTrackLoaded: make(chan time.Duration, 2),
 		tokenExpired:   make(chan bool),
@@ -107,6 +111,16 @@ func (publisher *Publisher) TrackPaused(track *Track) {
 
 func (events *Events) TrackPausedUpdates() <-chan *Track {
 	return events.trackPaused
+}
+
+func (publisher *Publisher) TrackStopped(track *Track) {
+	for _, subscriber := range subscribers {
+		subscriber.trackStopped <- track
+	}
+}
+
+func (events *Events) TrackStoppedUpdates() <-chan *Track {
+	return events.trackStopped
 }
 
 func (publisher *Publisher) Search(query string) {
@@ -167,6 +181,16 @@ func (publisher *Publisher) Pause() {
 
 func (events *Events) PauseUpdates() <-chan bool {
 	return events.pause
+}
+
+func (publisher *Publisher) Stop() {
+	for _, subscriber := range subscribers {
+		subscriber.stop <- true
+	}
+}
+
+func (events *Events) StopUpdates() <-chan bool {
+	return events.stop
 }
 
 func (publisher *Publisher) PlayPauseToggle() {

@@ -32,6 +32,8 @@ func StartMainLoop(events *Events, publisher *Publisher, ui UserInterface, askFo
 		select {
 		case track := <-events.TrackPausedUpdates():
 			ui.TrackPaused(track)
+		case track := <-events.TrackStoppedUpdates():
+			ui.TrackStopped(track)
 		case track := <-events.TrackPlayingUpdates():
 			ui.TrackPlaying(track)
 		case track := <-events.TrackNotAvailableUpdates():

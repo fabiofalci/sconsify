@@ -16,6 +16,7 @@ import (
 type Spotify struct {
 	currentTrack       *sconsify.Track
 	paused             bool
+	stopped            bool
 	events             *sconsify.Events
 	publisher          *sconsify.Publisher
 	pa                 *portAudio
@@ -185,6 +186,8 @@ func (spotify *Spotify) waitForEvents() {
 			spotify.play(track)
 		case <-spotify.events.PauseUpdates():
 			spotify.pause()
+		case <-spotify.events.StopUpdates():
+			spotify.stop()
 		case <-spotify.events.PlayPauseToggleUpdates():
 			spotify.playPauseToggle()
 		case <-spotify.events.ReplayUpdates():

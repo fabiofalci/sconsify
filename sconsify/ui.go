@@ -4,6 +4,7 @@ import "time"
 
 type UserInterface interface {
 	TrackPaused(track *Track)
+	TrackStopped(track *Track)
 	TrackPlaying(track *Track)
 	TrackNotAvailable(track *Track)
 	PlayTokenLost() error

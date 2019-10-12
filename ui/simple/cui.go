@@ -71,6 +71,14 @@ func (cui *ConsoleUserInterface) TrackPaused(track *sconsify.Track) {
 	}
 }
 
+func (cui *ConsoleUserInterface) TrackStopped(track *sconsify.Track) {
+	gui.setStatus("Stopped: " + track.GetFullTitle())
+	select {
+	case timeLeftChannels.songPaused <- true:
+	default:
+	}
+}
+
 func (cui *ConsoleUserInterface) TrackPlaying(track *sconsify.Track) {
 	gui.g.Update(func(g *gocui.Gui) error {
 		gui.PlayingTrack = track
