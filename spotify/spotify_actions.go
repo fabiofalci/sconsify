@@ -19,7 +19,7 @@ func (spotify *Spotify) shutdownSpotify() {
 
 func (spotify *Spotify) play(trackUri *sconsify.Track) {
 	if trackUri == nil {
-		if spotify.stopped || spotify.paused  {
+		if !spotify.playerState.isPlaying() {
 			if spotify.currentTrack != nil {
 				trackUri = spotify.currentTrack
 			} else {
@@ -32,7 +32,7 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 	}
 
 	player := spotify.session.Player()
-	if !spotify.paused || spotify.currentTrack != trackUri {
+	if spotify.playerState != Paused || spotify.currentTrack != trackUri {
 		link, err := spotify.session.ParseLink(trackUri.URI)
 		if err != nil {
 			return
@@ -70,8 +70,7 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 
 	spotify.publisher.TrackPlaying(trackUri)
 	spotify.currentTrack = trackUri
-	spotify.paused = false
-	spotify.stopped = false
+	spotify.playerState = Playing
 	return
 }
 
@@ -130,7 +129,7 @@ func checkAlias(query string) string {
 
 func (spotify *Spotify) playPauseToggle() {
 	if spotify.currentTrack != nil {
-		if spotify.paused || spotify.stopped {
+		if !spotify.playerState.isPlaying() {
 			spotify.play(spotify.currentTrack)
 		} else {
 			spotify.pauseCurrentTrack()
@@ -139,7 +138,7 @@ func (spotify *Spotify) playPauseToggle() {
 }
 
 func (spotify *Spotify) pause() {
-	if spotify.currentTrack != nil && !spotify.paused && !spotify.stopped {
+	if spotify.currentTrack != nil && spotify.playerState.isPlaying() {
 		spotify.pauseCurrentTrack()
 	}
 }
@@ -148,17 +147,16 @@ func (spotify *Spotify) pauseCurrentTrack() {
 	player := spotify.session.Player()
 	player.Pause()
 	spotify.publisher.TrackPaused(spotify.currentTrack)
-	spotify.paused = true
+	spotify.playerState = Paused
 }
 
 func (spotify *Spotify) stop() {
-	if spotify.currentTrack != nil && !spotify.stopped {
+	if spotify.currentTrack != nil && spotify.playerState != Stopped {
 		player := spotify.session.Player()
 		player.Pause()
 		player.Unload()
 		spotify.publisher.TrackStopped(spotify.currentTrack)
-		spotify.stopped = true
-		spotify.paused = false
+		spotify.playerState = Stopped
 	}
 }
 

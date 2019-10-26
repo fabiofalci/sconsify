@@ -15,8 +15,7 @@ import (
 
 type Spotify struct {
 	currentTrack       *sconsify.Track
-	paused             bool
-	stopped            bool
+	playerState        PlayerState
 	events             *sconsify.Events
 	publisher          *sconsify.Publisher
 	pa                 *portAudio
@@ -25,6 +24,18 @@ type Spotify struct {
 	playlistFilter     []string
 	client             *webspotify.Client
 	cacheWebApiContent bool
+}
+
+type PlayerState int
+
+const (
+	Playing = iota
+	Paused
+	Stopped
+)
+
+func (playerState PlayerState) isPlaying() bool {
+	return playerState ==  Playing
 }
 
 type SpotifyInitConf struct {
