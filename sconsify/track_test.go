@@ -5,7 +5,8 @@ import (
 )
 
 func TestCompletedTrack(t *testing.T) {
-	track := InitTrack("0", "0", "0", "0")
+	artist0 = InitArtist("artist0", "artist0")
+	track := InitTrack("0", artist0, "0", "0")
 
 	if track.IsPartial() {
 		t.Error("Track should be completed")

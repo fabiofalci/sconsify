@@ -14,21 +14,21 @@ func TestNormalMode(t *testing.T) {
 	playlists.AddPlaylist(createDummyPlaylist("name"))
 	playlists.SetCurrents("name", 0)
 
-	if track, repeating := playlists.GetNext(); track.Uri != "1" || repeating {
-		t.Error("Next track should be 1 and not repeating: ", track.Uri, repeating)
+	if track, repeating := playlists.GetNext(); track.URI != "1" || repeating {
+		t.Error("Next track should be 1 and not repeating: ", track.URI, repeating)
 	}
-	if track, repeating := playlists.GetNext(); track.Uri != "2" || repeating {
-		t.Error("Next track should be 2 and not repeating: ", track.Uri, repeating)
+	if track, repeating := playlists.GetNext(); track.URI != "2" || repeating {
+		t.Error("Next track should be 2 and not repeating: ", track.URI, repeating)
 	}
-	if track, repeating := playlists.GetNext(); track.Uri != "3" || repeating {
-		t.Error("Next track should be 3 and not repeating: "+track.Uri, repeating)
+	if track, repeating := playlists.GetNext(); track.URI != "3" || repeating {
+		t.Error("Next track should be 3 and not repeating: "+track.URI, repeating)
 	}
-	if track, repeating := playlists.GetNext(); track.Uri != "0" || !repeating {
-		t.Error("Next track should be 0 and repeating : ", track.Uri, repeating)
+	if track, repeating := playlists.GetNext(); track.URI != "0" || !repeating {
+		t.Error("Next track should be 0 and repeating : ", track.URI, repeating)
 	}
 
-	if track, repeating := playlists.GetNext(); track.Uri != "1" || repeating {
-		t.Error("Next track should be 1 and not repeating: ", track.Uri, repeating)
+	if track, repeating := playlists.GetNext(); track.URI != "1" || repeating {
+		t.Error("Next track should be 1 and not repeating: ", track.URI, repeating)
 	}
 }
 
@@ -45,15 +45,15 @@ func TestShuffleMode(t *testing.T) {
 	playlists.SetMode(ShuffleMode)
 
 	order := []string{"3", "0", "2", "1"}
-	for _, expectedUri := range order {
-		if track, repeating := playlists.GetNext(); expectedUri != track.Uri || repeating {
-			t.Errorf("Random track should be %v and not repeating but it is %v and isRepeating? %v", track.Uri, repeating)
+	for _, expectedURI := range order {
+		if track, repeating := playlists.GetNext(); expectedURI != track.URI || repeating {
+			t.Errorf("Random track should be %v and not repeating but it is %v and isRepeating? %v", track.URI, expectedURI, repeating)
 		}
 	}
 
 	// now is repeating
-	if track, repeating := playlists.GetNext(); track.Uri != "3" || !repeating {
-		t.Errorf("Random track should be 3 and repeating but it is %v and isRepeating? %v", repeating)
+	if track, repeating := playlists.GetNext(); track.URI != "3" || !repeating {
+		t.Errorf("Random track should be 3 and repeating but it is %v and isRepeating? %v", track.URI, repeating)
 	}
 }
 
@@ -72,15 +72,15 @@ func TestShuffleAllMode(t *testing.T) {
 
 	order := []string{"3", "3", "2", "1", "0", "1", "2", "0"}
 
-	for _, expectedUri := range order {
-		if track, repeating := playlists.GetNext(); expectedUri != track.Uri || repeating {
-			t.Errorf("Random track should be %v and not repeating but it is %v and isRepeating? %v", expectedUri, track.Uri, repeating)
+	for _, expectedURI := range order {
+		if track, repeating := playlists.GetNext(); expectedURI != track.URI || repeating {
+			t.Errorf("Random track should be %v and not repeating but it is %v and isRepeating? %v", expectedURI, track.URI, repeating)
 		}
 	}
 
 	// now is repeating
-	if track, repeating := playlists.GetNext(); track.Uri != "3" || !repeating {
-		t.Errorf("Random track should be 3 and repeating but it is %v and isRepeating? %v", track.Uri, repeating)
+	if track, repeating := playlists.GetNext(); track.URI != "3" || !repeating {
+		t.Errorf("Random track should be 3 and repeating but it is %v and isRepeating? %v", track.URI, repeating)
 	}
 }
 
@@ -99,15 +99,15 @@ func TestSequentialShuffleMode(t *testing.T) {
 
 	order := []string{"0", "1", "2", "3", "0", "1", "2", "3"}
 
-	for _, expectedUri := range order {
-		if track, repeating := playlists.GetNext(); expectedUri != track.Uri || repeating {
-			t.Errorf("Random track should be %v and not repeating but it is %v and isRepeating? %v", expectedUri, track.Uri, repeating)
+	for _, expectedURI := range order {
+		if track, repeating := playlists.GetNext(); expectedURI != track.URI || repeating {
+			t.Errorf("Random track should be %v and not repeating but it is %v and isRepeating? %v", expectedURI, track.URI, repeating)
 		}
 	}
 
 	// now is repeating
-	if track, repeating := playlists.GetNext(); track.Uri != "0" || !repeating {
-		t.Errorf("Random track should be 0 and repeating but it is %v and isRepeating? %v", track.Uri, repeating)
+	if track, repeating := playlists.GetNext(); track.URI != "0" || !repeating {
+		t.Errorf("Random track should be 0 and repeating but it is %v and isRepeating? %v", track.URI, repeating)
 	}
 }
 
@@ -226,13 +226,13 @@ func TestGetNext(t *testing.T) {
 
 	playlists.SetCurrents("name", 0)
 
-	if track, _ := playlists.GetNext(); track != nil && track.Uri != "1" {
+	if track, _ := playlists.GetNext(); track != nil && track.URI != "1" {
 		t.Errorf("Next track should be 1")
 	}
-	if track, _ := playlists.GetNext(); track != nil && track.Uri != "2" {
+	if track, _ := playlists.GetNext(); track != nil && track.URI != "2" {
 		t.Errorf("Next track should be 2")
 	}
-	if track, _ := playlists.GetNext(); track != nil && track.Uri != "3" {
+	if track, _ := playlists.GetNext(); track != nil && track.URI != "3" {
 		t.Errorf("Next track should be 3")
 	}
 }
@@ -489,14 +489,14 @@ func TestGetById(t *testing.T) {
 	playlists.AddPlaylist(createDummyPlaylistWithId("0", "name"))
 	playlists.AddPlaylist(createDummyPlaylistWithId("1", "any"))
 
-	if playlist := playlists.GetById("0"); playlist.Id() != "0" {
-		t.Error("Playlist Id should be '0': ", playlist.Id())
+	if playlist := playlists.GetByURI("0"); playlist.URI != "0" {
+		t.Error("Playlist Id should be '0': ", playlist.URI)
 	}
-	if playlist := playlists.GetById("1"); playlist.Id() != "1" {
-		t.Error("Playlist Id should be '1': ", playlist.Id())
+	if playlist := playlists.GetByURI("1"); playlist.URI != "1" {
+		t.Error("Playlist Id should be '1': ", playlist.URI)
 	}
 
-	if playlist := playlists.GetById("99"); playlist != nil {
+	if playlist := playlists.GetByURI("99"); playlist != nil {
 		t.Error("Playlist should not be found")
 	}
 }

@@ -15,7 +15,7 @@ default: build
 
 .PHONY: test
 test:
-	go test -v ./...
+	go test -count=1 -v ./...
 
 test-ui:
 	go run test/test_sconsify.go -run-test

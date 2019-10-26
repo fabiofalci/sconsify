@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+var (
+	artist0 = InitArtist("artist0", "artist0")
+	artist1 = InitArtist("artist1", "artist1")
+	artist2 = InitArtist("artist2", "artist2")
+	artist3 = InitArtist("artist3", "artist3")
+)
+
 func TestPlaylistTracks(t *testing.T) {
 	playlist := createDummyPlaylist("testing")
 
@@ -33,16 +40,16 @@ func TestPlaylistGetNextTrack(t *testing.T) {
 func TestPlaylistTrack(t *testing.T) {
 	playlist := createDummyPlaylist("testing")
 
-	if track := playlist.Track(0); track.Uri != "0" {
+	if track := playlist.Track(0); track.URI != "0" {
 		t.Errorf("Should be track 0")
 	}
-	if track := playlist.Track(1); track.Uri != "1" {
+	if track := playlist.Track(1); track.URI != "1" {
 		t.Errorf("Should be track 1")
 	}
-	if track := playlist.Track(2); track.Uri != "2" {
+	if track := playlist.Track(2); track.URI != "2" {
 		t.Errorf("Should be track 2")
 	}
-	if track := playlist.Track(3); track.Uri != "3" {
+	if track := playlist.Track(3); track.URI != "3" {
 		t.Errorf("Should be track 3")
 	}
 
@@ -74,8 +81,10 @@ func TestPlaylistIndexByUri(t *testing.T) {
 
 func TestSearchPlaylist(t *testing.T) {
 	tracks := make([]*Track, 1)
-	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
-	playlist := InitSearchPlaylist("0", "testing", tracks)
+	tracks[0] = InitTrack("0", artist0, "name0", "duration0")
+	playlist := InitSearchPlaylist("0", "testing", func(playlist *Playlist) {
+		playlist.AddTrack(tracks[0])
+	})
 
 	if !playlist.IsSearch() {
 		t.Errorf("Should be a search playlists")
@@ -282,28 +291,28 @@ func TestRemoveAllTracksFromPlaylist(t *testing.T) {
 
 func createDummyPlaylist(name string) *Playlist {
 	tracks := make([]*Track, 4)
-	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
-	tracks[1] = InitTrack("1", "artist1", "name1", "duration1")
-	tracks[2] = InitTrack("2", "artist2", "name2", "duration2")
-	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
+	tracks[0] = InitTrack("0", artist0, "name0", "duration0")
+	tracks[1] = InitTrack("1", artist1, "name1", "duration1")
+	tracks[2] = InitTrack("2", artist2, "name2", "duration2")
+	tracks[3] = InitTrack("3", artist3, "name3", "duration3")
 	return InitPlaylist(name, name, tracks)
 }
 
 func createDummyPlaylistWithId(id string, name string) *Playlist {
 	tracks := make([]*Track, 4)
-	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
-	tracks[1] = InitTrack("1", "artist1", "name1", "duration1")
-	tracks[2] = InitTrack("2", "artist2", "name2", "duration2")
-	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
+	tracks[0] = InitTrack("0", artist0, "name0", "duration0")
+	tracks[1] = InitTrack("1", artist1, "name1", "duration1")
+	tracks[2] = InitTrack("2", artist2, "name2", "duration2")
+	tracks[3] = InitTrack("3", artist3, "name3", "duration3")
 	return InitPlaylist(id, name, tracks)
 }
 
 func createSubPlaylist(id string, name string) *Playlist {
 	tracks := make([]*Track, 4)
-	tracks[0] = InitTrack("0", "artist0", "name0", "duration0")
-	tracks[1] = InitTrack("1", "artist1", "name1", "duration1")
-	tracks[2] = InitTrack("2", "artist2", "name2", "duration2")
-	tracks[3] = InitTrack("3", "artist3", "name3", "duration3")
+	tracks[0] = InitTrack("0", artist0, "name0", "duration0")
+	tracks[1] = InitTrack("1", artist1, "name1", "duration1")
+	tracks[2] = InitTrack("2", artist2, "name2", "duration2")
+	tracks[3] = InitTrack("3", artist3, "name3", "duration3")
 	return InitSubPlaylist(id, name, tracks)
 }
 

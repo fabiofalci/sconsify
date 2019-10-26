@@ -21,7 +21,7 @@ func TestQueueAddPopEmptyAndContents(t *testing.T) {
 	queue.Add(track0)
 	queue.Add(track1)
 
-	if queue.isEmpty() {
+	if queue.IsEmpty() {
 		t.Error("Queue is not adding elements")
 	}
 
@@ -134,20 +134,20 @@ func TestQueueRemoveAll(t *testing.T) {
 	track1 := &sconsify.Track{}
 	queue.Add(track1)
 
-	if queue.isEmpty() {
+	if queue.IsEmpty() {
 		t.Error("Queue is not empty")
 	}
 
 	queue.RemoveAll()
 
-	if !queue.isEmpty() {
+	if !queue.IsEmpty() {
 		t.Error("Queue is empty")
 	}
 }
 
 func TestQueueEmpty(t *testing.T) {
 	queue := InitQueue()
-	if !queue.isEmpty() {
+	if !queue.IsEmpty() {
 		t.Error("Queue should be empty after init")
 	}
 
