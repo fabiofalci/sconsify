@@ -1,10 +1,10 @@
-hash: 79f38586d6169b6b7719fc47c6f5942af913a5271d3a96764e88b9b0a427e6a7
-updated: 2019-10-11T21:46:33.725959267+01:00
+hash: 01063dfbe354e0adfe85732199a634e53d23b075393dadf45abdc938200e311c
+updated: 2019-10-27T21:05:13.329807569Z
 imports:
 - name: github.com/fabiofalci/flagrc
   version: 748e1426fdbd210e5ff8caf145546de70b559f28
 - name: github.com/fabiofalci/go-libspotify
-  version: fbe297fba0309063d327bd290b0ed3a6e07f98c2
+  version: ccb6354b63df936d6dfd44241a6516ef656ff7f5
   subpackages:
   - spotify
 - name: github.com/golang/protobuf
@@ -15,6 +15,8 @@ imports:
   version: 00e7307ccd93051979a933c6fd5ead641eba5686
 - name: github.com/guelfey/go.dbus
   version: f6a3a2366cc39b8479cadc499d3c735fb10fbdda
+  subpackages:
+  - introspect
 - name: github.com/howeyc/gopass
   version: 7cb4b85ec19c7c220ab71433a230f7eb200d639d
 - name: github.com/jroimartin/gocui
