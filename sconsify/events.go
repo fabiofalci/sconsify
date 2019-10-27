@@ -23,6 +23,7 @@ type Events struct {
 	artistAlbums    chan *Playlist
 
 	nextPlay          chan bool
+	previousPlay      chan bool
 	playTokenLost     chan bool
 	playlists         chan Playlists
 	trackNotAvailable chan *Track
@@ -58,6 +59,7 @@ func InitialiseEvents() *Events {
 		artistAlbums:    make(chan *Playlist),
 
 		nextPlay:          make(chan bool),
+		previousPlay:      make(chan bool),
 		playTokenLost:     make(chan bool),
 		playlists:         make(chan Playlists),
 		trackNotAvailable: make(chan *Track),
@@ -151,6 +153,16 @@ func (publisher *Publisher) NextPlay() {
 
 func (events *Events) NextPlayUpdates() <-chan bool {
 	return events.nextPlay
+}
+
+func (publisher *Publisher) PreviousPlay() {
+	for _, subscriber := range subscribers {
+		subscriber.previousPlay <- true
+	}
+}
+
+func (events *Events) PreviousPlayUpdates() <-chan bool {
+	return events.previousPlay
 }
 
 func (publisher *Publisher) Play(track *Track) {

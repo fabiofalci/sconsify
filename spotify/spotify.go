@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+    "container/list"
 
 	sp "github.com/fabiofalci/go-libspotify/spotify"
 	"github.com/fabiofalci/sconsify/infrastructure"
@@ -24,6 +25,7 @@ type Spotify struct {
 	playlistFilter     []string
 	client             *webspotify.Client
 	cacheWebApiContent bool
+	history            *list.List
 }
 
 type PlayerState int
@@ -60,6 +62,7 @@ func initialiseSpotify(initConf *SpotifyInitConf, username string, pass []byte, 
 	spotify := &Spotify{events: events, publisher: publisher}
 	spotify.setPlaylistFilter(initConf.PlaylistFilter)
 	spotify.cacheWebApiContent = initConf.CacheWebApiContent
+	spotify.history = list.New()
 	if err := spotify.initKey(); err != nil {
 		return err
 	}
@@ -209,6 +212,8 @@ func (spotify *Spotify) waitForEvents() {
 			spotify.search(query)
 		case artist := <-spotify.events.GetArtistAlbumsUpdates():
 			spotify.artistAlbums(artist)
+		case <-spotify.events.PreviousPlayUpdates():
+			spotify.playPrevious()
 		}
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/fabiofalci/sconsify/sconsify"
 	"github.com/guelfey/go.dbus"
 	"github.com/guelfey/go.dbus/introspect"
-	"os"
 )
 
 const intro = `
@@ -34,22 +33,29 @@ func StartDbus(publisher *sconsify.Publisher, fallbackOnServer bool) {
 func tryToStartDbusSession(publisher *sconsify.Publisher) bool {
 	conn, err := dbus.SessionBus()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Cannot access dbus, ignoring...")
+		fmt.Println("Cannot access dbus, ignoring...")
 		return false
 	}
 	reply, err := conn.RequestName("org.mpris.MediaPlayer2.sconsify", dbus.NameFlagDoNotQueue)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Cannot request dbus name, ignoring...")
+		fmt.Println("Cannot request dbus name, ignoring...")
 		return false
 	}
 	if reply != dbus.RequestNameReplyPrimaryOwner {
-		fmt.Fprintln(os.Stderr, "org.mpris.MediaPlayer2.sconsify name already taken, ignoring...")
+		fmt.Println("org.mpris.MediaPlayer2.sconsify name already taken, ignoring...")
 		return false
 	}
 	dbusMethods := new(DbusMethods)
 	dbusMethods.publisher = publisher
-	conn.Export(dbusMethods, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player")
-	conn.Export(introspect.Introspectable(intro), "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Introspectable")
+	err = conn.Export(dbusMethods, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player")
+	if err != nil {
+		fmt.Println("Cannot export mpris Player")
+		return false
+	}
+	err = conn.Export(introspect.Introspectable(intro), "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Introspectable")
+	if err != nil {
+		fmt.Println("Cannot export mpris Introspectable, ignoring...")
+	}
 	return true
 }
 
@@ -64,7 +70,7 @@ func (dbus DbusMethods) Next() *dbus.Error {
 }
 
 func (dbus DbusMethods) Previous() *dbus.Error {
-	//dbus.publisher.Previous()
+	dbus.publisher.PreviousPlay()
 	return nil
 }
 

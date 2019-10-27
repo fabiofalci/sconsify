@@ -17,7 +17,20 @@ func (spotify *Spotify) shutdownSpotify() {
 	spotify.publisher.ShutdownEngine()
 }
 
+func (spotify *Spotify) playPrevious() {
+	if spotify.history.Len() > 0 {
+		e := spotify.history.Front()
+		track := e.Value.(*sconsify.Track)
+		spotify.playTrack(track, true)
+		spotify.history.Remove(e)
+	}
+}
+
 func (spotify *Spotify) play(trackUri *sconsify.Track) {
+	spotify.playTrack(trackUri, false)
+}
+
+func (spotify *Spotify) playTrack(trackUri *sconsify.Track, previous bool) {
 	if trackUri == nil {
 		if !spotify.playerState.isPlaying() {
 			if spotify.currentTrack != nil {
@@ -50,9 +63,9 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 		if !spotify.isTrackAvailable(track) {
 			if trackUri.IsFromWebApi() {
 				retry := trackUri.RetryLoading()
-				if retry < 4 {
+				if retry < 9 {
 					go func() {
-						time.Sleep(100 * time.Millisecond)
+						time.Sleep(200 * time.Millisecond)
 						spotify.publisher.Play(trackUri)
 					}()
 					return
@@ -69,9 +82,19 @@ func (spotify *Spotify) play(trackUri *sconsify.Track) {
 	player.Play()
 
 	spotify.publisher.TrackPlaying(trackUri)
-	spotify.currentTrack = trackUri
+	spotify.setCurrentTrack(trackUri, previous)
 	spotify.playerState = Playing
 	return
+}
+
+func (spotify *Spotify) setCurrentTrack(track *sconsify.Track, previous bool) {
+	if spotify.currentTrack != nil && !previous {
+		spotify.history.PushFront(spotify.currentTrack)
+		if spotify.history.Len() > 50 {
+			spotify.history.Remove(spotify.history.Back())
+		}
+	}
+	spotify.currentTrack = track
 }
 
 func (spotify *Spotify) isTrackAvailable(track *sp.Track) bool {
