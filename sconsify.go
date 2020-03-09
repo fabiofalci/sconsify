@@ -41,7 +41,8 @@ func main() {
 	providedStatusFile := flag.String("status-file", "", "File that sconsify will output status such as track being played.")
 	providedStatusFileTemplate := flag.String("status-file-template", "", "Status file template.")
 	providedUi := flag.Bool("ui", true, "Run Sconsify with Console User Interface. If false then no User Interface will be presented and it'll shuffle tracks.")
-	providedPlaylists := flag.String("playlists", "", "Select just some Playlists to play. Comma separated list.")
+	providedFilterInclude := flag.String("filter-include", "", "Don't exclude playlists. Comma separated list of playlist name or ID.")
+	providedFilterExclude := flag.String("filter-exclude", "", "Exclude playlists. Comma separated list of playlist name or ID.")
 	providedPreferredBitrate := flag.String("preferred-bitrate", "320k", "Preferred bitrate: 96k, 160k, 320k.")
 	providedNoUiSilent := flag.Bool("noui-silent", false, "Silent mode when no UI is used.")
 	providedNoUiRepeatOn := flag.Bool("noui-repeat-on", true, "Play your playlist and repeat it after the last track.")
@@ -79,7 +80,8 @@ func main() {
 
 	initConf := &spotify.SpotifyInitConf{
 		WebApiAuth:         *providedWebApi,
-		PlaylistFilter:     *providedPlaylists,
+		IncludeFilter:      *providedFilterInclude,
+		ExcludeFilter:      *providedFilterExclude,
 		PreferredBitrate:   *providedPreferredBitrate,
 		CacheWebApiToken:   *providedWebApiCacheToken,
 		CacheWebApiContent: *providedWebApiCacheContent,

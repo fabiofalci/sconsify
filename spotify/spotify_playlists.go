@@ -144,7 +144,7 @@ func (spotify *Spotify) loadPlaylists(offset int, privateUser *webspotify.Privat
 	options := &webspotify.Options{Limit: &limit, Offset: &offset}
 	if simplePlaylistPage, err := spotify.client.GetPlaylistsForUserOpt(privateUser.ID, options); err == nil {
 		for _, webPlaylist := range simplePlaylistPage.Playlists {
-			if spotify.isOnFilter(webPlaylist.Name) {
+			if spotify.isOnFilter(webPlaylist.Name, webPlaylist.ID.String()) {
 				spotify.loadPlaylistTracks(&webPlaylist, playlists)
 			}
 		}
@@ -187,9 +187,9 @@ func (spotify *Spotify) loadPlaylistTracks(webPlaylist *webspotify.SimplePlaylis
 		total = playlistTrackPage.Total
 
 		if offset > total {
-			infrastructure.Debugf("%v: loaded %v from %v tracks\n", playlist.Name(), total, total)
+			infrastructure.Debugf("%v (%v): loaded %v from %v tracks\n", playlist.Name(), playlist.ToSpotifyID(), total, total)
 		} else {
-			infrastructure.Debugf("%v: loaded %v from %v tracks\n", playlist.Name(), offset, total)
+			infrastructure.Debugf("%v (%v): loaded %v from %v tracks\n", playlist.Name(), playlist.ToSpotifyID(), offset, total)
 		}
 	}
 
@@ -293,27 +293,51 @@ func (spotify *Spotify) initTrack(playlistTrack *sp.PlaylistTrack) *sconsify.Tra
 }
 
 func (spotify *Spotify) canAddPlaylist(playlist *sp.Playlist, playlistType sp.PlaylistType) bool {
-	return playlistType == sp.PlaylistTypePlaylist && spotify.isOnFilter(playlist.Name())
+	return playlistType == sp.PlaylistTypePlaylist && spotify.isOnFilter(playlist.Name(), playlist.Link().String())
 }
 
-func (spotify *Spotify) isOnFilter(playlist string) bool {
-	if spotify.playlistFilter == nil {
+func (spotify *Spotify) isOnFilter(playlistName string, playlistId string) bool {
+	if spotify.includeFilter == nil && spotify.excludeFilter == nil {
 		return true
 	}
-	for _, filter := range spotify.playlistFilter {
-		if filter == playlist {
-			return true
+	if spotify.includeFilter != nil && spotify.excludeFilter != nil {
+		infrastructure.Debugf("Cannot use both filter-exclude and filter-include. Ignoring filters.")
+		return true
+	}
+	if spotify.includeFilter != nil {
+		for _, filter := range spotify.includeFilter {
+			if filter == playlistName || filter == playlistId {
+				return true
+			}
+		}
+		return false
+	}
+	if spotify.excludeFilter != nil {
+		for _, filter := range spotify.excludeFilter {
+			if filter == playlistName || filter == playlistId {
+				return false
+			}
 		}
 	}
-	return false
+	return true
 }
 
-func (spotify *Spotify) setPlaylistFilter(playlistFilter string) {
-	if playlistFilter == "" {
+func (spotify *Spotify) setIncludeFilter(includeFilter string) {
+	if includeFilter == "" {
 		return
 	}
-	spotify.playlistFilter = strings.Split(playlistFilter, ",")
-	for i := range spotify.playlistFilter {
-		spotify.playlistFilter[i] = strings.Trim(spotify.playlistFilter[i], " ")
+	spotify.includeFilter = strings.Split(includeFilter, ",")
+	for i := range spotify.includeFilter {
+		spotify.includeFilter[i] = strings.Trim(spotify.includeFilter[i], " ")
+	}
+}
+
+func (spotify *Spotify) setExcludeFilter(excludeFilter string) {
+	if excludeFilter == "" {
+		return
+	}
+	spotify.excludeFilter = strings.Split(excludeFilter, ",")
+	for i := range spotify.excludeFilter {
+		spotify.excludeFilter[i] = strings.Trim(spotify.excludeFilter[i], " ")
 	}
 }
