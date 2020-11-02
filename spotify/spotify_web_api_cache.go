@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"github.com/fabiofalci/sconsify/infrastructure"
+	"sconsify/infrastructure"
 	webspotify "github.com/zmb3/spotify"
 	"io"
 	"io/ioutil"

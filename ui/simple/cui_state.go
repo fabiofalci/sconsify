@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/fabiofalci/sconsify/infrastructure"
-	"github.com/fabiofalci/sconsify/sconsify"
+	"sconsify/infrastructure"
+	"sconsify/sconsify"
 )
 
 type State struct {

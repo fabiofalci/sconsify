@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fabiofalci/sconsify/sconsify"
-	"github.com/fabiofalci/sconsify/ui"
+	"sconsify/sconsify"
+	"sconsify/ui"
 	"github.com/jroimartin/gocui"
 )
 

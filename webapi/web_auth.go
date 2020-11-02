@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/fabiofalci/sconsify/infrastructure"
+	"sconsify/infrastructure"
 	"github.com/zmb3/spotify"
 	"golang.org/x/oauth2"
 	"io/ioutil"

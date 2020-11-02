@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"github.com/fabiofalci/sconsify/sconsify"
+	"sconsify/sconsify"
 )
 
 var (

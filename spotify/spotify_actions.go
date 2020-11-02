@@ -2,12 +2,12 @@ package spotify
 
 import (
 	sp "github.com/fabiofalci/go-libspotify/spotify"
-	"github.com/fabiofalci/sconsify/infrastructure"
-	"github.com/fabiofalci/sconsify/sconsify"
+	"sconsify/infrastructure"
+	"sconsify/sconsify"
 	webspotify "github.com/zmb3/spotify"
 	"strings"
 	"time"
-	"github.com/fabiofalci/sconsify/webapi"
+	"sconsify/webapi"
 )
 
 func (spotify *Spotify) shutdownSpotify() {

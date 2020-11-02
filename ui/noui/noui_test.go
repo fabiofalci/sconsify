@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fabiofalci/sconsify/sconsify"
+	"sconsify/sconsify"
 )
 
 type TestPrinter struct {

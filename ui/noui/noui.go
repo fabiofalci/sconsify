@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"os/signal"
 
-	"github.com/fabiofalci/sconsify/sconsify"
+	"sconsify/sconsify"
 	"time"
 )
 

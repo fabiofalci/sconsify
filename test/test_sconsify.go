@@ -6,10 +6,10 @@ import (
 
 	"bytes"
 	"flag"
-	"github.com/fabiofalci/sconsify/infrastructure"
-	"github.com/fabiofalci/sconsify/sconsify"
-	"github.com/fabiofalci/sconsify/spotify/mock"
-	"github.com/fabiofalci/sconsify/ui/simple"
+	"sconsify/infrastructure"
+	"sconsify/sconsify"
+	"sconsify/spotify/mock"
+	"sconsify/ui/simple"
 	"os/exec"
 )
 

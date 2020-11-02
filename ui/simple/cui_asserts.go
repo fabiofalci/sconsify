@@ -1,6 +1,6 @@
 package simple
 
-import "github.com/fabiofalci/sconsify/sconsify"
+import "sconsify/sconsify"
 
 func CuiAssertSelectedPlaylist(playlist string) (bool, string) {
 	selectedPlaylistName := getPlaylistName(gui.getSelectedPlaylist())
