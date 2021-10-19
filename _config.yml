@@ -4,7 +4,7 @@ email: fabiofalci@gmail.com
 description: >
   Your awesome Spotify service now in a client text mode
 baseurl: ""
-url: "http://www.sconsify.org"
+url: "https://fabiofalci.github.io/sconsify"
 github_username: fabiofalci/sconsify
 
 # Build settings
