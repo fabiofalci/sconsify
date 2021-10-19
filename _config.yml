@@ -3,7 +3,7 @@ title: Sconsify
 email: fabiofalci@gmail.com
 description: >
   Your awesome Spotify service now in a client text mode
-baseurl: ""
+baseurl: "https://fabiofalci.github.io/sconsify/"
 url: "https://fabiofalci.github.io/sconsify"
 github_username: fabiofalci/sconsify
 
